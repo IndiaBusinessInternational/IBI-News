@@ -11,7 +11,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="ibi-build" content="v3.8.0-2026-05-08">
+<meta name="ibi-build" content="v4.0.0-2026-05-11">
 
 <!-- Favicon: IBI text in #00c5ff on black, Roboto -->
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='10' fill='black'/><text x='32' y='44' font-family='Roboto,Arial,sans-serif' font-size='26' font-weight='900' text-anchor='middle' fill='%2300c5ff' letter-spacing='-1'>IBI</text></svg>">
@@ -682,6 +682,7 @@ footer .accent { color: var(--accent); font-weight: 700; }
           <option value="gemini2">Gemini Key 2</option>
           <option value="openai">ChatGPT (GPT-4o mini)</option>
           <option value="claude">Claude (Haiku)</option>
+          <option value="deepseek">DeepSeek Chat</option>
         </select>
       </div>
       <button class="btn-refresh" id="refresh-btn" title="Refresh now">
@@ -808,7 +809,7 @@ footer .accent { color: var(--accent); font-weight: 700; }
 <footer>
   <div>© <span id="year"></span> <span class="accent">India Business International (IBI)</span> — Kanyakumari, Tamil Nadu</div>
   <div style="margin-top:6px;font-size:13px;opacity:0.7;">Live news aggregated from public sources via Google News. Headlines link to original publishers.</div>
-  <div style="margin-top:8px;font-size:11px;opacity:0.5;font-family:monospace;">Build v3.8.0 · 2026-05-08</div>
+  <div style="margin-top:8px;font-size:11px;opacity:0.5;font-family:monospace;">Build v4.0.0 · 2026-05-11</div>
 </footer>
 
 <!-- ===================== APP LOGIC ===================== -->
@@ -824,117 +825,117 @@ footer .accent { color: var(--accent); font-weight: 700; }
   const THEME_KEY = 'ibinews_theme';
 
   // ─────────────────────────────────────────────────────────────────────────
-  // NEWS FEEDS — English only · Reliable original sources · Latest news only
+  // NEWS FEEDS — English · Reliable sources · LATEST news prioritised
   //
-  // maxAgeHours: articles older than this are filtered out client-side.
-  // Google News queries use when: operator for server-side time filtering.
-  // Multi-URL feeds are merged, deduplicated, sorted newest-first.
+  // Freshness strategy (3 layers):
+  //  1. Google News `when:` operator = server-side time filter (primary sources)
+  //  2. maxAgeHours = client-side hard cutoff, drops anything older
+  //  3. Newest-first sort = freshest always on top
+  //
+  // Static RSS (BBC/Reuters/TechCrunch) are SECONDARY — they lack time filters
+  // and sometimes carry evergreen/old content, so time-filtered Google News
+  // queries lead each section to guarantee fresh headlines.
   // ─────────────────────────────────────────────────────────────────────────
   const FEEDS = {
 
     // ── Breaking News ──────────────────────────────────────────────────────
-    // FULL COVERAGE: Kanyakumari → Tamil Nadu → India → World
-    // 5 parallel sources merged and sorted by recency
+    // Kanyakumari → Tamil Nadu → India → World, all within last few hours
     'breaking': {
       urls: [
-        // 1. India National Breaking (Google News India English, last 6 hours)
-        'https://news.google.com/rss/search?q=breaking+news+India+when:6h&hl=en&gl=IN&ceid=IN:en',
-        // 2. Kanyakumari & Tamil Nadu (last 12 hours)
-        'https://news.google.com/rss/search?q=Kanyakumari+OR+Nagercoil+OR+%22Tamil+Nadu%22+when:12h&hl=en&gl=IN&ceid=IN:en',
-        // 3. NDTV India — latest headlines
-        'https://feeds.feedburner.com/ndtvnews-latest',
-        // 4. BBC World — international breaking
-        'https://feeds.bbci.co.uk/news/rss.xml',
-        // 5. Reuters — wire service breaking
-        'https://feeds.reuters.com/reuters/topNews'
+        'https://news.google.com/rss/search?q=India+breaking+news+when:3h&hl=en&gl=IN&ceid=IN:en',
+        'https://news.google.com/rss/search?q=%22Tamil+Nadu%22+OR+Kanyakumari+OR+Chennai+news+when:6h&hl=en&gl=IN&ceid=IN:en',
+        'https://news.google.com/rss/search?q=world+breaking+news+when:3h&hl=en&gl=US&ceid=US:en',
+        'https://news.google.com/rss/search?q=top+headlines+when:2h&hl=en&gl=IN&ceid=IN:en'
       ],
-      maxAgeHours: 12,
+      maxAgeHours: 8,
       label: 'Kanyakumari · Tamil Nadu · India · World'
     },
 
     // ── Politics & Government ──────────────────────────────────────────────
     'politics_kanyakumari': {
-      urls: ['https://news.google.com/rss/search?q=Kanyakumari+OR+Nagercoil+OR+Marthandam+OR+Colachel+OR+%22Kanyakumari+district%22+when:7d&hl=en&gl=IN&ceid=IN:en'],
-      maxAgeHours: 168, // 7 days — local news is sparse, wider window needed
+      urls: ['https://news.google.com/rss/search?q=Kanyakumari+OR+Nagercoil+OR+Marthandam+OR+Colachel+OR+Kanniyakumari+when:3d&hl=en&gl=IN&ceid=IN:en'],
+      maxAgeHours: 96, // 4 days — district news is sparse but keep it reasonably fresh
       label: 'Kanyakumari district · Google News'
     },
     'politics_tamilnadu': {
       urls: [
-        'https://www.thehindu.com/news/national/tamil-nadu/feeder/default.rss',
-        'https://news.google.com/rss/search?q=%22Tamil+Nadu%22+government+OR+politics+OR+court+OR+DMK+OR+election+when:1d&hl=en&gl=IN&ceid=IN:en'
+        'https://news.google.com/rss/search?q=%22Tamil+Nadu%22+government+OR+DMK+OR+AIADMK+OR+assembly+OR+CM+when:12h&hl=en&gl=IN&ceid=IN:en',
+        'https://news.google.com/rss/search?q=%22Tamil+Nadu%22+court+OR+politics+OR+minister+when:1d&hl=en&gl=IN&ceid=IN:en'
       ],
-      maxAgeHours: 48,
-      label: 'The Hindu · PTI · NDTV · Tamil Nadu'
+      maxAgeHours: 36,
+      label: 'Tamil Nadu · Google News · The Hindu'
     },
     'politics_india': {
       urls: [
-        'https://feeds.feedburner.com/ndtvnews-india-news',
-        'https://news.google.com/rss/search?q=India+parliament+OR+government+OR+supreme+court+OR+PIB+OR+PTI+OR+election+when:1d&hl=en&gl=IN&ceid=IN:en'
+        'https://news.google.com/rss/search?q=India+parliament+OR+government+OR+modi+OR+policy+when:12h&hl=en&gl=IN&ceid=IN:en',
+        'https://news.google.com/rss/search?q=India+supreme+court+OR+election+OR+PIB+when:1d&hl=en&gl=IN&ceid=IN:en'
       ],
-      maxAgeHours: 48,
-      label: 'NDTV · PTI · ANI · PIB · India'
+      maxAgeHours: 36,
+      label: 'India · NDTV · PTI · PIB'
     },
     'politics_world': {
       urls: [
-        'https://feeds.bbci.co.uk/news/world/rss.xml',
-        'https://feeds.reuters.com/reuters/worldNews',
-        'https://www.aljazeera.com/xml/rss/all.xml'
+        'https://news.google.com/rss/search?q=world+politics+OR+international+when:12h&hl=en&gl=US&ceid=US:en',
+        'https://news.google.com/rss/search?q=global+government+OR+diplomacy+OR+conflict+when:1d&hl=en&gl=US&ceid=US:en'
       ],
-      maxAgeHours: 48,
-      label: 'BBC · Reuters · Al Jazeera · World'
+      maxAgeHours: 36,
+      label: 'World · BBC · Reuters · Al Jazeera'
     },
 
     // ── Business & Economy ─────────────────────────────────────────────────
     'business_ecommerce': {
-      urls: ['https://news.google.com/rss/search?q=ecommerce+India+Amazon+Flipkart+Meesho+online+retail+D2C+when:2d&hl=en&gl=IN&ceid=IN:en'],
+      urls: [
+        'https://news.google.com/rss/search?q=India+ecommerce+Amazon+OR+Flipkart+OR+Meesho+when:1d&hl=en&gl=IN&ceid=IN:en',
+        'https://news.google.com/rss/search?q=India+online+retail+OR+D2C+OR+quick+commerce+when:2d&hl=en&gl=IN&ceid=IN:en'
+      ],
       maxAgeHours: 48,
       label: 'eCommerce · India'
     },
     'business_india_biz': {
       urls: [
-        'https://economictimes.indiatimes.com/rssfeedsdefault.cms',
-        'https://feeds.reuters.com/reuters/INbusinessNews'
+        'https://news.google.com/rss/search?q=India+stock+market+OR+sensex+OR+nifty+OR+RBI+when:12h&hl=en&gl=IN&ceid=IN:en',
+        'https://news.google.com/rss/search?q=India+economy+OR+business+OR+rupee+when:1d&hl=en&gl=IN&ceid=IN:en'
       ],
-      maxAgeHours: 48,
-      label: 'Economic Times · Reuters India'
+      maxAgeHours: 36,
+      label: 'Indian Markets · ET · Mint'
     },
     'business_global_biz': {
       urls: [
-        'https://feeds.bbci.co.uk/news/business/rss.xml',
-        'https://feeds.reuters.com/reuters/businessNews'
+        'https://news.google.com/rss/search?q=global+markets+OR+stocks+OR+economy+when:12h&hl=en&gl=US&ceid=US:en',
+        'https://news.google.com/rss/search?q=world+business+OR+%22federal+reserve%22+OR+oil+prices+when:1d&hl=en&gl=US&ceid=US:en'
       ],
-      maxAgeHours: 48,
-      label: 'BBC Business · Reuters'
+      maxAgeHours: 36,
+      label: 'Global Markets · BBC · Reuters'
     },
 
     // ── Health & Wellness ──────────────────────────────────────────────────
     'health': {
       urls: [
-        'https://feeds.bbci.co.uk/news/health/rss.xml',
-        'https://www.who.int/rss-feeds/news-releases-en.xml'
+        'https://news.google.com/rss/search?q=health+OR+medicine+OR+wellness+OR+disease+when:1d&hl=en&gl=IN&ceid=IN:en',
+        'https://news.google.com/rss/search?q=WHO+OR+healthcare+OR+medical+research+when:2d&hl=en&gl=US&ceid=US:en'
       ],
-      maxAgeHours: 72,
-      label: 'BBC Health · WHO'
+      maxAgeHours: 60,
+      label: 'Health & Wellness · BBC · WHO'
     },
 
     // ── Technology & Artificial Intelligence ──────────────────────────────
     'tech': {
       urls: [
-        'https://techcrunch.com/feed/',
-        'https://news.google.com/rss/search?q=%22artificial+intelligence%22+OR+technology+startup+India+when:1d&hl=en&gl=IN&ceid=IN:en'
+        'https://news.google.com/rss/search?q=%22artificial+intelligence%22+OR+AI+OR+technology+when:12h&hl=en&gl=US&ceid=US:en',
+        'https://news.google.com/rss/search?q=India+technology+OR+startup+OR+software+when:1d&hl=en&gl=IN&ceid=IN:en'
       ],
-      maxAgeHours: 48,
-      label: 'TechCrunch · Reuters · Bloomberg'
+      maxAgeHours: 36,
+      label: 'Technology & AI · TechCrunch · Reuters'
     },
 
     // ── Environment & Science ──────────────────────────────────────────────
     'env': {
       urls: [
-        'https://feeds.bbci.co.uk/news/science_and_environment/rss.xml',
-        'https://news.un.org/feed/subscribe/en/news/topic/climate-change/feed/rss.xml'
+        'https://news.google.com/rss/search?q=climate+OR+environment+OR+science+when:1d&hl=en&gl=US&ceid=US:en',
+        'https://news.google.com/rss/search?q=space+OR+research+OR+biodiversity+OR+ISRO+OR+NASA+when:2d&hl=en&gl=IN&ceid=IN:en'
       ],
-      maxAgeHours: 72,
-      label: 'BBC Science · UN Climate'
+      maxAgeHours: 60,
+      label: 'Environment & Science · BBC · UN'
     }
   };
 
@@ -1656,10 +1657,11 @@ footer .accent { color: var(--accent); font-weight: 700; }
 
   // Provider display labels (used in summary header and footer)
   const PROVIDER_DISPLAY = {
-    gemini1: { label: 'Gemini 2.5', footer: 'Gemini AI' },
-    gemini2: { label: 'Gemini 2.5', footer: 'Gemini AI' },
-    openai:  { label: 'ChatGPT',    footer: 'ChatGPT'   },
-    claude:  { label: 'Claude AI',  footer: 'Claude AI'  }
+    gemini1:  { label: 'Gemini 2.5', footer: 'Gemini AI' },
+    gemini2:  { label: 'Gemini 2.5', footer: 'Gemini AI' },
+    openai:   { label: 'ChatGPT',    footer: 'ChatGPT'   },
+    claude:   { label: 'Claude AI',  footer: 'Claude AI'  },
+    deepseek: { label: 'DeepSeek',   footer: 'DeepSeek'   }
   };
 
   // ---------- AI Provider selector ----------
@@ -1724,7 +1726,15 @@ footer .accent { color: var(--accent); font-weight: 700; }
     });
 
     // Refresh button
-    document.getElementById('refresh-btn').addEventListener('click', () => refreshAll(true));
+    document.getElementById('refresh-btn').addEventListener('click', () => {
+      // Manual refresh = force fresh fetch: clear news + AI caches first
+      cache = {};
+      try { localStorage.removeItem(STORAGE_KEY); } catch {}
+      Object.keys(localStorage).forEach(k => {
+        if (k.startsWith(AI_CACHE_KEY_PREFIX)) localStorage.removeItem(k);
+      });
+      refreshAll(true);
+    });
 
     // Theme toggle
     document.getElementById('theme-toggle').addEventListener('click', () => {
