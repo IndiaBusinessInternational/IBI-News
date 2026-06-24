@@ -11,7 +11,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="ibi-build" content="v4.2.0-2026-06-23">
+<meta name="ibi-build" content="v4.3.0-2026-06-24">
 
 <!-- Favicon: IBI text in #00c5ff on black, Roboto -->
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='10' fill='black'/><text x='32' y='44' font-family='Roboto,Arial,sans-serif' font-size='26' font-weight='900' text-anchor='middle' fill='%2300c5ff' letter-spacing='-1'>IBI</text></svg>">
@@ -691,7 +691,7 @@ footer .accent { color: var(--accent); font-weight: 700; }
     <div class="brand">
       <div class="brand-mark"></div>
       <div class="brand-text">
-        <div class="brand-title">IBI <span class="accent">News</span> <span class="version-badge" id="version-badge">v4.2</span></div>
+        <div class="brand-title">IBI <span class="accent">News</span> <span class="version-badge" id="version-badge">v4.3</span></div>
         <div class="brand-sub">Live Briefings</div>
       </div>
     </div>
@@ -834,7 +834,7 @@ footer .accent { color: var(--accent); font-weight: 700; }
 <footer>
   <div>© <span id="year"></span> <span class="accent">India Business International (IBI)</span> — Kanyakumari, Tamil Nadu</div>
   <div style="margin-top:6px;font-size:13px;opacity:0.7;">Live news aggregated from public sources via Google News. Headlines link to original publishers.</div>
-  <div style="margin-top:8px;font-size:11px;opacity:0.5;font-family:monospace;">Build v4.2.0 · 2026-06-23</div>
+  <div style="margin-top:8px;font-size:11px;opacity:0.5;font-family:monospace;">Build v4.3.0 · 2026-06-24</div>
 </footer>
 
 <!-- ===================== APP LOGIC ===================== -->
@@ -986,6 +986,11 @@ footer .accent { color: var(--accent); font-weight: 700; }
       build: (url) => `${OWN_PROXY_URL}?url=${encodeURIComponent(url)}`
     }] : []),
     {
+      name: 'allorigins-raw',
+      type: 'raw',
+      build: (url) => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`
+    },
+    {
       name: 'corsproxy.io',
       type: 'raw',
       build: (url) => `https://corsproxy.io/?url=${encodeURIComponent(url)}`
@@ -996,9 +1001,9 @@ footer .accent { color: var(--accent); font-weight: 700; }
       build: (url) => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`
     },
     {
-      name: 'allorigins-raw',
-      type: 'raw',
-      build: (url) => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`
+      name: 'allorigins-get',
+      type: 'allorigins-json',
+      build: (url) => `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`
     },
     {
       name: 'rss2json',
@@ -1006,7 +1011,7 @@ footer .accent { color: var(--accent); font-weight: 700; }
       build: (url) => `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(url)}&count=${ITEMS_PER_FEED}`
     }
   ];
-  const FETCH_TIMEOUT_MS = 12000;
+  const FETCH_TIMEOUT_MS = 15000;
 
   // ---------- Utility helpers ----------
   function stripHTML(html) {
@@ -1128,6 +1133,15 @@ footer .accent { color: var(--accent); font-weight: 700; }
             source: extractSourceFromTitle(it.title) || it.author || 'News',
             pubDate: it.pubDate
           }));
+        } else if (proxy.type === 'allorigins-json') {
+          // allorigins /get wraps the raw content in { contents: "..." }
+          const data = await resp.json();
+          const xml = data && data.contents ? data.contents : '';
+          if (!xml || xml.length < 50) throw new Error('empty body');
+          if (!xml.includes('<rss') && !xml.includes('<feed') && !xml.includes('<item')) {
+            throw new Error('not RSS XML');
+          }
+          items = parseRSSXML(xml);
         } else {
           const xml = await resp.text();
           if (!xml || xml.length < 50) throw new Error('empty body');
