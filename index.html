@@ -11,7 +11,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="ibi-build" content="v5.1.0-2026-06-24">
+<meta name="ibi-build" content="v5.2.0-2026-06-24">
 
 <!-- Favicon: IBI text in #00c5ff on black, Roboto -->
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='10' fill='black'/><text x='32' y='44' font-family='Roboto,Arial,sans-serif' font-size='26' font-weight='900' text-anchor='middle' fill='%2300c5ff' letter-spacing='-1'>IBI</text></svg>">
@@ -837,7 +837,7 @@ footer .accent { color: var(--accent); font-weight: 700; }
     <div class="brand">
       <div class="brand-mark"></div>
       <div class="brand-text">
-        <div class="brand-title">IBI <span class="accent">News</span> <span class="version-badge" id="version-badge">v5.1</span></div>
+        <div class="brand-title">IBI <span class="accent">News</span> <span class="version-badge" id="version-badge">v5.2</span></div>
         <div class="brand-sub">Live Briefings</div>
       </div>
     </div>
@@ -981,7 +981,7 @@ footer .accent { color: var(--accent); font-weight: 700; }
 <footer>
   <div>© <span id="year"></span> <span class="accent">India Business International (IBI)</span> — Kanyakumari, Tamil Nadu</div>
   <div style="margin-top:6px;font-size:13px;opacity:0.7;">Live news aggregated from public sources via Google News. Headlines link to original publishers.</div>
-  <div style="margin-top:8px;font-size:11px;opacity:0.5;font-family:monospace;">Build v5.1.0 · 2026-06-24</div>
+  <div style="margin-top:8px;font-size:11px;opacity:0.5;font-family:monospace;">Build v5.2.0 · 2026-06-24</div>
 </footer>
 
 <!-- ===================== APP LOGIC ===================== -->
@@ -1348,22 +1348,14 @@ footer .accent { color: var(--accent); font-weight: 700; }
     if (urls.length === 0) return [];
 
     if (urls.length === 1) {
-      // Single source — fetch then sort + RIGID 24h age-filter
+      // Single source — fetch then sort + RIGID 24h freshness check
       const items = await fetchSingleUrl(urls[0], feedKey);
       items.sort((a, b) => {
         const da = a.pubDate ? new Date(a.pubDate).getTime() : 0;
         const db = b.pubDate ? new Date(b.pubDate).getTime() : 0;
         return db - da;
       });
-      const maxAgeMs = (feed.maxAgeHours || 24) * 60 * 60 * 1000;
-      const cutoff = Date.now() - maxAgeMs;
-      const fresh = items.filter(item => {
-        if (!item.pubDate) return false;            // no date → reject
-        const d = new Date(item.pubDate).getTime();
-        if (isNaN(d)) return false;                 // bad date → reject
-        if (d > Date.now() + 3600000) return false; // future date → reject
-        return d >= cutoff;                          // older than 24h → reject
-      });
+      const fresh = items.filter(item => isFreshArticle(item, feed.maxAgeHours));
       return fresh.slice(0, ITEMS_PER_FEED); // NO fallback to old items
     }
 
@@ -1403,24 +1395,59 @@ footer .accent { color: var(--accent); font-weight: 700; }
       return db - da;
     });
 
-    // RIGID freshness: only keep articles published within maxAgeHours (24h).
-    // Articles with missing OR unparseable dates are REJECTED (not kept) —
-    // this is what was letting 40-day-old articles slip through as "1h ago".
-    // NO fallback to old items: if nothing is fresh, show nothing (by design).
-    const maxAgeMs = (feed.maxAgeHours || 24) * 60 * 60 * 1000;
-    const cutoff = Date.now() - maxAgeMs;
-    const fresh = deduped.filter(item => {
-      if (!item.pubDate) return false;            // no date → reject
-      const d = new Date(item.pubDate).getTime();
-      if (isNaN(d)) return false;                 // bad date → reject
-      if (d > Date.now() + 3600000) return false; // future date (>1h ahead) → reject
-      return d >= cutoff;                          // older than 24h → reject
-    });
+    // RIGID freshness: only keep articles within maxAgeHours (24h).
+    // Uses isFreshArticle which also scans content for old dates (Google News
+    // re-indexes old stories with fake-fresh pubDates — this catches them).
+    const fresh = deduped.filter(item => isFreshArticle(item, feed.maxAgeHours));
 
     return fresh.slice(0, ITEMS_PER_FEED);
   }
 
-  // ---------- Render ----------
+  // ---------- Freshness check (shared by single + multi URL paths) ----------
+  // Returns true only if the article is genuinely within maxAgeHours.
+  // Two layers: (1) pubDate check, (2) scan title/desc for explicit old dates
+  // because Google News sometimes re-indexes old stories with a fresh pubDate.
+  function isFreshArticle(item, maxAgeHours) {
+    const maxAgeMs = (maxAgeHours || 24) * 60 * 60 * 1000;
+    const now = Date.now();
+    const cutoff = now - maxAgeMs;
+
+    // Layer 1 — pubDate must exist, parse, not be future, and be within window
+    if (!item.pubDate) return false;
+    const d = new Date(item.pubDate).getTime();
+    if (isNaN(d)) return false;
+    if (d > now + 3600000) return false;     // future (>1h ahead) → reject
+    if (d < cutoff) return false;             // older than window → reject
+
+    // Layer 2 — scan title + description for an explicit date that is clearly old.
+    // Catches Google News re-indexed stories whose pubDate lies.
+    const text = ((item.title || '') + ' ' + (item.desc || '')).toLowerCase();
+    const nowD = new Date(now);
+    const curYear = nowD.getFullYear();
+    const months = ['january','february','march','april','may','june','july','august','september','october','november','december'];
+
+    // Look for "Month DD" or "DD Month" patterns with optional year
+    for (let mi = 0; mi < 12; mi++) {
+      const mName = months[mi];
+      if (text.indexOf(mName) === -1) continue;
+      // Try to find a year near the month mention
+      const re = new RegExp(mName + '\\s+\\d{1,2},?\\s*(\\d{4})?|\\d{1,2}\\s+' + mName + '\\s*(\\d{4})?', 'g');
+      let m;
+      while ((m = re.exec(text)) !== null) {
+        const yr = parseInt(m[1] || m[2] || curYear, 10);
+        // Build a date from the mentioned month/year
+        const mentioned = new Date(yr, mi, 15).getTime(); // mid-month estimate
+        // If the mentioned month is more than ~40 days before now, reject
+        if (mentioned < now - (40 * 24 * 60 * 60 * 1000)) {
+          return false;
+        }
+      }
+    }
+
+    return true;
+  }
+
+
   function renderSkeletons(gridEl, count) {
     gridEl.innerHTML = Array(count).fill(0).map(() => `
       <div class="skeleton-card">
