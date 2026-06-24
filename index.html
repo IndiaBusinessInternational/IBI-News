@@ -11,7 +11,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="ibi-build" content="v4.0.0-2026-05-11">
+<meta name="ibi-build" content="v4.2.0-2026-06-23">
 
 <!-- Favicon: IBI text in #00c5ff on black, Roboto -->
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='10' fill='black'/><text x='32' y='44' font-family='Roboto,Arial,sans-serif' font-size='26' font-weight='900' text-anchor='middle' fill='%2300c5ff' letter-spacing='-1'>IBI</text></svg>">
@@ -175,8 +175,23 @@ a { color: inherit; text-decoration: none; -webkit-tap-highlight-color: transpar
   font-weight: 900;
   letter-spacing: -0.3px;
   line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
 }
 .brand-title .accent { color: var(--accent); }
+.version-badge {
+  background: #000;
+  color: var(--accent);
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.5px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  border: 1px solid var(--accent);
+  vertical-align: middle;
+  font-family: 'Roboto', monospace;
+}
 .brand-sub {
   font-size: 13px;
   color: var(--text-muted);
@@ -184,6 +199,12 @@ a { color: inherit; text-decoration: none; -webkit-tap-highlight-color: transpar
   letter-spacing: 0.8px;
   text-transform: uppercase;
   margin-top: 4px;
+}
+.status-sep { margin: 0 8px; opacity: 0.5; }
+.live-clock {
+  font-weight: 500;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
 }
 
 .controls {
@@ -605,6 +626,8 @@ footer .accent { color: var(--accent); font-weight: 700; }
 
   /* Status bar wraps cleanly */
   .statusbar { font-size: 13px; flex-direction: column; gap: 4px; align-items: flex-start; }
+  .version-badge { font-size: 10px; padding: 2px 6px; }
+  .live-clock { font-size: 12px; }
 }
 
 /* ── AI Provider selector ─────────────────────────────────── */
@@ -668,7 +691,7 @@ footer .accent { color: var(--accent); font-weight: 700; }
     <div class="brand">
       <div class="brand-mark"></div>
       <div class="brand-text">
-        <div class="brand-title">IBI <span class="accent">News</span></div>
+        <div class="brand-title">IBI <span class="accent">News</span> <span class="version-badge" id="version-badge">v4.2</span></div>
         <div class="brand-sub">Live Briefings</div>
       </div>
     </div>
@@ -705,10 +728,12 @@ footer .accent { color: var(--accent); font-weight: 700; }
     <div class="status-left">
       <span class="dot" id="status-dot"></span>
       <span id="status-text">Ready</span>
+      <span class="status-sep">|</span>
+      <span class="live-clock" id="live-clock">—</span>
     </div>
     <div>
       <span id="last-updated">Last updated: —</span>
-      <span style="margin: 0 8px; opacity:0.5;">|</span>
+      <span class="status-sep">|</span>
       <span id="next-update">Next auto-refresh: 30 min</span>
     </div>
   </div>
@@ -809,7 +834,7 @@ footer .accent { color: var(--accent); font-weight: 700; }
 <footer>
   <div>© <span id="year"></span> <span class="accent">India Business International (IBI)</span> — Kanyakumari, Tamil Nadu</div>
   <div style="margin-top:6px;font-size:13px;opacity:0.7;">Live news aggregated from public sources via Google News. Headlines link to original publishers.</div>
-  <div style="margin-top:8px;font-size:11px;opacity:0.5;font-family:monospace;">Build v4.0.0 · 2026-05-11</div>
+  <div style="margin-top:8px;font-size:11px;opacity:0.5;font-family:monospace;">Build v4.2.0 · 2026-06-23</div>
 </footer>
 
 <!-- ===================== APP LOGIC ===================== -->
@@ -1031,6 +1056,35 @@ footer .accent { color: var(--accent); font-weight: 700; }
     return new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   }
 
+  // Full date-time formatter: "28 May 2026, Thursday, 01:38:00 PM"
+  function fullDateTimeFmt(d) {
+    const day    = d.getDate();
+    const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    const days   = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+    const month  = months[d.getMonth()];
+    const year   = d.getFullYear();
+    const weekday = days[d.getDay()];
+
+    let h = d.getHours();
+    const m = String(d.getMinutes()).padStart(2, '0');
+    const s = String(d.getSeconds()).padStart(2, '0');
+    const ampm = h >= 12 ? 'PM' : 'AM';
+    h = h % 12; if (h === 0) h = 12;
+    const hh = String(h).padStart(2, '0');
+
+    return `${day} ${month} ${year}, ${weekday}, ${hh}:${m}:${s} ${ampm}`;
+  }
+
+  let clockTimer = null;
+  function startLiveClock() {
+    const el = document.getElementById('live-clock');
+    if (!el) return;
+    const tick = () => { el.textContent = fullDateTimeFmt(new Date()); };
+    tick(); // immediate
+    if (clockTimer) clearInterval(clockTimer);
+    clockTimer = setInterval(tick, 1000); // update every second
+  }
+
   // ---------- Cache ----------
   function loadCache() {
     try {
@@ -1213,18 +1267,13 @@ footer .accent { color: var(--accent); font-weight: 700; }
   }
   function renderError(gridEl, feedKey, errorDetails) {
     const detailsBlock = errorDetails ? `
-        <details style="margin-top:10px;text-align:left;">
-          <summary style="cursor:pointer;color:var(--accent);font-weight:600;font-size:13px;text-align:center;user-select:none;">
-            ▸ Show technical details (tap to expand)
-          </summary>
-          <pre style="margin-top:8px;padding:10px;background:var(--bg);border:1px solid var(--border);border-radius:4px;overflow-x:auto;color:var(--text-muted);white-space:pre-wrap;font-family:monospace;font-size:11px;line-height:1.6;">${escapeHtml(errorDetails)}</pre>
-        </details>` : '';
+        <pre style="margin-top:10px;text-align:left;padding:10px;background:var(--bg);border:1px solid var(--border);border-radius:4px;overflow-x:auto;color:var(--text-muted);white-space:pre-wrap;font-family:monospace;font-size:11px;line-height:1.6;">${escapeHtml(errorDetails)}</pre>` : '';
     gridEl.innerHTML = `
       <div class="empty-state" style="grid-column: 1 / -1;">
         <div style="font-weight:600;margin-bottom:6px;">Couldn't load this feed</div>
         <div style="font-size:13px;opacity:0.75;line-height:1.5;">
-          Most common cause: an ad-blocker or privacy extension (uBlock Origin, Brave Shields, AdGuard, etc.)
-          is blocking the news proxy. Try disabling shields for this site.
+          Possible causes: (1) Cloudflare Worker proxy down, (2) ad-blocker/Brave Shields blocking the proxy,
+          or (3) news source temporarily unavailable.
         </div>${detailsBlock}
         <span class="retry" data-retry="${feedKey}">Retry now</span>
       </div>`;
@@ -1699,6 +1748,7 @@ footer .accent { color: var(--accent); font-weight: 700; }
   function init() {
     initTheme();
     initAiProvider();
+    startLiveClock();
     document.getElementById('year').textContent = new Date().getFullYear();
 
     // Tab clicks
