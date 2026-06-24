@@ -981,6 +981,7 @@ footer .accent { color: var(--accent); font-weight: 700; }
 <footer>
   <div>© <span id="year"></span> <span class="accent">India Business International (IBI)</span> — Kanyakumari, Tamil Nadu</div>
   <div style="margin-top:6px;font-size:13px;opacity:0.7;">Live news aggregated from public sources via Google News. Headlines link to original publishers.</div>
+  <div style="margin-top:8px;font-size:11px;opacity:0.5;font-family:monospace;">Build v5.2.0 · 2026-06-24</div>
 </footer>
 
 <!-- ===================== APP LOGIC ===================== -->
@@ -1217,20 +1218,16 @@ footer .accent { color: var(--accent); font-weight: 700; }
       };
     });
   }
-  function relativeTimeMs(ms) {
-    if (!ms || !isFinite(ms)) return '';
-    const diff = Math.floor((Date.now() - ms) / 1000);
-    if (diff < 60) return 'just now';
-    if (diff < 3600) return Math.floor(diff / 60) + 'm ago';
-    if (diff < 86400) return Math.floor(diff / 3600) + 'h ago';
-    if (diff < 604800) return Math.floor(diff / 86400) + 'd ago';
-    return new Date(ms).toLocaleDateString();
-  }
   function relativeTime(dateStr) {
     if (!dateStr) return '';
     const d = new Date(dateStr);
     if (isNaN(d)) return '';
-    return relativeTimeMs(d.getTime());
+    const diff = Math.floor((Date.now() - d.getTime()) / 1000);
+    if (diff < 60) return 'just now';
+    if (diff < 3600) return Math.floor(diff / 60) + 'm ago';
+    if (diff < 86400) return Math.floor(diff / 3600) + 'h ago';
+    if (diff < 604800) return Math.floor(diff / 86400) + 'd ago';
+    return d.toLocaleDateString();
   }
   function nowFmt() {
     return new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -1351,9 +1348,15 @@ footer .accent { color: var(--accent); font-weight: 700; }
     if (urls.length === 0) return [];
 
     if (urls.length === 1) {
-      // Single source — dedup + first-seen ledger + RIGID 24h freshness check
+      // Single source — fetch then sort + RIGID 24h freshness check
       const items = await fetchSingleUrl(urls[0], feedKey);
-      return finalizeItems(items, feed.maxAgeHours).slice(0, ITEMS_PER_FEED);
+      items.sort((a, b) => {
+        const da = a.pubDate ? new Date(a.pubDate).getTime() : 0;
+        const db = b.pubDate ? new Date(b.pubDate).getTime() : 0;
+        return db - da;
+      });
+      const fresh = items.filter(item => isFreshArticle(item, feed.maxAgeHours));
+      return fresh.slice(0, ITEMS_PER_FEED); // NO fallback to old items
     }
 
     // Multi-source — fetch all in parallel; partial success is fine
@@ -1377,13 +1380,27 @@ footer .accent { color: var(--accent); font-weight: 700; }
       throw new Error('All sources failed → ' + errors.join(' | '));
     }
 
-    // dedup (link + normalized title), sort, freshness, and the first-seen
-    // ledger are all handled by finalizeItems below.
+    // Deduplicate by link URL
+    const seen = new Set();
+    const deduped = allItems.filter(item => {
+      if (!item.link || seen.has(item.link)) return false;
+      seen.add(item.link);
+      return true;
+    });
+
+    // Sort newest-first
+    deduped.sort((a, b) => {
+      const da = a.pubDate ? new Date(a.pubDate).getTime() : 0;
+      const db = b.pubDate ? new Date(b.pubDate).getTime() : 0;
+      return db - da;
+    });
 
     // RIGID freshness: only keep articles within maxAgeHours (24h).
     // Uses isFreshArticle which also scans content for old dates (Google News
     // re-indexes old stories with fake-fresh pubDates — this catches them).
-    return finalizeItems(allItems, feed.maxAgeHours).slice(0, ITEMS_PER_FEED);
+    const fresh = deduped.filter(item => isFreshArticle(item, feed.maxAgeHours));
+
+    return fresh.slice(0, ITEMS_PER_FEED);
   }
 
   // ---------- Freshness check (shared by single + multi URL paths) ----------
@@ -1430,58 +1447,6 @@ footer .accent { color: var(--accent); font-weight: 700; }
     return true;
   }
 
-  // ---------- Persistent "first-seen" ledger (anti-stale) ----------
-  // Google News re-indexes old stories with a fake-fresh <pubDate>, and when the
-  // headline contains no date words the content-scan above can't catch it. So we
-  // also remember the first time THIS device saw each headline. A story we first
-  // saw more than maxAgeHours ago is stale no matter what pubDate claims — this is
-  // what kills the "same very old news keeps coming back" problem.
-  const SEEN_KEY = 'ibi_seen_v1';
-  function loadSeen() { try { return JSON.parse(localStorage.getItem(SEEN_KEY) || '{}') || {}; } catch { return {}; } }
-  function saveSeen(s) { try { localStorage.setItem(SEEN_KEY, JSON.stringify(s)); } catch {} }
-  function storyKey(item) {
-    // normalized headline (source suffix stripped, punctuation/case-insensitive)
-    const t = stripSourceFromTitle((item && item.title) || '');
-    return t.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
-  }
-
-  // Dedup by normalized headline, stamp an honest "effective" time, and drop
-  // anything stale — used by both the single-url and multi-url fetch paths.
-  function finalizeItems(items, maxAgeHours) {
-    const now = Date.now();
-    const maxAgeMs = (maxAgeHours || 24) * 60 * 60 * 1000;
-    const seen = loadSeen();
-    // prune ledger entries older than 30 days so localStorage can't grow forever
-    const pruneCut = now - 30 * 24 * 60 * 60 * 1000;
-    for (const k in seen) { if (!(seen[k] > pruneCut)) delete seen[k]; }
-
-    const keptKeys = new Set();
-    const out = [];
-    for (const it of (items || [])) {
-      const key = storyKey(it);
-      if (!key || keptKeys.has(key)) continue;        // drop blank + duplicate headlines
-
-      // first time this exact headline was seen on this device
-      const first = seen[key] || now;
-      if (!seen[key]) seen[key] = now;
-
-      // effective publish time = earliest time we can credibly attribute.
-      // Ignore a missing/future pubDate; otherwise take min(pubDate, firstSeen).
-      let pub = it.pubDate ? new Date(it.pubDate).getTime() : NaN;
-      if (isNaN(pub) || pub > now + 3600000) pub = Infinity;
-      const eff = Math.min(pub, first);
-
-      if (!isFreshArticle(it, maxAgeHours)) continue;  // existing pubDate + content-date layers
-      if (now - eff > maxAgeMs) continue;              // first-seen guard → kills re-indexed old stories
-
-      it._eff = eff;
-      keptKeys.add(key);
-      out.push(it);
-    }
-    saveSeen(seen);
-    out.sort((a, b) => (b._eff || 0) - (a._eff || 0));  // newest effective time first
-    return out;
-  }
 
   function renderSkeletons(gridEl, count) {
     gridEl.innerHTML = Array(count).fill(0).map(() => `
@@ -1513,7 +1478,7 @@ footer .accent { color: var(--accent); font-weight: 700; }
           ${desc ? `<div class="card-desc">${escapeHtml(desc)}</div>` : ''}
           <div class="card-meta">
             <span class="card-source" title="${escapeAttr(it.source || '')}">${escapeHtml(it.source || 'News')}</span>
-            <span class="card-time">${escapeHtml(it._eff ? relativeTimeMs(it._eff) : relativeTime(it.pubDate))}</span>
+            <span class="card-time">${escapeHtml(relativeTime(it.pubDate))}</span>
           </div>
         </a>
       `;
