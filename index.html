@@ -11,7 +11,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="ibi-build" content="v4.4.0-2026-06-24">
+<meta name="ibi-build" content="v5.0.0-2026-06-24">
 
 <!-- Favicon: IBI text in #00c5ff on black, Roboto -->
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='10' fill='black'/><text x='32' y='44' font-family='Roboto,Arial,sans-serif' font-size='26' font-weight='900' text-anchor='middle' fill='%2300c5ff' letter-spacing='-1'>IBI</text></svg>">
@@ -662,6 +662,109 @@ footer .accent { color: var(--accent); font-weight: 700; }
   -webkit-tap-highlight-color: transparent;
 }
 .ai-provider-sel:focus { outline: none; border-color: var(--accent); }
+.ai-keys-btn {
+  font-family: inherit;
+  font-size: 18px;
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--border-strong);
+  border-radius: 6px;
+  background: var(--bg-card);
+  color: var(--accent);
+  cursor: pointer;
+  flex-shrink: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+.ai-keys-btn:hover { border-color: var(--accent); }
+
+/* Keys modal */
+.keys-modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  z-index: 10000;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+.keys-modal-overlay.open { display: flex; }
+.keys-modal {
+  background: var(--bg-elev);
+  border: 1px solid var(--accent);
+  border-radius: 12px;
+  max-width: 480px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 12px 48px rgba(0,0,0,0.5);
+}
+.keys-modal-header {
+  background: #000;
+  color: var(--accent);
+  padding: 14px 18px;
+  font-size: 16px;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-radius: 12px 12px 0 0;
+  border-bottom: 1px solid var(--accent);
+}
+.keys-modal-close {
+  background: none;
+  border: none;
+  color: var(--accent);
+  font-size: 18px;
+  cursor: pointer;
+  padding: 4px 8px;
+}
+.keys-modal-body { padding: 18px; }
+.keys-warn {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text-muted);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 16px;
+}
+.keys-field { display: block; margin-bottom: 12px; }
+.keys-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 5px;
+}
+.keys-label em { font-style: normal; font-weight: 400; font-size: 11px; color: var(--text-faint); }
+.keys-field input {
+  width: 100%;
+  font-family: monospace;
+  font-size: 13px;
+  padding: 10px 12px;
+  border: 1px solid var(--border-strong);
+  border-radius: 6px;
+  background: var(--bg-card);
+  color: var(--text);
+}
+.keys-field input:focus { outline: none; border-color: var(--accent); }
+.keys-actions { display: flex; gap: 10px; margin-top: 16px; }
+.keys-save, .keys-clear {
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  padding: 11px 18px;
+  border-radius: 6px;
+  cursor: pointer;
+  flex: 1;
+}
+.keys-save { background: var(--accent); color: #000; border: none; }
+.keys-clear { background: transparent; color: var(--text-muted); border: 1px solid var(--border-strong); flex: 0 0 auto; }
+.keys-status { margin-top: 12px; font-size: 13px; text-align: center; min-height: 18px; }
+.keys-status.ok { color: #22c55e; }
+.keys-status.err { color: #ef4444; }
 @media (max-width: 640px) {
   .ai-provider-badge { display: none; }
   .ai-provider-sel { font-size: 12px; padding: 8px 6px; max-width: 110px; }
@@ -669,6 +772,49 @@ footer .accent { color: var(--accent); font-weight: 700; }
 </style>
 </head>
 <body>
+
+<!-- API Keys Modal -->
+<div class="keys-modal-overlay" id="keys-modal-overlay">
+  <div class="keys-modal">
+    <div class="keys-modal-header">
+      <span>⚙ AI Summary — API Keys</span>
+      <button class="keys-modal-close" id="keys-modal-close" aria-label="Close">✕</button>
+    </div>
+    <div class="keys-modal-body">
+      <div class="keys-warn">
+        <strong>⚠ Security note:</strong> Keys are stored in this browser only (localStorage) and are sent directly to each AI provider.
+        <span style="color:#ef4444;font-weight:700;">Gemini &amp; DeepSeek have free tiers (safe). ChatGPT &amp; Claude are pay-per-use — only add those if you accept billing risk.</span>
+      </div>
+
+      <label class="keys-field">
+        <span class="keys-label">Gemini API Key 1 <em>(free tier)</em></span>
+        <input type="password" id="key-gemini1" placeholder="AIzaSy..." autocomplete="off">
+      </label>
+      <label class="keys-field">
+        <span class="keys-label">Gemini API Key 2 <em>(free tier)</em></span>
+        <input type="password" id="key-gemini2" placeholder="AIzaSy..." autocomplete="off">
+      </label>
+      <label class="keys-field">
+        <span class="keys-label">DeepSeek API Key <em>(free tier)</em></span>
+        <input type="password" id="key-deepseek" placeholder="sk-..." autocomplete="off">
+      </label>
+      <label class="keys-field">
+        <span class="keys-label" style="color:#ef4444;">ChatGPT API Key <em>(⚠ paid)</em></span>
+        <input type="password" id="key-openai" placeholder="sk-..." autocomplete="off">
+      </label>
+      <label class="keys-field">
+        <span class="keys-label" style="color:#ef4444;">Claude API Key <em>(⚠ paid)</em></span>
+        <input type="password" id="key-claude" placeholder="sk-ant-..." autocomplete="off">
+      </label>
+
+      <div class="keys-actions">
+        <button class="keys-save" id="keys-save">Save Keys</button>
+        <button class="keys-clear" id="keys-clear">Clear All</button>
+      </div>
+      <div class="keys-status" id="keys-status"></div>
+    </div>
+  </div>
+</div>
 
 <!-- Pull-to-refresh indicator (mobile only) -->
 <div class="ptr-indicator" id="ptr-indicator">
@@ -691,7 +837,7 @@ footer .accent { color: var(--accent); font-weight: 700; }
     <div class="brand">
       <div class="brand-mark"></div>
       <div class="brand-text">
-        <div class="brand-title">IBI <span class="accent">News</span> <span class="version-badge" id="version-badge">v4.4</span></div>
+        <div class="brand-title">IBI <span class="accent">News</span> <span class="version-badge" id="version-badge">v5.0</span></div>
         <div class="brand-sub">Live Briefings</div>
       </div>
     </div>
@@ -707,6 +853,7 @@ footer .accent { color: var(--accent); font-weight: 700; }
           <option value="claude">Claude (Haiku)</option>
           <option value="deepseek">DeepSeek Chat</option>
         </select>
+        <button class="ai-keys-btn" id="ai-keys-btn" title="Manage API keys" aria-label="Manage API keys">⚙</button>
       </div>
       <button class="btn-refresh" id="refresh-btn" title="Refresh now">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -834,7 +981,7 @@ footer .accent { color: var(--accent); font-weight: 700; }
 <footer>
   <div>© <span id="year"></span> <span class="accent">India Business International (IBI)</span> — Kanyakumari, Tamil Nadu</div>
   <div style="margin-top:6px;font-size:13px;opacity:0.7;">Live news aggregated from public sources via Google News. Headlines link to original publishers.</div>
-  <div style="margin-top:8px;font-size:11px;opacity:0.5;font-family:monospace;">Build v4.4.0 · 2026-06-24</div>
+  <div style="margin-top:8px;font-size:11px;opacity:0.5;font-family:monospace;">Build v5.0.0 · 2026-06-24</div>
 </footer>
 
 <!-- ===================== APP LOGIC ===================== -->
@@ -1563,7 +1710,7 @@ footer .accent { color: var(--accent); font-weight: 700; }
   }
 
   function enqueueAiSummary(feedKey, items) {
-    if (!OWN_PROXY_URL || !items || !items.length) return;
+    if (!items || !items.length) return;
     aiQueue = aiQueue.filter(q => q.feedKey !== feedKey);
     aiQueue.push({ feedKey, items });
     if (!aiQueueRunning) runAiQueue();
@@ -1656,16 +1803,119 @@ footer .accent { color: var(--accent); font-weight: 700; }
   }
 
   // Main entry: fetch AI summary for a section after news items load
+  // Browser-side API key storage (localStorage)
+  const AI_KEYS_STORAGE = 'ibinews_ai_keys';
+  function getAiKeys() {
+    try { return JSON.parse(localStorage.getItem(AI_KEYS_STORAGE) || '{}'); }
+    catch { return {}; }
+  }
+  function saveAiKeys(keys) {
+    try { localStorage.setItem(AI_KEYS_STORAGE, JSON.stringify(keys)); } catch {}
+  }
+
+  function buildAiPrompt(section, headlines) {
+    return `You are a senior news analyst for IBI News (India Business International).
+Analyse these ${section} news items and write a crisp 5-point executive summary.
+Rules: Exactly 5 lines. English only. Each line = one key insight (max 25 words). Neutral, factual. No repetition.
+
+News items:
+${headlines.map((h, i) => `${i + 1}. "${h.title}" — ${h.source}`).join('\n')}
+
+Respond ONLY with valid JSON (no markdown):
+{"summary":["Line 1.","Line 2.","Line 3.","Line 4.","Line 5."],"references":["Source 1","Source 2","Source 3"]}`;
+  }
+
+  // Direct browser → AI provider calls (keys from localStorage)
+  async function callAiProvider(provider, prompt) {
+    const keys = getAiKeys();
+    const parseJson = (raw) => JSON.parse((raw || '{}').replace(/```json|```/g, '').trim());
+
+    if (provider === 'gemini1' || provider === 'gemini2') {
+      const key = provider === 'gemini1' ? keys.gemini1 : keys.gemini2;
+      if (!key) throw new Error('No Gemini API key saved — click ⚙ to add one');
+      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${key}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: { temperature: 0.2, maxOutputTokens: 500, responseMimeType: 'application/json' }
+        })
+      });
+      if (!res.ok) throw new Error((await res.text()).substring(0, 200));
+      const data = await res.json();
+      return parseJson(data.candidates?.[0]?.content?.parts?.[0]?.text);
+    }
+
+    if (provider === 'deepseek') {
+      const key = keys.deepseek;
+      if (!key) throw new Error('No DeepSeek API key saved — click ⚙ to add one');
+      const res = await fetch('https://api.deepseek.com/chat/completions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${key}` },
+        body: JSON.stringify({
+          model: 'deepseek-chat',
+          messages: [{ role: 'user', content: prompt }],
+          max_tokens: 500, temperature: 0.2, response_format: { type: 'json_object' }
+        })
+      });
+      if (!res.ok) throw new Error((await res.text()).substring(0, 200));
+      const data = await res.json();
+      return parseJson(data.choices?.[0]?.message?.content);
+    }
+
+    if (provider === 'openai') {
+      const key = keys.openai;
+      if (!key) throw new Error('No ChatGPT API key saved — click ⚙ to add one');
+      const res = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${key}` },
+        body: JSON.stringify({
+          model: 'gpt-4o-mini',
+          messages: [{ role: 'user', content: prompt }],
+          max_tokens: 500, temperature: 0.2, response_format: { type: 'json_object' }
+        })
+      });
+      if (!res.ok) throw new Error((await res.text()).substring(0, 200));
+      const data = await res.json();
+      return parseJson(data.choices?.[0]?.message?.content);
+    }
+
+    if (provider === 'claude') {
+      const key = keys.claude;
+      if (!key) throw new Error('No Claude API key saved — click ⚙ to add one');
+      const res = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': key,
+          'anthropic-version': '2023-06-01',
+          'anthropic-dangerous-direct-browser-access': 'true'
+        },
+        body: JSON.stringify({
+          model: 'claude-haiku-4-5-20251001',
+          max_tokens: 500,
+          messages: [{ role: 'user', content: prompt }]
+        })
+      });
+      if (!res.ok) throw new Error((await res.text()).substring(0, 200));
+      const data = await res.json();
+      return parseJson(data.content?.[0]?.text);
+    }
+
+    throw new Error('Unknown provider: ' + provider);
+  }
+
   async function summariseSection(feedKey, items) {
-    if (!OWN_PROXY_URL || !items || !items.length) return;
+    if (!items || !items.length) return;
     const boxId = aiBoxId(feedKey);
     const cKey  = AI_CACHE_KEY_PREFIX + feedKey;
+    const provider = getAiProvider();
 
     // Serve from cache if fresh
     try {
       const cached = JSON.parse(localStorage.getItem(cKey) || '{}');
       if (cached.ts && Date.now() - cached.ts < CACHE_TTL_MS && cached.data) {
-        renderAiSummary(boxId, feedKey, cached.data, cached.provider || getAiProvider());
+        renderAiSummary(boxId, feedKey, cached.data, cached.provider || provider);
         return;
       }
     } catch {}
@@ -1676,35 +1926,13 @@ footer .accent { color: var(--accent); font-weight: 700; }
       title:  (it.title  || '').substring(0, 120),
       source: (it.source || 'News').substring(0, 40)
     }));
+    const prompt = buildAiPrompt(FEEDS[feedKey]?.label || feedKey, headlines);
 
     try {
-      const res = await fetch(`${OWN_PROXY_URL}/summarise`, {
-        method:  'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          headlines,
-          section: FEEDS[feedKey]?.label || feedKey,
-          provider: getAiProvider()
-        })
-      });
-
-      // Show a visible error so user knows exactly what needs fixing
-      if (!res.ok) {
-        let errMsg = `HTTP ${res.status}`;
-        try {
-          const errData = await res.json();
-          errMsg = errData.error || errMsg;
-        } catch {}
-        showAiError(boxId, errMsg);
-        console.warn('[IBI News AI]', feedKey, errMsg);
-        return;
-      }
-
-      const data = await res.json();
-      if (!data.summary) throw new Error('No summary in response');
-      // Cache
-      try { localStorage.setItem(cKey, JSON.stringify({ ts: Date.now(), data, provider: getAiProvider() })); } catch {}
-      renderAiSummary(boxId, feedKey, data, getAiProvider());
+      const data = await callAiProvider(provider, prompt);
+      if (!data.summary) throw new Error('No summary in AI response');
+      try { localStorage.setItem(cKey, JSON.stringify({ ts: Date.now(), data, provider })); } catch {}
+      renderAiSummary(boxId, feedKey, data, provider);
     } catch (e) {
       console.warn('[IBI News AI]', feedKey, e.message);
       showAiError(boxId, e.message);
@@ -1770,10 +1998,71 @@ footer .accent { color: var(--accent); font-weight: 700; }
            'gemini1';
   }
 
+  // ---------- API Keys modal ----------
+  function initKeysModal() {
+    const overlay = document.getElementById('keys-modal-overlay');
+    const openBtn = document.getElementById('ai-keys-btn');
+    const closeBtn = document.getElementById('keys-modal-close');
+    const saveBtn = document.getElementById('keys-save');
+    const clearBtn = document.getElementById('keys-clear');
+    const status = document.getElementById('keys-status');
+    if (!overlay || !openBtn) return;
+
+    const fields = {
+      gemini1: document.getElementById('key-gemini1'),
+      gemini2: document.getElementById('key-gemini2'),
+      deepseek: document.getElementById('key-deepseek'),
+      openai: document.getElementById('key-openai'),
+      claude: document.getElementById('key-claude')
+    };
+
+    function loadIntoFields() {
+      const keys = getAiKeys();
+      Object.keys(fields).forEach(k => { if (fields[k]) fields[k].value = keys[k] || ''; });
+    }
+
+    openBtn.addEventListener('click', () => {
+      loadIntoFields();
+      status.textContent = '';
+      status.className = 'keys-status';
+      overlay.classList.add('open');
+    });
+    closeBtn.addEventListener('click', () => overlay.classList.remove('open'));
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.classList.remove('open'); });
+
+    saveBtn.addEventListener('click', () => {
+      const keys = {};
+      Object.keys(fields).forEach(k => {
+        const v = fields[k] ? fields[k].value.trim() : '';
+        if (v) keys[k] = v;
+      });
+      saveAiKeys(keys);
+      // Clear AI summary cache so summaries regenerate with new keys
+      Object.keys(localStorage).forEach(k => {
+        if (k.startsWith(AI_CACHE_KEY_PREFIX)) localStorage.removeItem(k);
+      });
+      status.textContent = '✓ Keys saved. Refreshing summaries…';
+      status.className = 'keys-status ok';
+      setTimeout(() => {
+        overlay.classList.remove('open');
+        document.querySelectorAll('[id^="ai-box-"]').forEach(box => box.style.display = 'none');
+        refreshAll(false);
+      }, 900);
+    });
+
+    clearBtn.addEventListener('click', () => {
+      try { localStorage.removeItem(AI_KEYS_STORAGE); } catch {}
+      Object.keys(fields).forEach(k => { if (fields[k]) fields[k].value = ''; });
+      status.textContent = 'All keys cleared.';
+      status.className = 'keys-status err';
+    });
+  }
+
   // ---------- Wire-up ----------
   function init() {
     initTheme();
     initAiProvider();
+    initKeysModal();
     startLiveClock();
     document.getElementById('year').textContent = new Date().getFullYear();
 
