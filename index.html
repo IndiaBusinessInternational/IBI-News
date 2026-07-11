@@ -26,7 +26,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="ibi-build" content="v5.3.0-2026-07-04">
+<meta name="ibi-build" content="v5.5.0-2026-07-11">
 
 <!-- Favicon: IBI text in #00c5ff on black, Roboto -->
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='10' fill='black'/><text x='32' y='44' font-family='Roboto,Arial,sans-serif' font-size='26' font-weight='900' text-anchor='middle' fill='%2300c5ff' letter-spacing='-1'>IBI</text></svg>">
@@ -852,7 +852,7 @@ footer .accent { color: var(--accent); font-weight: 700; }
     <div class="brand">
       <div class="brand-mark"></div>
       <div class="brand-text">
-        <div class="brand-title">IBI <span class="accent">News</span> <span class="version-badge" id="version-badge">v5.4</span></div>
+        <div class="brand-title">IBI <span class="accent">News</span> <span class="version-badge" id="version-badge">v5.5</span></div>
         <div class="brand-sub">Live Briefings</div>
       </div>
     </div>
@@ -996,7 +996,7 @@ footer .accent { color: var(--accent); font-weight: 700; }
 <footer>
   <div>© <span id="year"></span> <span class="accent">India Business International (IBI)</span> — Kanyakumari, Tamil Nadu</div>
   <div style="margin-top:6px;font-size:13px;opacity:0.7;">Live news aggregated from public sources via Google News. Headlines link to original publishers.</div>
-  <div style="margin-top:8px;font-size:11px;opacity:0.5;font-family:monospace;">Build v5.3.0 · 2026-07-04</div>
+  <div style="margin-top:8px;font-size:11px;opacity:0.5;font-family:monospace;">Build v5.5.0 · 2026-07-11</div>
 </footer>
 
 <!-- ===================== APP LOGIC ===================== -->
@@ -1008,121 +1008,139 @@ footer .accent { color: var(--accent); font-weight: 700; }
   const REFRESH_INTERVAL_MS = 30 * 60 * 1000; // 30 minutes
   const CACHE_TTL_MS = 30 * 60 * 1000;        // cache valid for 30 minutes
   const ITEMS_PER_FEED = 6;
-  const STORAGE_KEY = 'ibinews_cache_v1';
+  const STORAGE_KEY = 'ibinews_cache_v2'; // v2: items carry source labels + fromGoogle flag
   const THEME_KEY = 'ibinews_theme';
 
   // ─────────────────────────────────────────────────────────────────────────
-  // NEWS FEEDS — English · Reliable sources · LATEST news prioritised
+  // NEWS FEEDS — English · direct publisher RSS · LATEST news prioritised
   //
-  // Freshness strategy (3 layers):
-  //  1. Google News `when:` operator = server-side time filter (primary sources)
-  //  2. maxAgeHours = client-side hard cutoff, drops anything older
-  //  3. Newest-first sort = freshest always on top
+  // v5.5 ARCHITECTURE CHANGE: Google News RSS now serves its anti-bot "Sorry"
+  // page to every proxy route (own Worker, allorigins, corsproxy, codetabs,
+  // rss2json all fail), so direct publisher feeds are the PRIMARY sources.
+  // All hosts below are already in the Cloudflare Worker's ALLOWED_HOSTS and
+  // verified working through it. Google News remains only as a `bonus` URL
+  // (Kanyakumari district — no publisher offers a district feed) with a hard
+  // time budget so a blocked Google can never stall the section render.
   //
-  // Static RSS (BBC/Reuters/TechCrunch) are SECONDARY — they lack time filters
-  // and sometimes carry evergreen/old content, so time-filtered Google News
-  // queries lead each section to guarantee fresh headlines.
+  // URL entry = plain string, or { u, src, bonus }:
+  //   src   — publisher name shown on each card (Google News derives its own)
+  //   bonus — best-effort: failure or slowness never delays the section
+  //
+  // Freshness: maxAgeHours client-side hard cutoff + newest-first sort.
   // ─────────────────────────────────────────────────────────────────────────
   const FEEDS = {
 
     // ── Breaking News ──────────────────────────────────────────────────────
-    // Kanyakumari → Tamil Nadu → India → World, all within last few hours
     'breaking': {
       urls: [
-        'https://news.google.com/rss/search?q=India+breaking+news+when:1d&hl=en&gl=IN&ceid=IN:en',
-        'https://news.google.com/rss/search?q=%22Tamil+Nadu%22+OR+Kanyakumari+OR+Chennai+news+when:1d&hl=en&gl=IN&ceid=IN:en',
-        'https://news.google.com/rss/search?q=world+breaking+news+when:1d&hl=en&gl=US&ceid=US:en',
-        'https://news.google.com/rss/search?q=top+headlines+when:1d&hl=en&gl=IN&ceid=IN:en'
+        { u: 'https://feeds.feedburner.com/ndtvnews-top-stories', src: 'NDTV' },
+        { u: 'https://timesofindia.indiatimes.com/rssfeeds/-2128936835.cms', src: 'Times of India' },
+        { u: 'https://feeds.bbci.co.uk/news/world/rss.xml', src: 'BBC' },
+        { u: 'https://www.aljazeera.com/xml/rss/all.xml', src: 'Al Jazeera' }
       ],
       maxAgeHours: 24,
-      label: 'Kanyakumari · Tamil Nadu · India · World'
+      label: 'India & World · NDTV · TOI · BBC · Al Jazeera'
     },
 
     // ── Politics & Government ──────────────────────────────────────────────
+    // District news is sparse: publisher Tamil Nadu feeds are keyword-filtered
+    // to Kanyakumari-district places; Google News query rides along as bonus.
     'politics_kanyakumari': {
-      urls: ['https://news.google.com/rss/search?q=Kanyakumari+OR+Nagercoil+OR+Marthandam+OR+Colachel+OR+Kanniyakumari+when:1d&hl=en&gl=IN&ceid=IN:en'],
-      maxAgeHours: 24, // 24h hard cutoff — district news is sparse but must stay within a day
-      label: 'Kanyakumari district · Google News'
+      urls: [
+        { u: 'https://www.thehindu.com/news/national/tamil-nadu/feeder/default.rss', src: 'The Hindu' },
+        { u: 'https://timesofindia.indiatimes.com/rssfeeds/2950623.cms', src: 'Times of India' },
+        { u: 'https://news.google.com/rss/search?q=Kanyakumari+OR+Nagercoil+OR+Marthandam+OR+Colachel+OR+Kanniyakumari+when:1d&hl=en&gl=IN&ceid=IN:en', bonus: true }
+      ],
+      keywordFilter: /kanya?kumari|kanniyakumari|nagercoil|marthandam|colachel|kuzhithurai|padmanabhapuram|suchindram|thuckalay|cape\s?comorin|vivekananda\s?rock/i,
+      maxAgeHours: 24,
+      label: 'Kanyakumari district · The Hindu · TOI'
     },
     'politics_tamilnadu': {
       urls: [
-        'https://news.google.com/rss/search?q=%22Tamil+Nadu%22+government+OR+DMK+OR+AIADMK+OR+assembly+OR+CM+when:1d&hl=en&gl=IN&ceid=IN:en',
-        'https://news.google.com/rss/search?q=%22Tamil+Nadu%22+court+OR+politics+OR+minister+when:1d&hl=en&gl=IN&ceid=IN:en'
+        { u: 'https://www.thehindu.com/news/national/tamil-nadu/feeder/default.rss', src: 'The Hindu' },
+        { u: 'https://timesofindia.indiatimes.com/rssfeeds/2950623.cms', src: 'Times of India' }
       ],
       maxAgeHours: 24,
-      label: 'Tamil Nadu · Google News · The Hindu'
+      label: 'Tamil Nadu · The Hindu · TOI Chennai'
     },
     'politics_india': {
       urls: [
-        'https://news.google.com/rss/search?q=India+parliament+OR+government+OR+modi+OR+policy+when:1d&hl=en&gl=IN&ceid=IN:en',
-        'https://news.google.com/rss/search?q=India+supreme+court+OR+election+OR+PIB+when:1d&hl=en&gl=IN&ceid=IN:en'
+        { u: 'https://www.thehindu.com/news/national/feeder/default.rss', src: 'The Hindu' },
+        { u: 'https://feeds.feedburner.com/ndtvnews-india-news', src: 'NDTV' },
+        { u: 'https://indianexpress.com/section/india/feed/', src: 'Indian Express' },
+        { u: 'https://timesofindia.indiatimes.com/rssfeeds/296589292.cms', src: 'Times of India' }
       ],
       maxAgeHours: 24,
-      label: 'India · NDTV · PTI · PIB'
+      label: 'India · The Hindu · NDTV · Indian Express · TOI'
     },
     'politics_world': {
       urls: [
-        'https://news.google.com/rss/search?q=world+politics+OR+international+when:1d&hl=en&gl=US&ceid=US:en',
-        'https://news.google.com/rss/search?q=global+government+OR+diplomacy+OR+conflict+when:1d&hl=en&gl=US&ceid=US:en'
+        { u: 'https://feeds.bbci.co.uk/news/world/rss.xml', src: 'BBC' },
+        { u: 'https://www.aljazeera.com/xml/rss/all.xml', src: 'Al Jazeera' }
       ],
       maxAgeHours: 24,
-      label: 'World · BBC · Reuters · Al Jazeera'
+      label: 'World · BBC · Al Jazeera'
     },
 
     // ── Business & Economy ─────────────────────────────────────────────────
     'business_ecommerce': {
       urls: [
-        'https://news.google.com/rss/search?q=India+ecommerce+Amazon+OR+Flipkart+OR+Meesho+when:1d&hl=en&gl=IN&ceid=IN:en',
-        'https://news.google.com/rss/search?q=India+online+retail+OR+D2C+OR+quick+commerce+when:1d&hl=en&gl=IN&ceid=IN:en'
+        { u: 'https://economictimes.indiatimes.com/industry/services/retail/rssfeeds/13358759.cms', src: 'ET Retail' },
+        { u: 'https://www.livemint.com/rss/companies', src: 'Mint' },
+        { u: 'https://news.google.com/rss/search?q=India+ecommerce+Amazon+OR+Flipkart+OR+Meesho+when:1d&hl=en&gl=IN&ceid=IN:en', bonus: true }
       ],
       maxAgeHours: 24,
-      label: 'eCommerce · India'
+      label: 'eCommerce & Retail · ET · Mint'
     },
     'business_india_biz': {
       urls: [
-        'https://news.google.com/rss/search?q=India+stock+market+OR+sensex+OR+nifty+OR+RBI+when:1d&hl=en&gl=IN&ceid=IN:en',
-        'https://news.google.com/rss/search?q=India+economy+OR+business+OR+rupee+when:1d&hl=en&gl=IN&ceid=IN:en'
+        { u: 'https://economictimes.indiatimes.com/markets/rssfeeds/1977021501.cms', src: 'ET Markets' },
+        { u: 'https://www.livemint.com/rss/markets', src: 'Mint' },
+        { u: 'https://feeds.feedburner.com/ndtvprofit-latest', src: 'NDTV Profit' }
       ],
       maxAgeHours: 24,
-      label: 'Indian Markets · ET · Mint'
+      label: 'Indian Markets · ET · Mint · NDTV Profit'
     },
     'business_global_biz': {
       urls: [
-        'https://news.google.com/rss/search?q=global+markets+OR+stocks+OR+economy+when:1d&hl=en&gl=US&ceid=US:en',
-        'https://news.google.com/rss/search?q=world+business+OR+%22federal+reserve%22+OR+oil+prices+when:1d&hl=en&gl=US&ceid=US:en'
+        { u: 'https://feeds.bbci.co.uk/news/business/rss.xml', src: 'BBC' },
+        { u: 'https://economictimes.indiatimes.com/rssfeedstopstories.cms', src: 'Economic Times' }
       ],
       maxAgeHours: 24,
-      label: 'Global Markets · BBC · Reuters'
+      label: 'Global & Indian Business · BBC · ET'
     },
 
     // ── Health & Wellness ──────────────────────────────────────────────────
     'health': {
       urls: [
-        'https://news.google.com/rss/search?q=health+OR+medicine+OR+wellness+OR+disease+when:1d&hl=en&gl=IN&ceid=IN:en',
-        'https://news.google.com/rss/search?q=WHO+OR+healthcare+OR+medical+research+when:1d&hl=en&gl=US&ceid=US:en'
+        { u: 'https://feeds.bbci.co.uk/news/health/rss.xml', src: 'BBC' },
+        { u: 'https://www.who.int/rss-feeds/news-english.xml', src: 'WHO' },
+        { u: 'https://www.thehindu.com/sci-tech/health/feeder/default.rss', src: 'The Hindu' }
       ],
       maxAgeHours: 24,
-      label: 'Health & Wellness · BBC · WHO'
+      label: 'Health & Wellness · BBC · WHO · The Hindu'
     },
 
     // ── Technology & Artificial Intelligence ──────────────────────────────
     'tech': {
       urls: [
-        'https://news.google.com/rss/search?q=%22artificial+intelligence%22+OR+AI+OR+technology+when:1d&hl=en&gl=US&ceid=US:en',
-        'https://news.google.com/rss/search?q=India+technology+OR+startup+OR+software+when:1d&hl=en&gl=IN&ceid=IN:en'
+        { u: 'https://techcrunch.com/feed/', src: 'TechCrunch' },
+        { u: 'https://feeds.bbci.co.uk/news/technology/rss.xml', src: 'BBC' },
+        { u: 'https://economictimes.indiatimes.com/tech/rssfeeds/13357270.cms', src: 'ET Tech' }
       ],
       maxAgeHours: 24,
-      label: 'Technology & AI · TechCrunch · Reuters'
+      label: 'Technology & AI · TechCrunch · BBC · ET'
     },
 
     // ── Environment & Science ──────────────────────────────────────────────
     'env': {
       urls: [
-        'https://news.google.com/rss/search?q=climate+OR+environment+OR+science+when:1d&hl=en&gl=US&ceid=US:en',
-        'https://news.google.com/rss/search?q=space+OR+research+OR+biodiversity+OR+ISRO+OR+NASA+when:1d&hl=en&gl=IN&ceid=IN:en'
+        { u: 'https://feeds.bbci.co.uk/news/science_and_environment/rss.xml', src: 'BBC' },
+        { u: 'https://news.un.org/feed/subscribe/en/news/topic/climate-change/feed/rss.xml', src: 'UN News' },
+        { u: 'https://www.thehindu.com/sci-tech/energy-and-environment/feeder/default.rss', src: 'The Hindu' }
       ],
       maxAgeHours: 24,
-      label: 'Environment & Science · BBC · UN'
+      label: 'Environment & Science · BBC · UN · The Hindu'
     }
   };
 
@@ -1203,8 +1221,18 @@ footer .accent { color: var(--accent); font-weight: 700; }
     const match = title.match(/ - ([^-]+)$/);
     return match ? cleanText(match[1]) : '';
   }
-  function stripSourceFromTitle(title) {
-    return cleanText((title || '').replace(/ - [^-]+$/, ''));
+  // Only strip a " - Source" suffix when it actually matches the item's source
+  // (Google News titles). Publisher headlines legitimately contain hyphens —
+  // blind stripping would corrupt them.
+  function stripSourceFromTitle(title, source) {
+    const t = cleanText(title || '');
+    if (source) {
+      const suffix = ' - ' + source;
+      if (t.toLowerCase().endsWith(suffix.toLowerCase())) {
+        return cleanText(t.slice(0, t.length - suffix.length));
+      }
+    }
+    return t;
   }
   function parseRSSXML(xmlString) {
     const doc = new DOMParser().parseFromString(xmlString, 'application/xml');
@@ -1293,7 +1321,10 @@ footer .accent { color: var(--accent); font-weight: 700; }
 
   // ---------- Fetch a feed (with proxy fallback + per-proxy timeout) ----------
   // ---------- Fetch a single URL through proxy chain ----------
-  async function fetchSingleUrl(rawUrl, feedKey) {
+  // srcLabel: publisher name to stamp on every item (direct publisher feeds).
+  // Google News URLs omit it — their source is derived from the title suffix.
+  async function fetchSingleUrl(rawUrl, feedKey, srcLabel) {
+    const fromGoogle = rawUrl.indexOf('news.google.com') !== -1;
     const errors = [];
     for (const proxy of PROXIES) {
       const ctrl = new AbortController();
@@ -1338,8 +1369,13 @@ footer .accent { color: var(--accent); font-weight: 700; }
           items = parseRSSXML(xml);
         }
 
+        items = (items || []).map(it => ({
+          ...it,
+          source: srcLabel || it.source,
+          fromGoogle: fromGoogle
+        }));
         console.log(`[IBI News] ✓ ${feedKey} via ${proxy.name} (${items.length} items) — ${rawUrl.substring(0, 60)}`);
-        return items || [];
+        return items;
 
       } catch (e) {
         clearTimeout(timer);
@@ -1351,32 +1387,33 @@ footer .accent { color: var(--accent); font-weight: 700; }
     throw new Error(errors.join(' | '));
   }
 
-  // ---------- Fetch a feed — supports single url or multiple urls array ----------
-  // When multiple urls are given, all are fetched in parallel, results are merged,
-  // deduplicated by link, and sorted newest-first. Returns top ITEMS_PER_FEED items.
+  // ---------- Fetch a feed ----------
+  // All URLs are fetched in parallel, results are merged, deduplicated by link,
+  // optionally keyword-filtered, and sorted newest-first. Returns top ITEMS_PER_FEED.
+  // Bonus URLs (Google News) get a hard time budget so a blocked upstream can
+  // never stall the section render — their failure is silently tolerated.
+  const BONUS_URL_BUDGET_MS = 10000;
+
   async function fetchFeed(feedKey) {
     const feed = FEEDS[feedKey];
     if (!feed) return [];
 
-    // Normalise: support both legacy `url` string and new `urls` array
-    const urls = feed.urls || (feed.url ? [feed.url] : []);
-    if (urls.length === 0) return [];
+    // Normalise: entries may be plain URL strings or { u, src, bonus } objects
+    const entries = (feed.urls || (feed.url ? [feed.url] : []))
+      .map(e => (typeof e === 'string' ? { u: e } : e));
+    if (entries.length === 0) return [];
 
-    if (urls.length === 1) {
-      // Single source — fetch then sort + RIGID 24h freshness check
-      const items = await fetchSingleUrl(urls[0], feedKey);
-      items.sort((a, b) => {
-        const da = a.pubDate ? new Date(a.pubDate).getTime() : 0;
-        const db = b.pubDate ? new Date(b.pubDate).getTime() : 0;
-        return db - da;
-      });
-      const fresh = items.filter(item => isFreshArticle(item, feed.maxAgeHours));
-      return fresh.slice(0, ITEMS_PER_FEED); // NO fallback to old items
-    }
-
-    // Multi-source — fetch all in parallel; partial success is fine
+    // Fetch all in parallel; partial success is fine
     const results = await Promise.allSettled(
-      urls.map(u => fetchSingleUrl(u, feedKey))
+      entries.map(en => {
+        const p = fetchSingleUrl(en.u, feedKey, en.src);
+        if (!en.bonus) return p;
+        return Promise.race([
+          p,
+          new Promise((_, rej) => setTimeout(
+            () => rej(new Error('bonus url budget exceeded')), BONUS_URL_BUDGET_MS))
+        ]);
+      })
     );
 
     const allItems = [];
@@ -1410,10 +1447,16 @@ footer .accent { color: var(--accent); font-weight: 700; }
       return db - da;
     });
 
+    // Optional per-feed keyword filter (e.g. Kanyakumari district place names
+    // applied to the broader Tamil Nadu publisher feeds)
+    const pool = feed.keywordFilter
+      ? deduped.filter(it => feed.keywordFilter.test((it.title || '') + ' ' + (it.desc || '')))
+      : deduped;
+
     // RIGID freshness: only keep articles within maxAgeHours (24h).
-    // Uses isFreshArticle which also scans content for old dates (Google News
-    // re-indexes old stories with fake-fresh pubDates — this catches them).
-    const fresh = deduped.filter(item => isFreshArticle(item, feed.maxAgeHours));
+    // For Google News items, isFreshArticle also scans content for old dates
+    // (Google re-indexes old stories with fake-fresh pubDates — this catches them).
+    const fresh = pool.filter(item => isFreshArticle(item, feed.maxAgeHours));
 
     return fresh.slice(0, ITEMS_PER_FEED);
   }
@@ -1435,7 +1478,11 @@ footer .accent { color: var(--accent); font-weight: 700; }
     if (d < cutoff) return false;             // older than window → reject
 
     // Layer 2 — scan title + description for an explicit date that is clearly old.
-    // Catches Google News re-indexed stories whose pubDate lies.
+    // Catches Google News re-indexed stories whose pubDate lies. Applied ONLY to
+    // Google News items: publisher feeds don't fake pubDates, and their longer
+    // descriptions legitimately reference past months ("launched in March…"),
+    // which would trigger false rejections here.
+    if (!item.fromGoogle) return true;
     const text = ((item.title || '') + ' ' + (item.desc || '')).toLowerCase();
     const nowD = new Date(now);
     const curYear = nowD.getFullYear();
@@ -1485,7 +1532,7 @@ footer .accent { color: var(--accent); font-weight: 700; }
       return;
     }
     gridEl.innerHTML = items.map(it => {
-      const cleanTitle = stripSourceFromTitle(it.title);
+      const cleanTitle = stripSourceFromTitle(it.title, it.source);
       const desc = it.desc && it.desc.length > 5 ? it.desc : '';
       return `
         <a class="card" href="${escapeAttr(it.link)}" target="_blank" rel="noopener noreferrer">
@@ -1868,7 +1915,9 @@ footer .accent { color: var(--accent); font-weight: 700; }
       </div>`;
   }
 
-  // Toggle show/hide of a summary body
+  // Toggle show/hide of a summary body.
+  // Must be on window: it's invoked from an inline onclick attribute, which
+  // resolves at global scope — inside this IIFE it would be unreachable.
   function toggleAiBox(boxId) {
     const body = document.getElementById('ai-body-' + boxId);
     const tog  = document.getElementById('ai-tog-' + boxId);
@@ -1877,6 +1926,7 @@ footer .accent { color: var(--accent); font-weight: 700; }
     body.style.display = hidden ? '' : 'none';
     if (tog) tog.textContent = hidden ? '▾' : '▸';
   }
+  window.toggleAiBox = toggleAiBox;
 
   // Main entry: fetch AI summary for a section after news items load
   // Browser-side API key storage (localStorage)
