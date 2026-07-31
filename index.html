@@ -26,7 +26,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="ibi-build" content="v5.5.0-2026-07-11">
+<meta name="ibi-build" content="v6.0.0-2026-07-31">
 
 <!-- Favicon: IBI text in #00c5ff on black, Roboto -->
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='10' fill='black'/><text x='32' y='44' font-family='Roboto,Arial,sans-serif' font-size='26' font-weight='900' text-anchor='middle' fill='%2300c5ff' letter-spacing='-1'>IBI</text></svg>">
@@ -852,7 +852,7 @@ footer .accent { color: var(--accent); font-weight: 700; }
     <div class="brand">
       <div class="brand-mark"></div>
       <div class="brand-text">
-        <div class="brand-title">IBI <span class="accent">News</span> <span class="version-badge" id="version-badge">v5.5</span></div>
+        <div class="brand-title">IBI <span class="accent">News</span> <span class="version-badge" id="version-badge">v6.0</span></div>
         <div class="brand-sub">Live Briefings</div>
       </div>
     </div>
@@ -920,10 +920,34 @@ footer .accent { color: var(--accent); font-weight: 700; }
     </div>
   </section>
 
-  <!-- Section 1: Politics & Government -->
+  <!-- Section 1: eCommerce & Marketplaces -->
+  <section class="section" id="section-ecom">
+    <div class="section-header">
+      <div class="section-title"><span class="section-title-num">1</span>eCommerce &amp; Marketplaces <span style="opacity:0.7;font-weight:500;font-size:15px;">— sellers, platforms &amp; logistics</span></div>
+      <span class="section-meta" id="meta-ecom">—</span>
+    </div>
+    <div class="news-body" style="border-top: 1px solid var(--border); border-radius: 0 0 8px 8px;">
+      <div class="ai-summary-box" id="ai-box-ecom" style="display:none;"></div>
+      <div class="news-grid" id="grid-ecom"></div>
+    </div>
+  </section>
+
+  <!-- Section 2: Artificial Intelligence -->
+  <section class="section" id="section-ai">
+    <div class="section-header">
+      <div class="section-title"><span class="section-title-num">2</span>Artificial Intelligence</div>
+      <span class="section-meta" id="meta-ai">—</span>
+    </div>
+    <div class="news-body" style="border-top: 1px solid var(--border); border-radius: 0 0 8px 8px;">
+      <div class="ai-summary-box" id="ai-box-ai" style="display:none;"></div>
+      <div class="news-grid" id="grid-ai"></div>
+    </div>
+  </section>
+
+  <!-- Section 3: Politics & Government -->
   <section class="section" id="section-politics">
     <div class="section-header">
-      <div class="section-title"><span class="section-title-num">1</span>Politics &amp; Government <span style="opacity:0.7;font-weight:500;font-size:15px;">— including Legal</span></div>
+      <div class="section-title"><span class="section-title-num">3</span>Politics &amp; Government <span style="opacity:0.7;font-weight:500;font-size:15px;">— including Legal</span></div>
       <span class="section-meta" id="meta-politics">—</span>
     </div>
     <div class="tabs" id="politics-tabs">
@@ -938,15 +962,14 @@ footer .accent { color: var(--accent); font-weight: 700; }
     </div>
   </section>
 
-  <!-- Section 2: Business & Economy -->
+  <!-- Section 4: Business & Economy -->
   <section class="section" id="section-business">
     <div class="section-header">
-      <div class="section-title"><span class="section-title-num">2</span>Business &amp; Economy <span style="opacity:0.7;font-weight:500;font-size:15px;">— including eCommerce</span></div>
+      <div class="section-title"><span class="section-title-num">4</span>Business &amp; Economy</div>
       <span class="section-meta" id="meta-business">—</span>
     </div>
     <div class="tabs" id="business-tabs">
-      <button class="tab active" data-tab="ecommerce">eCommerce</button>
-      <button class="tab" data-tab="india_biz">Indian Markets</button>
+      <button class="tab active" data-tab="india_biz">Indian Markets</button>
       <button class="tab" data-tab="global_biz">Global Markets</button>
     </div>
     <div class="news-body">
@@ -955,10 +978,10 @@ footer .accent { color: var(--accent); font-weight: 700; }
     </div>
   </section>
 
-  <!-- Section 3: Health & Wellness -->
+  <!-- Section 5: Health & Wellness -->
   <section class="section" id="section-health">
     <div class="section-header">
-      <div class="section-title"><span class="section-title-num">3</span>Health &amp; Wellness</div>
+      <div class="section-title"><span class="section-title-num">5</span>Health &amp; Wellness</div>
       <span class="section-meta" id="meta-health">—</span>
     </div>
     <div class="news-body" style="border-top: 1px solid var(--border); border-radius: 0 0 8px 8px;">
@@ -967,10 +990,10 @@ footer .accent { color: var(--accent); font-weight: 700; }
     </div>
   </section>
 
-  <!-- Section 4: Technology & AI -->
+  <!-- Section 6: Technology -->
   <section class="section" id="section-tech">
     <div class="section-header">
-      <div class="section-title"><span class="section-title-num">4</span>Technology &amp; Artificial Intelligence</div>
+      <div class="section-title"><span class="section-title-num">6</span>Technology</div>
       <span class="section-meta" id="meta-tech">—</span>
     </div>
     <div class="news-body" style="border-top: 1px solid var(--border); border-radius: 0 0 8px 8px;">
@@ -979,10 +1002,10 @@ footer .accent { color: var(--accent); font-weight: 700; }
     </div>
   </section>
 
-  <!-- Section 5: Environment & Science -->
+  <!-- Section 7: Environment & Science -->
   <section class="section" id="section-env">
     <div class="section-header">
-      <div class="section-title"><span class="section-title-num">5</span>Environment &amp; Science</div>
+      <div class="section-title"><span class="section-title-num">7</span>Environment &amp; Science</div>
       <span class="section-meta" id="meta-env">—</span>
     </div>
     <div class="news-body" style="border-top: 1px solid var(--border); border-radius: 0 0 8px 8px;">
@@ -995,8 +1018,8 @@ footer .accent { color: var(--accent); font-weight: 700; }
 
 <footer>
   <div>© <span id="year"></span> <span class="accent">India Business International (IBI)</span> — Kanyakumari, Tamil Nadu</div>
-  <div style="margin-top:6px;font-size:13px;opacity:0.7;">Live news aggregated from public sources via Google News. Headlines link to original publishers.</div>
-  <div style="margin-top:8px;font-size:11px;opacity:0.5;font-family:monospace;">Build v5.5.0 · 2026-07-11</div>
+  <div style="margin-top:6px;font-size:13px;opacity:0.7;">Live news aggregated from direct publisher RSS feeds. Headlines link to original publishers.</div>
+  <div style="margin-top:8px;font-size:11px;opacity:0.5;font-family:monospace;">Build v6.0.0 · 2026-07-31</div>
 </footer>
 
 <!-- ===================== APP LOGIC ===================== -->
@@ -1008,7 +1031,10 @@ footer .accent { color: var(--accent); font-weight: 700; }
   const REFRESH_INTERVAL_MS = 30 * 60 * 1000; // 30 minutes
   const CACHE_TTL_MS = 30 * 60 * 1000;        // cache valid for 30 minutes
   const ITEMS_PER_FEED = 6;
-  const STORAGE_KEY = 'ibinews_cache_v2'; // v2: items carry source labels + fromGoogle flag
+  // v3: sections re-ordered (eCommerce 1st, AI 2nd) + topic-relevance filtering.
+  // Bumping the key discards v2 caches, which held the old unfiltered
+  // business_ecommerce pool and would otherwise keep rendering off-topic cards.
+  const STORAGE_KEY = 'ibinews_cache_v3';
   const THEME_KEY = 'ibinews_theme';
 
   // ─────────────────────────────────────────────────────────────────────────
@@ -1028,6 +1054,42 @@ footer .accent { color: var(--accent); font-weight: 700; }
   //
   // Freshness: maxAgeHours client-side hard cutoff + newest-first sort.
   // ─────────────────────────────────────────────────────────────────────────
+  // ─────────────────────────────────────────────────────────────────────────
+  // TOPIC RELEVANCE MATCHERS (v6.0)
+  //
+  // Publisher RSS feeds are section-wide (all of "Retail", all of "Tech"), not
+  // topic-specific — so an unfiltered eCommerce section fills up with airline,
+  // semiconductor and FMCG stories. These matchers score each article and the
+  // section keeps only what is genuinely on-topic.
+  //
+  // Scoring (eCommerce): STRONG term = 3, marketplace/platform BRAND = 3,
+  // supporting retail word = 1. An article needs >= 3 to qualify, i.e. it must
+  // hit a real eCommerce concept or a named platform — a passing mention of
+  // "retail" or "consumers" is never enough on its own.
+  // ─────────────────────────────────────────────────────────────────────────
+  const ECOM_STRONG = /(e-?commerce|e-?tail(er|ers|ing)?|online (retail|shopping|marketplace|seller|store|sales|grocery|order)|marketplace seller|quick ?commerce|q-?commerce|dark stores?|\bd2c\b|direct[- ]to[- ]consumer|dropship\w*|omnichannel|gross merchandise|\bgmv\b|\bondc\b|open network for digital commerce|gem portal|big billion|great indian festival|festive sale|last[- ]mile deliver|fulfil?ment cent(re|er)|cash on delivery|online sellers?|social commerce|live commerce|shopping app|online platform)/i;
+  const ECOM_BRANDS = /\b(amazon|flipkart|meesho|myntra|ajio|nykaa|snapdeal|jiomart|bigbasket|blinkit|zepto|instamart|swiggy|zomato|shopify|alibaba|aliexpress|ebay|etsy|temu|shein|walmart|reliance retail|tata neu|tatacliq|tata cliq|dmart|avenue supermarts|delhivery|ecom express|shiprocket|blue ?dart|xpressbees|shadowfax|paytm mall|shopclues|indiamart|udaan|firstcry|lenskart|pepperfry|purplle|urban company|zudio|instacart|doordash|rakuten|coupang|mercado libre|wayfair)\b/i;
+  const ECOM_SUPPORT = /\b(retail(er|ers)?|logistics|courier|parcel|shipping|warehous\w*|supply chain|seller(s)?|deliver(y|ies)|checkout|carts?|shoppers?|consumers?|discounts?|\bsku\b|catalogue|listing)\b/i;
+
+  function isEcommerceItem(it) {
+    const t = (it.title || '') + ' ' + (it.desc || '');
+    let score = 0;
+    if (ECOM_STRONG.test(t))  score += 3;
+    if (ECOM_BRANDS.test(t))  score += 3;
+    if (ECOM_SUPPORT.test(t)) score += 1;
+    return score >= 3;
+  }
+
+  // AI: the bare acronym is matched CASE-SENSITIVELY on purpose — a case-
+  // insensitive /\bai\b/ matches ordinary words in transliterated names.
+  const AI_ACRONYM = /\bAI\b|\bA\.I\.|\bAGI\b|\bGenAI\b/;
+  const AI_TERMS = /(artificial intelligence|machine learning|deep learning|neural network|generative ai|large language model|\bllms?\b|chatgpt|openai|anthropic|\bclaude\b|\bgemini\b|copilot|deepseek|mistral ai|\bllama ?\d|midjourney|stable diffusion|hugging ?face|nvidia|chatbot|agentic|foundation model|superintelligence|\bgpt-?\d|perplexity ai|\bsora\b|\bgrok\b)/i;
+
+  function isAiItem(it) {
+    const t = (it.title || '') + ' ' + (it.desc || '');
+    return AI_ACRONYM.test(t) || AI_TERMS.test(t);
+  }
+
   const FEEDS = {
 
     // ── Breaking News ──────────────────────────────────────────────────────
@@ -1082,16 +1144,46 @@ footer .accent { color: var(--accent); font-weight: 700; }
       label: 'World · BBC · Al Jazeera'
     },
 
-    // ── Business & Economy ─────────────────────────────────────────────────
-    'business_ecommerce': {
+    // ── SECTION 1 — eCommerce & Marketplaces ───────────────────────────────
+    // ETRetail's own site carries a dedicated /rss/e-commerce section; ETtech
+    // is where most Flipkart / Meesho / quick-commerce reporting actually
+    // lands. Every item is then relevance-filtered (isEcommerceItem) because
+    // even these feeds are section-wide, not topic-specific. maxItems is
+    // raised to 9 — this is the section the business runs on.
+    'ecom': {
       urls: [
-        { u: 'https://economictimes.indiatimes.com/industry/services/retail/rssfeeds/13358759.cms', src: 'ET Retail' },
+        { u: 'https://retail.economictimes.indiatimes.com/rss/e-commerce', src: 'ETRetail eCommerce' },
+        { u: 'https://retail.economictimes.indiatimes.com/rss/recentstories', src: 'ETRetail' },
+        { u: 'https://retail.economictimes.indiatimes.com/rss/topstories', src: 'ETRetail' },
+        { u: 'https://economictimes.indiatimes.com/tech/rssfeeds/13357270.cms', src: 'ETtech' },
         { u: 'https://www.livemint.com/rss/companies', src: 'Mint' },
-        { u: 'https://news.google.com/rss/search?q=India+ecommerce+Amazon+OR+Flipkart+OR+Meesho+when:1d&hl=en&gl=IN&ceid=IN:en', bonus: true }
+        { u: 'https://techcrunch.com/tag/e-commerce/feed/', src: 'TechCrunch', bonus: true },
+        { u: 'https://news.google.com/rss/search?q=India+ecommerce+Amazon+OR+Flipkart+OR+Meesho+OR+ONDC+when:1d&hl=en&gl=IN&ceid=IN:en', bonus: true }
       ],
+      relevanceFilter: isEcommerceItem,
+      maxItems: 9,
       maxAgeHours: 24,
-      label: 'eCommerce & Retail · ET · Mint'
+      label: 'eCommerce & Marketplaces · ETRetail · ETtech · Mint'
     },
+
+    // ── SECTION 2 — Artificial Intelligence ────────────────────────────────
+    // TechCrunch AI + ET's AI feed + ETCIO AI carry the volume; BBC Tech and
+    // Mint Tech are general feeds narrowed down by isAiItem.
+    'ai': {
+      urls: [
+        { u: 'https://techcrunch.com/category/artificial-intelligence/feed/', src: 'TechCrunch' },
+        { u: 'https://economictimes.indiatimes.com/tech/artificial-intelligence/rssfeeds/78570530.cms', src: 'ET AI' },
+        { u: 'https://cio.economictimes.indiatimes.com/rss/artificial-intelligence', src: 'ETCIO' },
+        { u: 'https://www.livemint.com/rss/technology', src: 'Mint' },
+        { u: 'https://feeds.bbci.co.uk/news/technology/rss.xml', src: 'BBC' }
+      ],
+      relevanceFilter: isAiItem,
+      maxItems: 9,
+      maxAgeHours: 24,
+      label: 'Artificial Intelligence · TechCrunch · ET · ETCIO · Mint · BBC'
+    },
+
+    // ── Business & Economy ─────────────────────────────────────────────────
     'business_india_biz': {
       urls: [
         { u: 'https://economictimes.indiatimes.com/markets/rssfeeds/1977021501.cms', src: 'ET Markets' },
@@ -1121,7 +1213,8 @@ footer .accent { color: var(--accent); font-weight: 700; }
       label: 'Health & Wellness · BBC · WHO · The Hindu'
     },
 
-    // ── Technology & Artificial Intelligence ──────────────────────────────
+    // ── Technology ────────────────────────────────────────────────────────
+    // AI now has its own section (see 'ai' above); this stays general tech.
     'tech': {
       urls: [
         { u: 'https://techcrunch.com/feed/', src: 'TechCrunch' },
@@ -1129,7 +1222,7 @@ footer .accent { color: var(--accent); font-weight: 700; }
         { u: 'https://economictimes.indiatimes.com/tech/rssfeeds/13357270.cms', src: 'ET Tech' }
       ],
       maxAgeHours: 24,
-      label: 'Technology & AI · TechCrunch · BBC · ET'
+      label: 'Technology · TechCrunch · BBC · ET'
     },
 
     // ── Environment & Science ──────────────────────────────────────────────
@@ -1449,16 +1542,24 @@ footer .accent { color: var(--accent); font-weight: 700; }
 
     // Optional per-feed keyword filter (e.g. Kanyakumari district place names
     // applied to the broader Tamil Nadu publisher feeds)
-    const pool = feed.keywordFilter
+    let pool = feed.keywordFilter
       ? deduped.filter(it => feed.keywordFilter.test((it.title || '') + ' ' + (it.desc || '')))
       : deduped;
+
+    // Optional per-feed topic relevance filter (v6.0) — publisher feeds are
+    // section-wide, so the eCommerce and AI sections score every article and
+    // drop anything off-topic instead of padding the grid with whatever the
+    // Retail/Tech desk happened to publish.
+    if (typeof feed.relevanceFilter === 'function') {
+      pool = pool.filter(it => { try { return feed.relevanceFilter(it); } catch { return false; } });
+    }
 
     // RIGID freshness: only keep articles within maxAgeHours (24h).
     // For Google News items, isFreshArticle also scans content for old dates
     // (Google re-indexes old stories with fake-fresh pubDates — this catches them).
     const fresh = pool.filter(item => isFreshArticle(item, feed.maxAgeHours));
 
-    return fresh.slice(0, ITEMS_PER_FEED);
+    return fresh.slice(0, feed.maxItems || ITEMS_PER_FEED);
   }
 
   // ---------- Freshness check (shared by single + multi URL paths) ----------
@@ -1523,10 +1624,15 @@ footer .accent { color: var(--accent); font-weight: 700; }
 
   function renderItems(gridEl, items, feedKey) {
     if (!items || items.length === 0) {
+      const hrs = (FEEDS[feedKey] && FEEDS[feedKey].maxAgeHours) || 24;
+      const topicFiltered = !!(FEEDS[feedKey] && FEEDS[feedKey].relevanceFilter);
+      const note = topicFiltered
+        ? `This section only shows genuinely on-topic stories from the past ${hrs} hours — off-topic headlines are filtered out rather than used as filler.`
+        : `This section only shows news from the past ${hrs} hours. Check back later.`;
       gridEl.innerHTML = `
         <div class="empty-state" style="grid-column: 1 / -1;">
-          <div style="font-weight:600;margin-bottom:4px;">No fresh news in the last 24 hours</div>
-          <div style="font-size:13px;opacity:0.7;">This section only shows news from the past 24 hours. Check back later.</div>
+          <div style="font-weight:600;margin-bottom:4px;">No fresh news in the last ${hrs} hours</div>
+          <div style="font-size:13px;opacity:0.7;">${note}</div>
           <span class="retry" data-retry="${feedKey}">Refresh</span>
         </div>`;
       return;
@@ -1568,7 +1674,7 @@ footer .accent { color: var(--accent); font-weight: 700; }
   let cache = loadCache();
   const activeTabs = {
     politics: 'kanyakumari',
-    business: 'ecommerce'
+    business: 'india_biz'   // eCommerce moved out to its own section 1 (v6.0)
   };
 
   // ---------- Section loaders ----------
@@ -1652,6 +1758,8 @@ footer .accent { color: var(--accent); font-weight: 700; }
     document.getElementById('refresh-btn').classList.add('spinning');
 
     // Set meta labels immediately (no waiting for fetch)
+    document.getElementById('meta-ecom').textContent = FEEDS.ecom.label;
+    document.getElementById('meta-ai').textContent = FEEDS.ai.label;
     document.getElementById('meta-health').textContent = FEEDS.health.label;
     document.getElementById('meta-tech').textContent = FEEDS.tech.label;
     document.getElementById('meta-env').textContent = FEEDS.env.label;
@@ -1659,11 +1767,14 @@ footer .accent { color: var(--accent); font-weight: 700; }
     document.getElementById('meta-politics').textContent = FEEDS['politics_' + activeTabs.politics].label;
     document.getElementById('meta-business').textContent = FEEDS['business_' + activeTabs.business].label;
 
-    // Only fetch what's actually visible: 6 feeds instead of 11.
+    // Only fetch what's actually visible: 8 feeds instead of 12.
     // Inactive politics/business tabs are loaded lazily when the user clicks them.
+    // eCommerce and AI lead the list so the two priority sections paint first.
     // Stagger by 250ms so requests don't all hit the same proxy simultaneously.
     const STAGGER_MS = 250;
     const visibleFeeds = [
+      ['ecom',                                    document.getElementById('grid-ecom')],
+      ['ai',                                      document.getElementById('grid-ai')],
       ['breaking',                                document.getElementById('grid-breaking')],
       ['politics_' + activeTabs.politics,         document.getElementById('grid-politics')],
       ['business_' + activeTabs.business,         document.getElementById('grid-business')],
@@ -2235,7 +2346,7 @@ Respond ONLY with valid JSON (no markdown):
 
     // Initial set of metadata labels & active tabs
     activatePoliticsTab('kanyakumari');
-    activateBusinessTab('ecommerce');
+    activateBusinessTab('india_biz');
 
     // Initial full load
     refreshAll(false);
