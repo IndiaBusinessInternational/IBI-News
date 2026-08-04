@@ -3,6 +3,15 @@
  * Gemini Key 1 → auto-rotates to Key 2 on 429 quota exhaustion
  */
 
+/* ⚠ BUMP THESE TWO WHENEVER YOU EDIT THIS FILE.
+   This Worker is deployed by hand from the Cloudflare dashboard, and nothing
+   about a running Worker tells you which build is live — the RSS path answers
+   identically on every version, so a smoke test proves it is alive, not that
+   your new code shipped. GET /version reports these, so confirming a deploy
+   is opening one URL instead of comparing version IDs in the dashboard. */
+const WORKER_VERSION = 'v6.1.0';
+const WORKER_BUILT   = '2026-08-04';
+
 const ALLOWED_HOSTS = [
   'news.google.com','www.google.com',
   'feeds.bbci.co.uk','feeds.reuters.com',
@@ -43,6 +52,30 @@ export default {
 
     if (url.pathname === '/summarise' && request.method === 'POST') {
       return handleSummarise(request, env);
+    }
+
+    // GET /version — "which build is actually live?"
+    // Also reports which AI keys are configured, as booleans. The secret NAMES
+    // are already public in this repo; the VALUES are never read here, so this
+    // answers "is DeepSeek set up?" without exposing anything.
+    if (url.pathname === '/version') {
+      const keys = {};
+      for (const id in PROVIDERS) keys[id] = Boolean(env && env[PROVIDERS[id].secretKey]);
+      return new Response(JSON.stringify({
+        worker:       'ibi-news-proxy',
+        version:      WORKER_VERSION,
+        built:        WORKER_BUILT,
+        allowedHosts: ALLOWED_HOSTS.length,
+        aiKeysSet:    keys
+      }, null, 2), {
+        headers: {
+          ...corsHeaders(),
+          'Content-Type': 'application/json',
+          // Never cache this one — a stale answer would defeat its whole
+          // purpose, and the feed path above deliberately caches at the edge.
+          'Cache-Control': 'no-store'
+        }
+      });
     }
 
     const target = url.searchParams.get('url');
