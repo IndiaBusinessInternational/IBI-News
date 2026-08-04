@@ -56,7 +56,10 @@ export default {
     try {
       const upstream = await fetch(target, {
         headers: { 'User-Agent': 'Mozilla/5.0 (compatible; IBINewsBot/1.0)', 'Accept': 'application/rss+xml, application/xml, text/xml, */*' },
-        cf: { cacheTtl: 300, cacheEverything: true }
+        // Cache successful feeds at the edge for 5 min, but NEVER cache error
+        // responses (e.g. Google's 503 "Sorry" anti-bot page) — caching those
+        // would keep serving the outage even after the upstream recovers.
+        cf: { cacheTtlByStatus: { '200-299': 300, '400-599': 0 }, cacheEverything: true }
       });
       const body = await upstream.text();
       const ct = upstream.headers.get('content-type') || 'application/xml; charset=utf-8';
@@ -120,7 +123,11 @@ async function callGemini(apiKey, prompt) {
   const res = await fetch(
     `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`,
     { method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], generationConfig: { temperature: 0.2, maxOutputTokens: 500, responseMimeType: 'application/json' } }) }
+      // gemini-2.5-flash is a "thinking" model: thinking tokens count against
+      // maxOutputTokens, so a low cap (500) was being consumed by thinking and the
+      // JSON came back truncated ("Unterminated string in JSON"). Disable thinking
+      // for this simple JSON task and give the output ample room.
+      body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], generationConfig: { temperature: 0.2, maxOutputTokens: 1024, responseMimeType: 'application/json', thinkingConfig: { thinkingBudget: 0 } } }) }
   );
   if (!res.ok) { const e = await res.text(); throw new Error(e.substring(0, 300)); }
   const data = await res.json();
@@ -155,11 +162,17 @@ async function callDeepSeek(apiKey, prompt) {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
     body: JSON.stringify({
-      model: 'deepseek-chat',
+      // 'deepseek-chat' was retired on 2026-07-24 — calls naming it now fail.
+      model: 'deepseek-v4-flash',
       messages: [{ role: 'user', content: prompt }],
       max_tokens: 500,
       temperature: 0.2,
-      response_format: { type: 'json_object' }
+      response_format: { type: 'json_object' },
+      // Non-thinking mode. v4 defaults to THINKING at high effort, and its
+      // reasoning tokens are drawn from this same 500-token budget — so with it
+      // on, the call can spend the whole allowance reasoning and come back with
+      // no content. Scoring a headline for relevance needs no reasoning pass.
+      thinking: { type: 'disabled' }
     })
   });
   if (!res.ok) { const e = await res.text(); throw new Error(e.substring(0, 300)); }
