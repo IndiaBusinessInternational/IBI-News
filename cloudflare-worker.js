@@ -12,16 +12,32 @@
 const WORKER_VERSION = 'v6.1.0';
 const WORKER_BUILT   = '2026-08-04';
 
+// NOTE: matching is `hostname === h || hostname.endsWith('.' + h)`, so a bare
+// domain here also covers every subdomain of it.
+//
+// Verified 14 Aug 2026 — do not bother re-adding these, they have no public RSS:
+//   feeds.reuters.com  → DNS no longer resolves; Reuters retired RSS in 2020
+//   www.aninews.in     → 404 on every RSS path, no <link rel=alternate> anywhere
+//   ptinews.com        → HTML app shell only; PTI is a subscription wire
+//   rss.cnn.com        → ZOMBIE: answers 200 with 50-69 items whose newest pubDate
+//                        is from 2022-2023. Kept in the list only so a future
+//                        reader sees this note; nothing points at it any more.
+//   moneycontrol       → same zombie pattern, newest item ~2.3 years old
 const ALLOWED_HOSTS = [
   'news.google.com','www.google.com',
-  'feeds.bbci.co.uk','feeds.reuters.com',
+  'feeds.bbci.co.uk',
   'economictimes.indiatimes.com','timesofindia.indiatimes.com',
   'www.thehindu.com','feeds.feedburner.com','www.ndtv.com',
   'www.aljazeera.com','rss.cnn.com',
   'techcrunch.com','feeds.techcrunch.com',
   'www.who.int','news.un.org',
   'indianexpress.com','www.livemint.com',
-  'www.business-standard.com','www.aninews.in'
+  'www.business-standard.com',
+  // added v7.3 — mainstream broadcasters/dailies, each verified to be publishing
+  // within the last 24h on 14 Aug 2026 (not just returning HTTP 200)
+  'theguardian.com','feeds.abcnews.com','abcnews.go.com',
+  'www.hindustantimes.com',
+  'feeds.npr.org','feeds.skynews.com'
 ];
 
 const GEMINI_MODEL = 'gemini-2.5-flash';

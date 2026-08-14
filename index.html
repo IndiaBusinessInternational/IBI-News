@@ -35,7 +35,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="ibi-build" content="v7.2.0-2026-08-14">
+<meta name="ibi-build" content="v7.3.0-2026-08-14">
 
 <!-- Favicon: IBI text in #00c5ff on black, Roboto -->
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='10' fill='black'/><text x='32' y='44' font-family='Roboto,Arial,sans-serif' font-size='26' font-weight='900' text-anchor='middle' fill='%2300c5ff' letter-spacing='-1'>IBI</text></svg>">
@@ -1398,7 +1398,7 @@ footer .accent { color: var(--accent); font-weight: 700; }
     <div class="brand">
       <div class="brand-mark"></div>
       <div class="brand-text">
-        <h1 class="brand-title">IBI <span class="accent">News</span> <span class="version-badge" id="version-badge">v7.2</span></h1>
+        <h1 class="brand-title">IBI <span class="accent">News</span> <span class="version-badge" id="version-badge">v7.3</span></h1>
         <div class="brand-sub">Live Briefings</div>
       </div>
     </div>
@@ -1621,7 +1621,7 @@ footer .accent { color: var(--accent); font-weight: 700; }
   <div style="margin-top:8px;font-size:12px;opacity:0.8;">
     Shortcuts: <kbd>/</kbd> search · <kbd>r</kbd> refresh · <kbd>t</kbd> theme · <kbd>s</kbd> saved · <kbd>Esc</kbd> close
   </div>
-  <div style="margin-top:8px;font-size:11px;opacity:0.5;font-family:monospace;">Build v7.2.0 · 2026-08-14</div>
+  <div style="margin-top:8px;font-size:11px;opacity:0.5;font-family:monospace;">Build v7.3.0 · 2026-08-14</div>
 </footer>
 
 <!-- ===================== APP LOGIC ===================== -->
@@ -1701,15 +1701,36 @@ footer .accent { color: var(--accent); font-weight: 700; }
   const FEEDS = {
 
     // ── Breaking News ──────────────────────────────────────────────────────
+    // ⚠ WIRE SERVICES — READ BEFORE ADDING "Reuters / PTI / ANI" (checked 14 Aug 2026)
+    //   Reuters — no public RSS at all. feeds.reuters.com no longer even resolves
+    //             (ENOTFOUND) and reutersagency.com/feed is a 404. Retired in 2020;
+    //             the wire is licence-only now. Nothing to point at.
+    //   PTI     — ptinews.com/feed serves an HTML app shell, no feed anywhere.
+    //             Subscription wire. Its copy reaches us through NDTV / The Hindu /
+    //             Indian Express, which are already sources here.
+    //   ANI     — aninews.in 404s on every RSS path and advertises no <link rel=alternate>.
+    //   CNN     — ⚠ ZOMBIE FEED. rss.cnn.com answers 200 with 50-69 items, so every
+    //             "is it up?" check passes — but the newest story in edition.rss is
+    //             from Apr 2023, cnn_topstories from 2022, cnn_latest from 2024.
+    //             CNN abandoned these endpoints without turning them off. They can
+    //             never produce a card here (24h cutoff) and would only ever be
+    //             wasted requests. Status code alone does NOT mean a feed is alive —
+    //             check the newest pubDate.
+    //   Moneycontrol /rss/latestnews.xml — same zombie pattern, newest item ~2.3 years old.
+    // ⚠ Hosts marked "needs Worker allow-list" 403 until cloudflare-worker.js is
+    //   redeployed with them in ALLOWED_HOSTS. They are `bonus` so a 403 can never
+    //   hold up a section render; they light up on their own once the Worker ships.
     'breaking': {
       urls: [
         { u: 'https://feeds.feedburner.com/ndtvnews-top-stories', src: 'NDTV' },
         { u: 'https://timesofindia.indiatimes.com/rssfeeds/-2128936835.cms', src: 'Times of India' },
         { u: 'https://feeds.bbci.co.uk/news/world/rss.xml', src: 'BBC' },
-        { u: 'https://www.aljazeera.com/xml/rss/all.xml', src: 'Al Jazeera' }
+        { u: 'https://www.aljazeera.com/xml/rss/all.xml', src: 'Al Jazeera' },
+        { u: 'https://feeds.abcnews.com/abcnews/topstories', src: 'ABC News', bonus: true },      // needs Worker allow-list
+        { u: 'https://www.hindustantimes.com/feeds/rss/india-news/rssfeed.xml', src: 'Hindustan Times', bonus: true } // needs Worker allow-list
       ],
       maxAgeHours: 24,
-      label: 'India & World · NDTV · TOI · BBC · Al Jazeera'
+      label: 'India & World · NDTV · TOI · BBC · ABC · HT · Al Jazeera'
     },
 
     // ── Politics & Government ──────────────────────────────────────────────
@@ -1763,10 +1784,12 @@ footer .accent { color: var(--accent); font-weight: 700; }
     'politics_world': {
       urls: [
         { u: 'https://feeds.bbci.co.uk/news/world/rss.xml', src: 'BBC' },
-        { u: 'https://www.aljazeera.com/xml/rss/all.xml', src: 'Al Jazeera' }
+        { u: 'https://www.aljazeera.com/xml/rss/all.xml', src: 'Al Jazeera' },
+        { u: 'https://www.theguardian.com/world/rss', src: 'The Guardian', bonus: true },     // needs Worker allow-list
+        { u: 'https://feeds.abcnews.com/abcnews/internationalheadlines', src: 'ABC News', bonus: true } // needs Worker allow-list
       ],
       maxAgeHours: 24,
-      label: 'World · BBC · Al Jazeera'
+      label: 'World · BBC · Guardian · ABC · Al Jazeera'
     },
 
     // ── SECTION 1 — eCommerce & Marketplaces ───────────────────────────────
@@ -1816,18 +1839,20 @@ footer .accent { color: var(--accent); font-weight: 700; }
       urls: [
         { u: 'https://economictimes.indiatimes.com/markets/rssfeeds/1977021501.cms', src: 'ET Markets' },
         { u: 'https://www.livemint.com/rss/markets', src: 'Mint' },
-        { u: 'https://feeds.feedburner.com/ndtvprofit-latest', src: 'NDTV Profit' }
+        { u: 'https://feeds.feedburner.com/ndtvprofit-latest', src: 'NDTV Profit' },
+        { u: 'https://www.hindustantimes.com/feeds/rss/business/rssfeed.xml', src: 'Hindustan Times', bonus: true } // needs Worker allow-list
       ],
       maxAgeHours: 24,
-      label: 'Indian Markets · ET · Mint · NDTV Profit'
+      label: 'Indian Markets · ET · Mint · NDTV Profit · HT'
     },
     'business_global_biz': {
       urls: [
         { u: 'https://feeds.bbci.co.uk/news/business/rss.xml', src: 'BBC' },
-        { u: 'https://economictimes.indiatimes.com/rssfeedstopstories.cms', src: 'Economic Times' }
+        { u: 'https://economictimes.indiatimes.com/rssfeedstopstories.cms', src: 'Economic Times' },
+        { u: 'https://www.theguardian.com/uk/business/rss', src: 'The Guardian', bonus: true } // needs Worker allow-list
       ],
       maxAgeHours: 24,
-      label: 'Global & Indian Business · BBC · ET'
+      label: 'Global & Indian Business · BBC · Guardian · ET'
     },
 
     // ── Health & Wellness ──────────────────────────────────────────────────
@@ -1847,10 +1872,11 @@ footer .accent { color: var(--accent); font-weight: 700; }
       urls: [
         { u: 'https://techcrunch.com/feed/', src: 'TechCrunch' },
         { u: 'https://feeds.bbci.co.uk/news/technology/rss.xml', src: 'BBC' },
-        { u: 'https://economictimes.indiatimes.com/tech/rssfeeds/13357270.cms', src: 'ET Tech' }
+        { u: 'https://economictimes.indiatimes.com/tech/rssfeeds/13357270.cms', src: 'ET Tech' },
+        { u: 'https://www.theguardian.com/uk/technology/rss', src: 'The Guardian', bonus: true } // needs Worker allow-list
       ],
       maxAgeHours: 24,
-      label: 'Technology · TechCrunch · BBC · ET'
+      label: 'Technology · TechCrunch · BBC · Guardian · ET'
     },
 
     // ── Environment & Science ──────────────────────────────────────────────
@@ -2294,7 +2320,40 @@ footer .accent { color: var(--accent); font-weight: 700; }
     // and gives site-wide search something to search. maxItems still decides how
     // many are visible on first paint.
     const shown = feed.maxItems || ITEMS_PER_FEED;
-    return fresh.slice(0, Math.max(shown, feed.poolItems || 18));
+    return diversifyBySource(fresh).slice(0, Math.max(shown, feed.poolItems || 18));
+  }
+
+  // ---------- Source diversity (v7.3) ----------
+  // A pure newest-first sort hands the whole section to whoever publishes most.
+  // Measured on Breaking News: Al Jazeera, NDTV and TOI file so often that BBC —
+  // configured since v5.5 and fetching 36 items perfectly well — never once made
+  // the visible cut, which reads as "BBC is missing" even though nothing failed.
+  //
+  // So: bucket by source, order the buckets by how fresh their newest story is,
+  // then round-robin. Row one becomes the latest from each of several publishers
+  // (freshest publisher first) instead of five from one. Recency still decides
+  // the order inside every bucket and which bucket leads.
+  function diversifyBySource(items) {
+    const buckets = new Map();
+    items.forEach(it => {
+      const k = (it.source || 'News').trim();
+      if (!buckets.has(k)) buckets.set(k, []);
+      buckets.get(k).push(it);
+    });
+    if (buckets.size < 2) return items;
+
+    const ts = it => { const d = new Date(it.pubDate || 0).getTime(); return isNaN(d) ? 0 : d; };
+    const queues = Array.from(buckets.values()).sort((a, b) => ts(b[0]) - ts(a[0]));
+
+    const out = [];
+    for (let round = 0; out.length < items.length; round++) {
+      let placed = false;
+      for (const q of queues) {
+        if (q.length > round) { out.push(q[round]); placed = true; }
+      }
+      if (!placed) break;
+    }
+    return out;
   }
 
   // ---------- Freshness check (shared by single + multi URL paths) ----------
