@@ -35,7 +35,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="ibi-build" content="v7.0.0-2026-08-14">
+<meta name="ibi-build" content="v7.1.0-2026-08-14">
 
 <!-- Favicon: IBI text in #00c5ff on black, Roboto -->
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='10' fill='black'/><text x='32' y='44' font-family='Roboto,Arial,sans-serif' font-size='26' font-weight='900' text-anchor='middle' fill='%2300c5ff' letter-spacing='-1'>IBI</text></svg>">
@@ -1398,7 +1398,7 @@ footer .accent { color: var(--accent); font-weight: 700; }
     <div class="brand">
       <div class="brand-mark"></div>
       <div class="brand-text">
-        <h1 class="brand-title">IBI <span class="accent">News</span> <span class="version-badge" id="version-badge">v7.0</span></h1>
+        <h1 class="brand-title">IBI <span class="accent">News</span> <span class="version-badge" id="version-badge">v7.1</span></h1>
         <div class="brand-sub">Live Briefings</div>
       </div>
     </div>
@@ -1621,7 +1621,7 @@ footer .accent { color: var(--accent); font-weight: 700; }
   <div style="margin-top:8px;font-size:12px;opacity:0.8;">
     Shortcuts: <kbd>/</kbd> search · <kbd>r</kbd> refresh · <kbd>t</kbd> theme · <kbd>s</kbd> saved · <kbd>Esc</kbd> close
   </div>
-  <div style="margin-top:8px;font-size:11px;opacity:0.5;font-family:monospace;">Build v7.0.0 · 2026-08-14</div>
+  <div style="margin-top:8px;font-size:11px;opacity:0.5;font-family:monospace;">Build v7.1.0 · 2026-08-14</div>
 </footer>
 
 <!-- ===================== APP LOGIC ===================== -->
@@ -1692,6 +1692,12 @@ footer .accent { color: var(--accent); font-weight: 700; }
     return AI_ACRONYM.test(t) || AI_TERMS.test(t);
   }
 
+  // Kanyakumari district place names. Statewide feeds only mention the district
+  // by name, so this is what turns a Tamil Nadu feed into a district feed.
+  // Widened v7.1 with the taluk headquarters and the coastal/hill towns that
+  // carry most of the district's civic reporting.
+  const KANYAKUMARI_RE = /kanya?kumari|kanniyakumari|nagercoil|marthandam|colachel|kuzhithurai|padmanabhapuram|suchindram|thuckalay|cape\s?comorin|vivekananda\s?rock|thiruvalluvar statue|kulasekhara\w*|karungal|thovalai|agastheeswaram|vilavancode|killiyoor|thiruvattar|rajakkamangalam|anjugramam|boothapandi|azhagiapandi\w*|eraniel|munchirai|kalkulam|mandaikadu|manavalakurichi|thengapattanam|arumanai|pechiparai|perunchani|vellamadam|kaliakkavilai|muttom|midalam|kadiapattinam|chitharal|udayagiri fort|maruthuvazhmalai/i;
+
   const FEEDS = {
 
     // ── Breaking News ──────────────────────────────────────────────────────
@@ -1709,19 +1715,36 @@ footer .accent { color: var(--accent); font-weight: 700; }
     // ── Politics & Government ──────────────────────────────────────────────
     // District news is sparse: publisher Tamil Nadu feeds are keyword-filtered
     // to Kanyakumari-district places; Google News query rides along as bonus.
+    // ⚠ MEASURED 14 Aug 2026: The Hindu's **Madurai (southern districts) edition**
+    // is the feed that actually carries Kanniyakumari district copy — the
+    // state-level Tamil Nadu feed had 0 district items across 60 stories / 38h,
+    // while Madurai had 2 in the same window. That single missing source, not the
+    // regex, is why this tab kept coming up empty.
+    // The Google News district query was dropped: re-tested the same day, it still
+    // returns the anti-bot "Sorry" page through every proxy (Worker 503, allorigins
+    // 522), so it was a guaranteed-failing request on every refresh.
     'politics_kanyakumari': {
       urls: [
+        { u: 'https://www.thehindu.com/news/cities/Madurai/feeder/default.rss', src: 'The Hindu' },
         { u: 'https://www.thehindu.com/news/national/tamil-nadu/feeder/default.rss', src: 'The Hindu' },
         { u: 'https://timesofindia.indiatimes.com/rssfeeds/2950623.cms', src: 'Times of India' },
-        { u: 'https://news.google.com/rss/search?q=Kanyakumari+OR+Nagercoil+OR+Marthandam+OR+Colachel+OR+Kanniyakumari+when:1d&hl=en&gl=IN&ceid=IN:en', bonus: true }
+        { u: 'https://indianexpress.com/section/cities/chennai/feed/', src: 'Indian Express' }
       ],
-      keywordFilter: /kanya?kumari|kanniyakumari|nagercoil|marthandam|colachel|kuzhithurai|padmanabhapuram|suchindram|thuckalay|cape\s?comorin|vivekananda\s?rock/i,
+      keywordFilter: KANYAKUMARI_RE,
       maxAgeHours: 24,
+      // District news is genuinely sparse — a strict 24h cutoff leaves the tab
+      // blank most mornings. Widen only when the tighter window finds nothing,
+      // and tell the reader which window is on screen.
+      widenTo: [72, 168],
+      maxItems: 9,
       label: 'Kanyakumari district · The Hindu · TOI'
     },
     'politics_tamilnadu': {
       urls: [
         { u: 'https://www.thehindu.com/news/national/tamil-nadu/feeder/default.rss', src: 'The Hindu' },
+        // Southern-districts edition — carries the district reporting the state
+        // feed leaves out (see the Kanyakumari note below).
+        { u: 'https://www.thehindu.com/news/cities/Madurai/feeder/default.rss', src: 'The Hindu' },
         { u: 'https://timesofindia.indiatimes.com/rssfeeds/2950623.cms', src: 'Times of India' }
       ],
       maxAgeHours: 24,
@@ -1759,8 +1782,11 @@ footer .accent { color: var(--accent); font-weight: 700; }
         { u: 'https://retail.economictimes.indiatimes.com/rss/topstories', src: 'ETRetail' },
         { u: 'https://economictimes.indiatimes.com/tech/rssfeeds/13357270.cms', src: 'ETtech' },
         { u: 'https://www.livemint.com/rss/companies', src: 'Mint' },
-        { u: 'https://techcrunch.com/tag/e-commerce/feed/', src: 'TechCrunch', bonus: true },
-        { u: 'https://news.google.com/rss/search?q=India+ecommerce+Amazon+OR+Flipkart+OR+Meesho+OR+ONDC+when:1d&hl=en&gl=IN&ceid=IN:en', bonus: true }
+        { u: 'https://techcrunch.com/tag/e-commerce/feed/', src: 'TechCrunch', bonus: true }
+        // Google News search dropped in v7.1 — re-verified 14 Aug 2026: it still
+        // answers every proxy with its anti-bot "Sorry" page (Worker 503,
+        // allorigins 522/CORS), so it was six guaranteed-failing requests per
+        // refresh and a console full of red.
       ],
       relevanceFilter: isEcommerceItem,
       maxItems: 9,
@@ -1907,8 +1933,25 @@ footer .accent { color: var(--accent); font-weight: 700; }
     tmp.innerHTML = html;
     return tmp.textContent || tmp.innerText || '';
   }
+  // Some publishers double-encode their headlines (the feed literally carries
+  // "Shein&amp;#039;s"), so one XML decode still leaves "Shein&#039;s" on screen.
+  // Decode any leftover entity here — rendering escapes everything again, so a
+  // decode at parse time can never introduce markup.
+  const ENTITY_RE = /&(?:#\d+|#x[0-9a-f]+|[a-z][a-z0-9]{1,9});/i;
+  function decodeEntities(t) {
+    if (!t || !ENTITY_RE.test(t)) return t;
+    const ta = document.createElement('textarea');
+    let out = t;
+    for (let i = 0; i < 2 && ENTITY_RE.test(out); i++) {
+      ta.innerHTML = out;
+      const next = ta.value;
+      if (next === out) break;
+      out = next;
+    }
+    return out;
+  }
   function cleanText(t) {
-    return (t || '').replace(/\s+/g, ' ').trim();
+    return decodeEntities((t || '').replace(/\s+/g, ' ').trim()).replace(/\s+/g, ' ').trim();
   }
   function extractSourceFromTitle(title) {
     // Google News appends " - Source" at end of title
@@ -1982,9 +2025,11 @@ footer .accent { color: var(--accent); font-weight: 700; }
 
   function parseRSSXML(xmlString) {
     const doc = new DOMParser().parseFromString(xmlString, 'application/xml');
-    // Capture up to 30 items so date-filtering downstream has enough to work with
-    // (don't slice to ITEMS_PER_FEED here — fresh items may be further down the list)
-    const items = Array.from(doc.querySelectorAll('item, entry')).slice(0, 30);
+    // Capture up to 60 items so date- and keyword-filtering downstream has enough
+    // to work with (don't slice to ITEMS_PER_FEED here — fresh items may be far
+    // down the list). Raised from 30 in v7.1: The Hindu's Madurai edition carries
+    // 60 items over ~62h and the district stories often sit past position 30.
+    const items = Array.from(doc.querySelectorAll('item, entry')).slice(0, 60);
     return items.map(item => {
       const title = cleanText(item.querySelector('title')?.textContent || '');
       // RSS uses <pubDate>; Atom uses <published> or <updated>
@@ -2142,6 +2187,22 @@ footer .accent { color: var(--accent); font-weight: 700; }
   // never stall the section render — their failure is silently tolerated.
   const BONUS_URL_BUDGET_MS = 10000;
 
+  // Freshness window (in hours) that last produced items for a feed — set by
+  // fetchFeed, restored from cache on reload. Never let the cached render use a
+  // narrower window than the fetch did, or the items vanish on the next paint.
+  const FEED_WINDOW = Object.create(null);
+  function feedWindow(feedKey) {
+    return FEED_WINDOW[feedKey]
+        || (cache[feedKey] && cache[feedKey].window)
+        || (FEEDS[feedKey] && FEEDS[feedKey].maxAgeHours)
+        || 24;
+  }
+  function windowLabel(h) {
+    if (h <= 24) return 'past 24 hours';
+    if (h < 168) return 'past ' + Math.round(h / 24) + ' days';
+    return 'past ' + Math.round(h / 24 / 7) + ' week' + (h >= 336 ? 's' : '');
+  }
+
   async function fetchFeed(feedKey) {
     const feed = FEEDS[feedKey];
     if (!feed) return [];
@@ -2212,7 +2273,22 @@ footer .accent { color: var(--accent); font-weight: 700; }
     // RIGID freshness: only keep articles within maxAgeHours (24h).
     // For Google News items, isFreshArticle also scans content for old dates
     // (Google re-indexes old stories with fake-fresh pubDates — this catches them).
-    const fresh = pool.filter(item => isFreshArticle(item, feed.maxAgeHours));
+    //
+    // v7.1 — ESCALATING WINDOW (opt-in via `widenTo`). A district feed has no
+    // obligation to publish something every 24 hours, and an empty section is a
+    // worse answer than a two-day-old story that is clearly stamped as such. Try
+    // the tight window first; only if it yields nothing, step out to the next.
+    // The window that actually produced items is recorded so the cached render,
+    // the section meta and the empty state all agree with what is on screen.
+    const windows = [feed.maxAgeHours || 24].concat(feed.widenTo || []);
+    let fresh = [];
+    let usedWindow = windows[0];
+    for (const w of windows) {
+      usedWindow = w;
+      fresh = pool.filter(item => isFreshArticle(item, w));
+      if (fresh.length) break;
+    }
+    FEED_WINDOW[feedKey] = usedWindow;
 
     // Keep a deeper pool than the section shows — the surplus powers "Show more"
     // and gives site-wide search something to search. maxItems still decides how
@@ -2344,11 +2420,15 @@ footer .accent { color: var(--accent); font-weight: 700; }
     const titleHTML = terms ? highlight(title, terms) : escapeHtml(title);
     const descHTML  = terms ? highlight(desc, terms)  : escapeHtml(desc);
     const isSaved = savedIds.has(id);
+    // Feed image first, then anything recovered earlier from the article's
+    // og:image (see IMAGE RECOVERY) — so a story keeps its picture across
+    // re-renders, search results and reloads without refetching.
+    const imgUrl = it.image || cachedImage(it.link);
     // The thumb slot is always present. A dead image URL just hides the <img>,
     // uncovering the branded placeholder underneath — the card keeps its shape.
     const thumb = `
         <div class="card-thumb">
-          ${it.image ? `<img src="${escapeAttr(it.image)}" alt="" loading="lazy" decoding="async"
+          ${imgUrl ? `<img src="${escapeAttr(imgUrl)}" alt="" loading="lazy" decoding="async"
                referrerpolicy="no-referrer" onerror="this.style.display='none'">
           <span class="card-kicker">${escapeHtml(src)}</span>` : ''}
         </div>`;
@@ -2379,14 +2459,20 @@ footer .accent { color: var(--accent); font-weight: 700; }
 
   function renderItems(gridEl, items, feedKey) {
     if (!items || items.length === 0) {
-      const hrs = (FEEDS[feedKey] && FEEDS[feedKey].maxAgeHours) || 24;
-      const topicFiltered = !!(FEEDS[feedKey] && FEEDS[feedKey].relevanceFilter);
-      const note = topicFiltered
-        ? `This section only shows genuinely on-topic stories from the past ${hrs} hours — off-topic headlines are filtered out rather than used as filler.`
-        : `This section only shows news from the past ${hrs} hours. Check back later.`;
+      const feed = FEEDS[feedKey] || {};
+      // For a widened feed, report the WIDEST window we searched — saying "24
+      // hours" when we actually swept a week would misrepresent the emptiness.
+      const hrs = (feed.widenTo && feed.widenTo.length)
+        ? feed.widenTo[feed.widenTo.length - 1]
+        : (feed.maxAgeHours || 24);
+      const note = feed.relevanceFilter
+        ? `This section only shows genuinely on-topic stories — off-topic headlines are filtered out rather than used as filler.`
+        : feed.keywordFilter
+          ? `Only stories that actually name a place in the district are shown here — statewide headlines are not used as filler.`
+          : `This section only shows news from the ${windowLabel(hrs)}. Check back later.`;
       gridEl.innerHTML = `
         <div class="empty-state" style="grid-column: 1 / -1;">
-          <div style="font-weight:600;margin-bottom:4px;">No fresh news in the last ${hrs} hours</div>
+          <div style="font-weight:600;margin-bottom:4px;">No news found in the ${windowLabel(hrs)}</div>
           <div style="font-size:13px;opacity:0.7;">${note}</div>
           <span class="retry" data-retry="${feedKey}">Refresh</span>
         </div>`;
@@ -2396,7 +2482,7 @@ footer .accent { color: var(--accent); font-weight: 700; }
     // render, the rest are in the DOM but hidden behind "Show more stories".
     const visible = (FEEDS[feedKey] && FEEDS[feedKey].maxItems) || ITEMS_PER_FEED;
     const html = items.map((it, i) => cardHTML(it, {
-      lead: i === 0 && !!it.image && items.length >= 3,
+      lead: i === 0 && !!(it.image || cachedImage(it.link)) && items.length >= 3,
       hidden: i >= visible
     })).join('');
 
@@ -2407,6 +2493,7 @@ footer .accent { color: var(--accent); font-weight: 700; }
          </button></div>`
       : '';
     gridEl.innerHTML = html + more;
+    observeCardsForImages(gridEl, feedKey === 'breaking' ? 3 : 0);
   }
   function renderError(gridEl, feedKey, errorDetails) {
     const detailsBlock = errorDetails ? `
@@ -2439,25 +2526,42 @@ footer .accent { color: var(--accent); font-weight: 700; }
   // the cutoff since (30-min cache TTL + stale-cache fallback on fetch failure).
   // This guarantees the UI never displays news older than 24 hours.
   function filterFreshCached(items, feedKey) {
-    const maxAge = (FEEDS[feedKey] && FEEDS[feedKey].maxAgeHours) || 24;
-    return (items || []).filter(it => isFreshArticle(it, maxAge));
+    return (items || []).filter(it => isFreshArticle(it, feedWindow(feedKey)));
+  }
+
+  // Section meta line: publisher list, plus the window actually on screen when a
+  // widened feed had to reach further back than its normal cutoff.
+  function metaElFor(feedKey) {
+    const id = feedKey.startsWith('politics_') ? 'meta-politics'
+             : feedKey.startsWith('business_') ? 'meta-business'
+             : 'meta-' + feedKey;
+    return document.getElementById(id);
+  }
+  function updateFeedMeta(feedKey) {
+    const el = metaElFor(feedKey);
+    const feed = FEEDS[feedKey];
+    if (!el || !feed) return;
+    const w = feedWindow(feedKey);
+    el.textContent = feed.label + (w > (feed.maxAgeHours || 24) ? ' · ' + windowLabel(w) : '');
   }
 
   async function loadFeedAndRender(feedKey, gridEl, force) {
     const cached = cache[feedKey];
     if (!force && isCacheFresh(cached) && cached.items) {
-      // Drop any cached item that has since aged past 24h before rendering
+      // Drop any cached item that has since aged past the feed's window
       const freshCached = filterFreshCached(cached.items, feedKey);
       renderItems(gridEl, freshCached, feedKey);
+      updateFeedMeta(feedKey);
       enqueueAiSummary(feedKey, freshCached); // AI summary from cache
       return freshCached;
     }
     renderSkeletons(gridEl, 4);
     try {
       const items = await fetchFeed(feedKey);
-      cache[feedKey] = { items, timestamp: Date.now() };
+      cache[feedKey] = { items, timestamp: Date.now(), window: FEED_WINDOW[feedKey] };
       saveCache(cache);
       renderItems(gridEl, items, feedKey);
+      updateFeedMeta(feedKey);
       enqueueAiSummary(feedKey, items); // AI summary for fresh items
       return items;
     } catch (e) {
@@ -3067,6 +3171,192 @@ Respond ONLY with valid JSON (no markdown):
   // v7.0 — READER FEATURES
   // ═══════════════════════════════════════════════════════════════════════
 
+  // ═══════════════════════════════════════════════════════════════════════
+  // v7.1 — IMAGE RECOVERY (og:image)
+  //
+  // Some publishers ship no per-item image at all — Al Jazeera's all.xml is the
+  // worst offender and it dominates Breaking News, which is why that section was
+  // a wall of placeholders. For those cards we fetch the article page through the
+  // same proxy chain and read its og:image / twitter:image tag.
+  //
+  // This is deliberately lazy and capped, because each article page is ~150-250KB:
+  //   • only cards the reader actually scrolls to (IntersectionObserver)
+  //   • 2 at a time, hard session cap, 8s timeout
+  //   • results cached in localStorage for a week, INCLUDING misses (so a truly
+  //     image-less article is never fetched twice)
+  //   • skipped entirely when offline or on a metered/data-saver connection
+  // ═══════════════════════════════════════════════════════════════════════
+  const IMG_CACHE_KEY   = 'ibinews_img_v1';
+  const IMG_TTL_MS      = 7 * 24 * 60 * 60 * 1000;
+  const IMG_MAX_ENTRIES = 400;
+  const IMG_CONCURRENCY = 2;
+  const IMG_SESSION_CAP = 60;
+  const IMG_TIMEOUT_MS  = 8000;
+
+  let imgCache = (function () {
+    try {
+      const v = JSON.parse(localStorage.getItem(IMG_CACHE_KEY));
+      if (!v || typeof v !== 'object') return {};
+      const now = Date.now();
+      Object.keys(v).forEach(k => { if (!v[k] || now - (v[k].t || 0) > IMG_TTL_MS) delete v[k]; });
+      return v;
+    } catch { return {}; }
+  })();
+
+  let imgCacheDirty = false;
+  function persistImgCache() {
+    if (!imgCacheDirty) return;
+    imgCacheDirty = false;
+    try {
+      const keys = Object.keys(imgCache);
+      if (keys.length > IMG_MAX_ENTRIES) {
+        keys.sort((a, b) => (imgCache[a].t || 0) - (imgCache[b].t || 0))
+            .slice(0, keys.length - IMG_MAX_ENTRIES)
+            .forEach(k => delete imgCache[k]);
+      }
+      localStorage.setItem(IMG_CACHE_KEY, JSON.stringify(imgCache));
+    } catch {}
+  }
+  function cachedImage(link) {
+    const e = link && imgCache[link];
+    return (e && e.u) || '';
+  }
+
+  const OG_RE_1 = /<meta[^>]+(?:property|name)=["'](?:og:image(?::secure_url)?|twitter:image(?::src)?)["'][^>]*content=["']([^"']+)["']/i;
+  const OG_RE_2 = /<meta[^>]+content=["']([^"']+)["'][^>]*(?:property|name)=["'](?:og:image(?::secure_url)?|twitter:image(?::src)?)["']/i;
+
+  // Raw HTML through the proxy chain. Reuses PROXIES but skips rss2json, which
+  // only speaks RSS and would 422 on an article page.
+  async function fetchHtmlViaProxy(rawUrl) {
+    for (const proxy of PROXIES) {
+      if (proxy.type === 'rss2json') continue;
+      const ctrl = new AbortController();
+      const timer = setTimeout(() => ctrl.abort(), IMG_TIMEOUT_MS);
+      try {
+        const resp = await fetch(proxy.build(rawUrl), { signal: ctrl.signal, redirect: 'follow' });
+        clearTimeout(timer);
+        if (!resp.ok) throw new Error('HTTP ' + resp.status);
+        let html = await resp.text();
+        if (proxy.type === 'allorigins-json') {
+          try { html = (JSON.parse(html) || {}).contents || ''; } catch { html = ''; }
+        }
+        if (html && html.length > 200) return html;
+        throw new Error('empty body');
+      } catch (e) {
+        clearTimeout(timer);
+      }
+    }
+    return '';
+  }
+
+  const imgQueue = [];
+  const imgSeen = new Set();
+  let imgActive = 0;
+  let imgFetched = 0;
+
+  function imagesAllowed() {
+    if (!navigator.onLine) return false;
+    const c = navigator.connection;
+    if (c && (c.saveData || /^(slow-)?2g$/.test(c.effectiveType || ''))) return false;
+    return true;
+  }
+
+  function queueImageLookup(link, id) {
+    if (!link || imgSeen.has(link) || imgFetched >= IMG_SESSION_CAP) return;
+    const hit = imgCache[link];
+    if (hit) {                       // includes the negative cache (u === '')
+      if (hit.u) applyImage(id, link, hit.u);
+      return;
+    }
+    imgSeen.add(link);
+    imgQueue.push({ link, id });
+    pumpImageQueue();
+  }
+
+  function pumpImageQueue() {
+    if (!imagesAllowed()) return;
+    while (imgActive < IMG_CONCURRENCY && imgQueue.length && imgFetched < IMG_SESSION_CAP) {
+      const job = imgQueue.shift();
+      imgActive++;
+      imgFetched++;
+      fetchHtmlViaProxy(job.link)
+        .then(html => {
+          const m = html && (html.match(OG_RE_1) || html.match(OG_RE_2));
+          const url = m ? normaliseImgUrl(decodeEntities(m[1])) : '';
+          imgCache[job.link] = { u: url, t: Date.now() };   // '' = known imageless
+          imgCacheDirty = true;
+          if (url) applyImage(job.id, job.link, url);
+        })
+        .catch(() => {})
+        .then(() => {
+          imgActive--;
+          persistImgCache();
+          pumpImageQueue();
+        });
+    }
+  }
+
+  // Paint the recovered image into every copy of the card (a story can be on
+  // screen in the feed, in search results and in Saved at the same time).
+  function applyImage(id, link, url) {
+    document.querySelectorAll('.card[data-id="' + id + '"] .card-thumb').forEach(thumb => {
+      if (thumb.querySelector('img')) return;
+      const item = ITEM_INDEX[id] || {};
+      const img = document.createElement('img');
+      img.src = url;
+      img.alt = '';
+      img.loading = 'lazy';
+      img.decoding = 'async';
+      img.referrerPolicy = 'no-referrer';
+      img.style.opacity = '0';
+      img.style.transition = 'opacity .3s ease';
+      img.onload = () => { img.style.opacity = '1'; };
+      img.onerror = () => { img.remove(); };
+      thumb.appendChild(img);
+      const kicker = document.createElement('span');
+      kicker.className = 'card-kicker';
+      kicker.textContent = item.source || 'News';
+      thumb.appendChild(kicker);
+    });
+  }
+
+  // Watch image-less cards; look up og:image once one comes within a screen or
+  // two of the viewport. The margin is deliberately generous — a lookup takes
+  // ~0.5-1s, and a reader scrolling at speed would otherwise pass the card
+  // before its picture lands.
+  //
+  // `eager` fills the first N image-less cards of a grid without waiting for the
+  // observer at all. Used for Breaking News: it is the hero block, it is what the
+  // reader sees first, and it is the section whose feed (Al Jazeera) most often
+  // ships no images.
+  let imgObserver = null;
+  function observeCardsForImages(root, eager) {
+    if (!imagesAllowed()) return;
+    const scope = root || document;
+    const pending = Array.from(scope.querySelectorAll('.card:not(.is-hidden)'))
+      .filter(card => !card.querySelector('.card-thumb img'));
+
+    if (eager) {
+      pending.slice(0, eager).forEach(card => {
+        const it = ITEM_INDEX[card.dataset.id];
+        if (it && it.link) queueImageLookup(it.link, card.dataset.id);
+      });
+    }
+    if (!('IntersectionObserver' in window)) return;
+    if (!imgObserver) {
+      imgObserver = new IntersectionObserver((entries) => {
+        entries.forEach(en => {
+          if (!en.isIntersecting) return;
+          imgObserver.unobserve(en.target);
+          const id = en.target.dataset.id;
+          const it = ITEM_INDEX[id];
+          if (it && it.link) queueImageLookup(it.link, id);
+        });
+      }, { rootMargin: '1200px 0px' });
+    }
+    pending.forEach(card => imgObserver.observe(card));
+  }
+
   // ---------- Toast ----------
   function toast(msg, ms) {
     const host = document.getElementById('toast-host');
@@ -3131,6 +3421,7 @@ Respond ONLY with valid JSON (no markdown):
     }
     countEl.innerHTML = '<strong>' + hits.length + '</strong> ' + (hits.length === 1 ? 'story' : 'stories') + ' matching <strong>' + escapeHtml(q) + '</strong>';
     grid.innerHTML = hits.slice(0, 60).map(it => cardHTML(it, { highlight: terms })).join('');
+    observeCardsForImages(grid);
   }
 
   function initSearch() {
@@ -3184,6 +3475,7 @@ Respond ONLY with valid JSON (no markdown):
     }
     sum.innerHTML = '<strong>' + savedItems.length + '</strong> saved ' + (savedItems.length === 1 ? 'story' : 'stories');
     grid.innerHTML = savedItems.map(it => cardHTML(it, {})).join('');
+    observeCardsForImages(grid);
   }
 
   function syncSaveButtons(id) {
@@ -3443,6 +3735,7 @@ Respond ONLY with valid JSON (no markdown):
           grid.querySelectorAll('.card.is-hidden').forEach(c => c.classList.remove('is-hidden'));
           const wrap = more.closest('.more-wrap');
           if (wrap) wrap.remove();
+          observeCardsForImages(grid);   // newly revealed cards want images too
         }
         return;
       }
