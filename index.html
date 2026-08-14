@@ -2,8 +2,16 @@
 <html lang="en" data-theme="dark">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>IBI News — Live Briefings</title>
+<link rel="canonical" href="https://news.indiabusinessinternational.online/">
+<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
+<meta name="author" content="India Business International">
+<!-- Single media-less tag: setTheme() rewrites it so the browser chrome always
+     matches the theme the user actually chose in-app, not the OS setting. -->
+<meta name="theme-color" content="#0a0a0a">
+<meta name="color-scheme" content="dark light">
+<meta name="format-detection" content="telephone=no">
 <!-- Open Graph / social sharing -->
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="India Business International">
@@ -14,6 +22,7 @@
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="IBI News — Live Briefings — India Business International">
+<meta property="og:locale" content="en_IN">
 <!-- Twitter Card -->
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="IBI News — Live Briefings">
@@ -26,10 +35,51 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="ibi-build" content="v6.1.0-2026-08-04">
+<meta name="ibi-build" content="v7.0.0-2026-08-14">
 
 <!-- Favicon: IBI text in #00c5ff on black, Roboto -->
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='10' fill='black'/><text x='32' y='44' font-family='Roboto,Arial,sans-serif' font-size='26' font-weight='900' text-anchor='middle' fill='%2300c5ff' letter-spacing='-1'>IBI</text></svg>">
+
+<!-- PWA: installable, offline-capable (see sw.js / manifest.json) -->
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="IBI News">
+<meta name="application-name" content="IBI News">
+
+<!-- Structured data: search engines index this as a news site, not a blank SPA -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebSite",
+      "@id": "https://news.indiabusinessinternational.online/#website",
+      "url": "https://news.indiabusinessinternational.online/",
+      "name": "IBI News",
+      "description": "Live news briefings on eCommerce, AI, politics, business, health, technology and environment — curated for Indian online sellers.",
+      "inLanguage": "en-IN",
+      "publisher": { "@id": "https://news.indiabusinessinternational.online/#org" }
+    },
+    {
+      "@type": "Organization",
+      "@id": "https://news.indiabusinessinternational.online/#org",
+      "name": "India Business International",
+      "alternateName": "IBI",
+      "url": "https://indiabusinessinternational.online/",
+      "logo": "https://news.indiabusinessinternational.online/og-banner.png",
+      "slogan": "eCommerce for the World",
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "Kanyakumari",
+        "addressRegion": "Tamil Nadu",
+        "addressCountry": "IN"
+      }
+    }
+  ]
+}
+</script>
 
 <!-- Roboto font -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -45,9 +95,11 @@
   --border: #262626;
   --border-strong: #333;
   --text: #f5f5f5;
-  --text-muted: #a3a3a3;
-  --text-faint: #6b6b6b;
+  --text-muted: #a8a8a8;
+  /* faint text lifted from #6b6b6b — it failed WCAG AA (3.4:1) on card backgrounds */
+  --text-faint: #8f8f8f;
   --accent: #00c5ff;
+  --accent-text: #00c5ff;   /* accent used as TEXT on card/page backgrounds */
   --accent-bg: #000;
   --shadow: 0 4px 16px rgba(0,0,0,0.4);
   --skeleton: #1f1f1f;
@@ -61,8 +113,10 @@
   --border-strong: #d1d5db;
   --text: #111827;
   --text-muted: #4b5563;
-  --text-faint: #9ca3af;
+  --text-faint: #6b7280;
   --accent: #00c5ff;
+  /* #00c5ff on white is ~2:1 — unreadable. Text-only accent is darkened. */
+  --accent-text: #0369a1;
   --accent-bg: #000;
   --shadow: 0 4px 16px rgba(0,0,0,0.08);
   --skeleton: #e5e7eb;
@@ -153,14 +207,14 @@ a { color: inherit; text-decoration: none; -webkit-tap-highlight-color: transpar
   .hero-logo { max-height: 60px; }
 }
 
-/* ---------- Top bar (title + controls) ---------- */
+/* ---------- Top bar (title + controls) ----------
+   The masthead scrolls away; the slim category nav below it is what stays
+   pinned. Two stacked sticky bars would eat a third of a phone screen. */
 .topbar {
-  position: sticky;
-  top: 0;
+  position: relative;
   z-index: 100;
   background: var(--bg-elev);
   border-bottom: 1px solid var(--border);
-  backdrop-filter: blur(8px);
 }
 .topbar-inner {
   max-width: 1280px;
@@ -354,7 +408,7 @@ main {
 /* Section headers — #00c5ff text on black bg */
 .section {
   margin-bottom: 36px;
-  scroll-margin-top: 100px;
+  scroll-margin-top: 66px;   /* clears the sticky category nav */
 }
 .section-header {
   background: var(--accent-bg);
@@ -439,21 +493,22 @@ main {
 }
 .news-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 14px;
+  grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+  gap: 16px;
 }
 
-/* Card */
+/* ---------- Card ----------
+   Structure: <article.card> wraps a full-bleed <a.card-hit> (thumb + text) and
+   a meta row that carries Save/Share buttons. The buttons must NOT sit inside
+   the anchor — nesting interactive controls in a link breaks keyboard users
+   and mobile tap targets. */
 .card {
   background: var(--bg-card);
   border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 18px;
+  border-radius: 10px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
   transition: transform 0.18s, border-color 0.18s, box-shadow 0.18s;
-  cursor: pointer;
   position: relative;
   overflow: hidden;
 }
@@ -465,13 +520,86 @@ main {
   background: var(--accent);
   transform: translateX(-3px);
   transition: transform 0.18s;
+  z-index: 2;
 }
 .card:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: var(--shadow); }
 .card:hover::before { transform: translateX(0); }
+.card:focus-within { border-color: var(--accent); }
+
+.card-hit {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+  cursor: pointer;
+}
+.card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px 16px 0;
+  flex: 1;
+  min-width: 0;
+}
+
+/* Thumbnail — 16:9. EVERY card gets the slot: the branded ::before placeholder
+   sits underneath, so feeds without images (and images that 404) degrade to a
+   clean IBI tile instead of leaving a ragged hole in the grid. */
+.card-thumb {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.card-thumb::before {
+  content: 'IBI';
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 44px;
+  font-weight: 900;
+  letter-spacing: -2px;
+  color: var(--accent);
+  opacity: 0.16;
+  background: linear-gradient(135deg, var(--bg-elev) 0%, var(--bg-card) 100%);
+}
+.card-thumb img {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  background: var(--bg-elev);
+  transition: transform 0.4s ease;
+}
+.card:hover .card-thumb img { transform: scale(1.04); }
+.card-kicker {
+  position: absolute;
+  z-index: 2;
+  left: 10px;
+  bottom: 10px;
+  background: rgba(0,0,0,0.78);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  padding: 4px 8px;
+  border-radius: 4px;
+  max-width: calc(100% - 20px);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 .card-title {
   font-size: 18px;
   font-weight: 700;
-  line-height: 1.45;
+  line-height: 1.4;
   color: var(--text);
   display: -webkit-box;
   -webkit-line-clamp: 3;
@@ -490,32 +618,89 @@ main {
 .card-meta {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   font-size: 13px;
   color: var(--text-faint);
   margin-top: auto;
-  padding-top: 8px;
-  border-top: 1px dashed var(--border);
+  padding: 10px 12px 10px 16px;
   gap: 8px;
 }
 .card-source {
   font-weight: 500;
-  color: var(--accent);
+  color: var(--accent-text);
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;
-  max-width: 60%;
+  max-width: 50%;
 }
 .card-time { white-space: nowrap; }
+.card-dot { opacity: 0.5; }
+.card-actions { margin-left: auto; display: flex; gap: 2px; flex-shrink: 0; }
 
-/* Skeleton loader */
+/* Icon buttons on the card (save / share) — 40px hit area, visible focus */
+.card-act {
+  width: 40px; height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  color: var(--text-faint);
+  cursor: pointer;
+  transition: color 0.15s, background 0.15s;
+  -webkit-tap-highlight-color: transparent;
+  padding: 0;
+}
+.card-act svg { width: 18px; height: 18px; pointer-events: none; }
+.card-act:hover { color: var(--accent-text); background: var(--bg-elev); }
+.card-act.saved { color: var(--accent-text); }
+.card-act.saved svg { fill: currentColor; }
+
+/* Lead story — first card of a section goes full width with a side image.
+   Standard front-page treatment on every major news site. */
+.card-lead { grid-column: 1 / -1; }
+.card-lead .card-title { font-size: 24px; -webkit-line-clamp: 3; }
+.card-lead .card-desc { -webkit-line-clamp: 4; font-size: 16px; }
+@media (min-width: 760px) {
+  .card-lead .card-hit { flex-direction: row; gap: 0; }
+  .card-lead .card-thumb { width: 46%; aspect-ratio: auto; min-height: 240px; }
+  .card-lead .card-body { padding: 22px 22px 0; justify-content: center; }
+}
+
+/* "Show more" reveal — sections render a deeper pool than they show */
+.card.is-hidden { display: none; }
+.more-wrap { grid-column: 1 / -1; margin-top: 4px; text-align: center; }
+.btn-more {
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  padding: 12px 22px;
+  min-height: 44px;
+  border: 1px solid var(--border-strong);
+  background: var(--bg-card);
+  color: var(--text);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s;
+}
+.btn-more:hover { border-color: var(--accent); color: var(--accent-text); }
+
+/* Skeleton loader — mirrors the real card (thumb + 3 lines) so the layout
+   doesn't jump when content lands */
 .skeleton-card {
   background: var(--bg-card);
   border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 16px;
-  height: 160px;
+  border-radius: 10px;
+  overflow: hidden;
 }
+.skeleton-thumb {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: linear-gradient(90deg, var(--skeleton) 0%, var(--skeleton-shine) 50%, var(--skeleton) 100%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+}
+.skeleton-body { padding: 16px; }
 .skeleton-line {
   background: linear-gradient(90deg, var(--skeleton) 0%, var(--skeleton-shine) 50%, var(--skeleton) 100%);
   background-size: 200% 100%;
@@ -528,6 +713,329 @@ main {
 @keyframes shimmer {
   0% { background-position: 200% 0; }
   100% { background-position: -200% 0; }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   v7.0 — standard news-app furniture
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ---------- Accessibility: skip link + visible focus ---------- */
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 10000;
+  background: var(--accent);
+  color: #000;
+  font-weight: 700;
+  padding: 12px 18px;
+  border-radius: 0 0 8px 0;
+}
+.skip-link:focus { left: 0; }
+
+:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Screen-reader-only text */
+.sr-only {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ---------- Reading progress bar ---------- */
+.read-progress {
+  position: fixed;
+  top: 0; left: 0;
+  height: 3px;
+  width: 0;
+  background: var(--accent);
+  z-index: 200;
+  transition: width 0.1s linear;
+  pointer-events: none;
+}
+
+/* ---------- Search ---------- */
+.search-wrap {
+  position: relative;
+  flex: 1 1 320px;
+  max-width: 460px;
+  min-width: 0;
+}
+.search-wrap svg.search-icon {
+  position: absolute;
+  left: 12px; top: 50%;
+  transform: translateY(-50%);
+  width: 17px; height: 17px;
+  color: var(--text-faint);
+  pointer-events: none;
+}
+.search-input {
+  font-family: inherit;
+  font-size: 15px;
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 38px 10px 38px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-strong);
+  border-radius: 999px;
+  color: var(--text);
+  transition: border-color 0.2s;
+}
+.search-input::placeholder { color: var(--text-faint); }
+.search-input:focus { border-color: var(--accent); outline: none; }
+.search-clear {
+  position: absolute;
+  right: 6px; top: 50%;
+  transform: translateY(-50%);
+  width: 32px; height: 32px;
+  border: none;
+  background: transparent;
+  color: var(--text-faint);
+  border-radius: 50%;
+  cursor: pointer;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  line-height: 1;
+}
+.search-wrap.has-value .search-clear { display: flex; }
+.search-clear:hover { color: var(--text); }
+
+/* ---------- Icon buttons in the top bar ---------- */
+.icon-btn {
+  position: relative;
+  width: 44px; height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border-strong);
+  background: var(--bg-card);
+  color: var(--text);
+  border-radius: 8px;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: border-color 0.2s, color 0.2s;
+  -webkit-tap-highlight-color: transparent;
+  padding: 0;
+}
+.icon-btn:hover { border-color: var(--accent); color: var(--accent-text); }
+.icon-btn svg { width: 19px; height: 19px; pointer-events: none; }
+.icon-btn .count {
+  position: absolute;
+  top: -6px; right: -6px;
+  min-width: 19px; height: 19px;
+  padding: 0 5px;
+  background: var(--accent);
+  color: #000;
+  font-size: 11px;
+  font-weight: 900;
+  border-radius: 999px;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+.icon-btn .count.show { display: inline-flex; }
+.icon-btn.active { border-color: var(--accent); color: var(--accent-text); }
+
+/* ---------- Category nav (sticky, scroll-spy) ---------- */
+.catnav {
+  position: sticky;
+  top: 0;
+  z-index: 90;
+  background: var(--bg-elev);
+  border-bottom: 1px solid var(--border);
+  box-shadow: 0 2px 10px rgba(0,0,0,0.12);
+}
+.catnav-inner {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 12px;
+  display: flex;
+  gap: 2px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x proximity;
+}
+.catnav-inner::-webkit-scrollbar { display: none; }
+.catnav a {
+  flex: 0 0 auto;
+  padding: 14px 14px;
+  min-height: 48px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--text-muted);
+  border-bottom: 3px solid transparent;
+  white-space: nowrap;
+  scroll-snap-align: start;
+  transition: color 0.18s, border-color 0.18s;
+}
+.catnav a:hover { color: var(--text); }
+.catnav a[aria-current="true"] {
+  color: var(--accent-text);
+  border-bottom-color: var(--accent);
+}
+.catnav .live-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: #ef4444;
+  animation: pulse 1.6s ease-in-out infinite;
+}
+
+/* ---------- Offline / connection banner ---------- */
+.net-banner {
+  display: none;
+  background: #b45309;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  text-align: center;
+  padding: 9px 16px;
+}
+.net-banner.show { display: block; }
+
+/* ---------- Toast ---------- */
+.toast-host {
+  position: fixed;
+  left: 50%;
+  bottom: calc(24px + env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  z-index: 9998;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+  pointer-events: none;
+  width: max-content;
+  max-width: 92vw;
+}
+.toast {
+  background: #000;
+  color: #fff;
+  border: 1px solid var(--accent);
+  border-radius: 999px;
+  padding: 11px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  animation: toast-in 0.22s ease;
+}
+.toast.leaving { animation: toast-out 0.22s ease forwards; }
+@keyframes toast-in  { from { opacity: 0; transform: translateY(12px); } }
+@keyframes toast-out { to   { opacity: 0; transform: translateY(12px); } }
+
+/* ---------- Back to top ---------- */
+.to-top {
+  position: fixed;
+  right: calc(18px + env(safe-area-inset-right));
+  bottom: calc(18px + env(safe-area-inset-bottom));
+  width: 48px; height: 48px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #000;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.35);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(10px);
+  transition: opacity 0.22s, transform 0.22s, visibility 0.22s;
+  z-index: 95;
+}
+.to-top.show { opacity: 1; visibility: visible; transform: none; }
+.to-top svg { width: 22px; height: 22px; }
+
+/* ---------- Search results & Saved views ---------- */
+.view-section { display: none; }
+.view-section.active { display: block; }
+.result-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+.result-count { font-size: 15px; color: var(--text-muted); }
+.result-count strong { color: var(--text); }
+.btn-ghost {
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 9px 14px;
+  min-height: 40px;
+  background: transparent;
+  border: 1px solid var(--border-strong);
+  color: var(--text-muted);
+  border-radius: 8px;
+  cursor: pointer;
+}
+.btn-ghost:hover { border-color: var(--accent); color: var(--accent-text); }
+mark.hl { background: rgba(0,197,255,0.28); color: inherit; border-radius: 2px; padding: 0 1px; }
+
+/* ---------- Update-available prompt (service worker) ---------- */
+.sw-update {
+  position: fixed;
+  left: 50%;
+  bottom: calc(80px + env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  z-index: 9997;
+  display: none;
+  align-items: center;
+  gap: 12px;
+  background: var(--bg-card);
+  border: 1px solid var(--accent);
+  border-radius: 999px;
+  padding: 10px 12px 10px 18px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  font-size: 14px;
+  font-weight: 600;
+  max-width: 92vw;
+}
+.sw-update.show { display: flex; }
+.sw-update button {
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 800;
+  background: var(--accent);
+  color: #000;
+  border: none;
+  border-radius: 999px;
+  padding: 9px 16px;
+  cursor: pointer;
+}
+
+/* ---------- Motion & print ---------- */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+  html { scroll-behavior: auto; }
+}
+@media print {
+  .topbar, .catnav, .to-top, .toast-host, .ptr-indicator, .card-actions,
+  .hero, .sw-update, .net-banner, .more-wrap { display: none !important; }
+  .card, .news-body, .section { break-inside: avoid; border-color: #ccc; }
+  body { background: #fff; color: #000; font-size: 12pt; }
 }
 
 /* Empty/error state */
@@ -629,12 +1137,19 @@ footer .accent { color: var(--accent); font-weight: 700; }
   .ai-num     { font-size: 14px; }
 
   /* Full-width single column cards */
-  .news-grid { grid-template-columns: 1fr; gap: 10px; }
-  .card { padding: 16px 14px; }
+  .news-grid { grid-template-columns: 1fr; gap: 12px; }
+  .card-body { padding: 14px 14px 0; }
+  .card-meta { padding: 8px 8px 8px 14px; }
+  .card-lead .card-title { font-size: 21px; }
 
   /* Compact controls — hide refresh label */
   .btn-refresh span { display: none; }
   .ai-provider-sel { max-width: 110px; font-size: 13px; }
+
+  /* Search drops to its own full-width row under the brand */
+  .topbar-inner { flex-wrap: wrap; row-gap: 10px; }
+  .search-wrap { order: 3; flex: 1 1 100%; max-width: none; }
+  .catnav a { padding: 12px 12px; font-size: 14px; }
 
   /* Tab row — smaller text but taller tap area */
   .tab { font-size: 14px; padding: 13px 14px; }
@@ -788,14 +1303,45 @@ footer .accent { color: var(--accent); font-weight: 700; }
 </head>
 <body>
 
+<a class="skip-link" href="#main-content">Skip to news</a>
+<div class="read-progress" id="read-progress" aria-hidden="true"></div>
+<div class="toast-host" id="toast-host" aria-live="polite" aria-atomic="true"></div>
+
+<!-- Offline / restored-connection banner -->
+<div class="net-banner" id="net-banner" role="status">
+  You are offline — showing the last saved headlines.
+</div>
+
+<!-- Service-worker update prompt -->
+<div class="sw-update" id="sw-update" role="status">
+  <span>A new version of IBI News is ready.</span>
+  <button type="button" id="sw-update-btn">Update</button>
+</div>
+
+<!-- Back to top -->
+<button class="to-top" id="to-top" type="button" aria-label="Back to top" title="Back to top">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+</button>
+
 <!-- API Keys Modal -->
 <div class="keys-modal-overlay" id="keys-modal-overlay">
   <div class="keys-modal">
     <div class="keys-modal-header">
-      <span>⚙ AI Summary — API Keys</span>
+      <span>⚙ Settings — AI Summaries</span>
       <button class="keys-modal-close" id="keys-modal-close" aria-label="Close">✕</button>
     </div>
     <div class="keys-modal-body">
+      <label class="keys-field">
+        <span class="keys-label">AI summary provider</span>
+        <select class="ai-provider-sel" id="ai-provider-sel" aria-label="AI Summary provider" style="width:100%;max-width:none;">
+          <option value="gemini1">Gemini Key 1 (free tier)</option>
+          <option value="gemini2">Gemini Key 2 (free tier)</option>
+          <option value="openai">ChatGPT (GPT-4o mini)</option>
+          <option value="claude">Claude (Haiku)</option>
+          <option value="deepseek">DeepSeek (free tier)</option>
+        </select>
+      </label>
+
       <div class="keys-warn">
         <strong>⚠ Security note:</strong> Keys are stored in this browser only (localStorage) and are sent directly to each AI provider.
         <span style="color:#ef4444;font-weight:700;">Gemini &amp; DeepSeek have free tiers (safe). ChatGPT &amp; Claude are pay-per-use — only add those if you accept billing risk.</span>
@@ -852,24 +1398,24 @@ footer .accent { color: var(--accent); font-weight: 700; }
     <div class="brand">
       <div class="brand-mark"></div>
       <div class="brand-text">
-        <div class="brand-title">IBI <span class="accent">News</span> <span class="version-badge" id="version-badge">v6.1</span></div>
+        <h1 class="brand-title">IBI <span class="accent">News</span> <span class="version-badge" id="version-badge">v7.0</span></h1>
         <div class="brand-sub">Live Briefings</div>
       </div>
     </div>
 
+    <!-- Search — industry-standard placement: centre of the masthead -->
+    <div class="search-wrap" id="search-wrap" role="search">
+      <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.2-4.2"/></svg>
+      <input type="search" class="search-input" id="search-input" placeholder="Search headlines…  (press /)"
+             aria-label="Search headlines" autocomplete="off" enterkeyhint="search">
+      <button class="search-clear" id="search-clear" type="button" aria-label="Clear search">✕</button>
+    </div>
+
     <div class="controls">
-      <!-- AI Provider selector -->
-      <div class="ai-provider-wrap" title="Select AI provider for section summaries">
-        <span class="ai-provider-badge">AI</span>
-        <select class="ai-provider-sel" id="ai-provider-sel" aria-label="AI Summary provider">
-          <option value="gemini1">Gemini Key 1</option>
-          <option value="gemini2">Gemini Key 2</option>
-          <option value="openai">ChatGPT (GPT-4o mini)</option>
-          <option value="claude">Claude (Haiku)</option>
-          <option value="deepseek">DeepSeek Chat</option>
-        </select>
-        <button class="ai-keys-btn" id="ai-keys-btn" title="Manage API keys" aria-label="Manage API keys">⚙</button>
-      </div>
+      <button class="icon-btn" id="saved-btn" type="button" title="Saved stories" aria-label="Saved stories" aria-pressed="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+        <span class="count" id="saved-count">0</span>
+      </button>
       <button class="btn-refresh" id="refresh-btn" title="Refresh now">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
           <polyline points="23 4 23 10 17 10"/>
@@ -877,6 +1423,9 @@ footer .accent { color: var(--accent); font-weight: 700; }
           <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
         </svg>
         <span>Refresh</span>
+      </button>
+      <button class="icon-btn" id="ai-keys-btn" type="button" title="Settings — AI summaries &amp; API keys" aria-label="Settings">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/></svg>
       </button>
       <button class="theme-toggle" id="theme-toggle" title="Toggle theme" aria-label="Toggle theme">
         <span class="theme-toggle-knob">
@@ -887,7 +1436,7 @@ footer .accent { color: var(--accent); font-weight: 700; }
     </div>
   </div>
   <div class="statusbar">
-    <div class="status-left">
+    <div class="status-left" role="status" aria-live="polite">
       <span class="dot" id="status-dot"></span>
       <span id="status-text">Ready</span>
       <span class="status-sep">|</span>
@@ -901,17 +1450,66 @@ footer .accent { color: var(--accent); font-weight: 700; }
   </div>
 </header>
 
+<!-- ===================== CATEGORY NAV (sticky, scroll-spy) ===================== -->
+<nav class="catnav" id="catnav" aria-label="News sections">
+  <div class="catnav-inner">
+    <a href="#section-breaking" data-sec="section-breaking"><span class="live-dot" aria-hidden="true"></span>Breaking</a>
+    <a href="#section-ecom"     data-sec="section-ecom">eCommerce</a>
+    <a href="#section-ai"       data-sec="section-ai">AI</a>
+    <a href="#section-politics" data-sec="section-politics">Politics</a>
+    <a href="#section-business" data-sec="section-business">Business</a>
+    <a href="#section-health"   data-sec="section-health">Health</a>
+    <a href="#section-tech"     data-sec="section-tech">Technology</a>
+    <a href="#section-env"      data-sec="section-env">Environment</a>
+  </div>
+</nav>
+
 <!-- ===================== MAIN CONTENT ===================== -->
-<main>
+<main id="main-content">
+
+  <!-- Search results view -->
+  <section class="section view-section" id="view-search" aria-label="Search results">
+    <div class="section-header">
+      <h2 class="section-title">Search results</h2>
+      <span class="section-meta" id="meta-search">—</span>
+    </div>
+    <div class="news-body" style="border-top: 1px solid var(--border); border-radius: 0 0 8px 8px;">
+      <div class="result-head">
+        <div class="result-count" id="search-count">—</div>
+        <button class="btn-ghost" type="button" data-close-view="search">✕ Back to all news</button>
+      </div>
+      <div class="news-grid" id="grid-search"></div>
+    </div>
+  </section>
+
+  <!-- Saved stories view -->
+  <section class="section view-section" id="view-saved" aria-label="Saved stories">
+    <div class="section-header">
+      <h2 class="section-title">Saved stories</h2>
+      <span class="section-meta">Kept on this device</span>
+    </div>
+    <div class="news-body" style="border-top: 1px solid var(--border); border-radius: 0 0 8px 8px;">
+      <div class="result-head">
+        <div class="result-count" id="saved-summary">—</div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn-ghost" type="button" id="saved-clear">Clear all</button>
+          <button class="btn-ghost" type="button" data-close-view="saved">✕ Back to all news</button>
+        </div>
+      </div>
+      <div class="news-grid" id="grid-saved"></div>
+    </div>
+  </section>
+
+<div id="view-feed">
 
   <!-- Breaking News -->
   <section class="section section-breaking" id="section-breaking">
     <div class="section-header">
-      <div class="section-title">
+      <h2 class="section-title">
         <span class="breaking-pulse" aria-hidden="true"></span>
         Breaking News
         <span class="breaking-pill">Live</span>
-      </div>
+      </h2>
       <span class="section-meta" id="meta-breaking">Top headlines · India &amp; World</span>
     </div>
     <div class="news-body" style="border-top: 1px solid var(--border); border-radius: 0 0 8px 8px;">
@@ -923,7 +1521,7 @@ footer .accent { color: var(--accent); font-weight: 700; }
   <!-- Section 1: eCommerce & Marketplaces -->
   <section class="section" id="section-ecom">
     <div class="section-header">
-      <div class="section-title"><span class="section-title-num">1</span>eCommerce &amp; Marketplaces <span style="opacity:0.7;font-weight:500;font-size:15px;">— sellers, platforms &amp; logistics</span></div>
+      <h2 class="section-title"><span class="section-title-num">1</span>eCommerce &amp; Marketplaces <span style="opacity:0.7;font-weight:500;font-size:15px;">— sellers, platforms &amp; logistics</span></h2>
       <span class="section-meta" id="meta-ecom">—</span>
     </div>
     <div class="news-body" style="border-top: 1px solid var(--border); border-radius: 0 0 8px 8px;">
@@ -935,7 +1533,7 @@ footer .accent { color: var(--accent); font-weight: 700; }
   <!-- Section 2: Artificial Intelligence -->
   <section class="section" id="section-ai">
     <div class="section-header">
-      <div class="section-title"><span class="section-title-num">2</span>Artificial Intelligence</div>
+      <h2 class="section-title"><span class="section-title-num">2</span>Artificial Intelligence</h2>
       <span class="section-meta" id="meta-ai">—</span>
     </div>
     <div class="news-body" style="border-top: 1px solid var(--border); border-radius: 0 0 8px 8px;">
@@ -947,7 +1545,7 @@ footer .accent { color: var(--accent); font-weight: 700; }
   <!-- Section 3: Politics & Government -->
   <section class="section" id="section-politics">
     <div class="section-header">
-      <div class="section-title"><span class="section-title-num">3</span>Politics &amp; Government <span style="opacity:0.7;font-weight:500;font-size:15px;">— including Legal</span></div>
+      <h2 class="section-title"><span class="section-title-num">3</span>Politics &amp; Government <span style="opacity:0.7;font-weight:500;font-size:15px;">— including Legal</span></h2>
       <span class="section-meta" id="meta-politics">—</span>
     </div>
     <div class="tabs" id="politics-tabs">
@@ -965,7 +1563,7 @@ footer .accent { color: var(--accent); font-weight: 700; }
   <!-- Section 4: Business & Economy -->
   <section class="section" id="section-business">
     <div class="section-header">
-      <div class="section-title"><span class="section-title-num">4</span>Business &amp; Economy</div>
+      <h2 class="section-title"><span class="section-title-num">4</span>Business &amp; Economy</h2>
       <span class="section-meta" id="meta-business">—</span>
     </div>
     <div class="tabs" id="business-tabs">
@@ -981,7 +1579,7 @@ footer .accent { color: var(--accent); font-weight: 700; }
   <!-- Section 5: Health & Wellness -->
   <section class="section" id="section-health">
     <div class="section-header">
-      <div class="section-title"><span class="section-title-num">5</span>Health &amp; Wellness</div>
+      <h2 class="section-title"><span class="section-title-num">5</span>Health &amp; Wellness</h2>
       <span class="section-meta" id="meta-health">—</span>
     </div>
     <div class="news-body" style="border-top: 1px solid var(--border); border-radius: 0 0 8px 8px;">
@@ -993,7 +1591,7 @@ footer .accent { color: var(--accent); font-weight: 700; }
   <!-- Section 6: Technology -->
   <section class="section" id="section-tech">
     <div class="section-header">
-      <div class="section-title"><span class="section-title-num">6</span>Technology</div>
+      <h2 class="section-title"><span class="section-title-num">6</span>Technology</h2>
       <span class="section-meta" id="meta-tech">—</span>
     </div>
     <div class="news-body" style="border-top: 1px solid var(--border); border-radius: 0 0 8px 8px;">
@@ -1005,7 +1603,7 @@ footer .accent { color: var(--accent); font-weight: 700; }
   <!-- Section 7: Environment & Science -->
   <section class="section" id="section-env">
     <div class="section-header">
-      <div class="section-title"><span class="section-title-num">7</span>Environment &amp; Science</div>
+      <h2 class="section-title"><span class="section-title-num">7</span>Environment &amp; Science</h2>
       <span class="section-meta" id="meta-env">—</span>
     </div>
     <div class="news-body" style="border-top: 1px solid var(--border); border-radius: 0 0 8px 8px;">
@@ -1014,12 +1612,16 @@ footer .accent { color: var(--accent); font-weight: 700; }
     </div>
   </section>
 
+</div><!-- /#view-feed -->
 </main>
 
 <footer>
   <div>© <span id="year"></span> <span class="accent">India Business International (IBI)</span> — Kanyakumari, Tamil Nadu</div>
-  <div style="margin-top:6px;font-size:13px;opacity:0.7;">Live news aggregated from direct publisher RSS feeds. Headlines link to original publishers.</div>
-  <div style="margin-top:8px;font-size:11px;opacity:0.5;font-family:monospace;">Build v6.1.0 · 2026-08-04</div>
+  <div style="margin-top:6px;font-size:13px;opacity:0.7;">Live news aggregated from direct publisher RSS feeds. Headlines, images and excerpts remain the property of their publishers; every card links to the original article.</div>
+  <div style="margin-top:8px;font-size:12px;opacity:0.8;">
+    Shortcuts: <kbd>/</kbd> search · <kbd>r</kbd> refresh · <kbd>t</kbd> theme · <kbd>s</kbd> saved · <kbd>Esc</kbd> close
+  </div>
+  <div style="margin-top:8px;font-size:11px;opacity:0.5;font-family:monospace;">Build v7.0.0 · 2026-08-14</div>
 </footer>
 
 <!-- ===================== APP LOGIC ===================== -->
@@ -1327,6 +1929,57 @@ footer .accent { color: var(--accent); font-weight: 700; }
     }
     return t;
   }
+  // ---------- Article image extraction (v7.0) ----------
+  // Publishers advertise the lead image in half a dozen different ways. Order of
+  // preference: <media:content>/<media:thumbnail> (widest wins) → <enclosure> →
+  // first <img> inside description/content:encoded. Anything non-http is dropped;
+  // http:// is upgraded to https:// because the page is served over TLS and a
+  // mixed-content image would be blocked by the browser anyway.
+  function normaliseImgUrl(u) {
+    if (!u) return '';
+    u = String(u).trim();
+    if (u.startsWith('//')) u = 'https:' + u;
+    if (u.startsWith('http://')) u = 'https://' + u.slice(7);
+    return /^https:\/\/\S+$/i.test(u) ? u : '';
+  }
+
+  function extractImage(item) {
+    let best = '', bestW = -1;
+    const els = Array.from(item.getElementsByTagName('*'));
+    for (const el of els) {
+      const ln = (el.localName || el.nodeName || '').toLowerCase();
+      const type = el.getAttribute && (el.getAttribute('type') || el.getAttribute('medium')) || '';
+      const raw = el.getAttribute && (el.getAttribute('url') || el.getAttribute('href') || el.getAttribute('src')) || '';
+      const url = normaliseImgUrl(raw);
+      if (!url) continue;
+
+      if (ln === 'thumbnail' || ln === 'image') {
+        const w = parseInt(el.getAttribute('width') || '0', 10) || 1;
+        if (w > bestW) { bestW = w; best = url; }
+      } else if (ln === 'content') {
+        // media:content is also used for video/audio — keep images only
+        if (type && !/^image/i.test(type)) continue;
+        if (!type && !/\.(jpe?g|png|webp|gif|avif)(\?|$)/i.test(url)) continue;
+        const w = parseInt(el.getAttribute('width') || '0', 10) || 1;
+        if (w > bestW) { bestW = w; best = url; }
+      } else if (ln === 'enclosure') {
+        if (/^image/i.test(type) || /\.(jpe?g|png|webp|gif|avif)(\?|$)/i.test(url)) {
+          if (bestW < 0) { bestW = 0; best = url; }
+        }
+      }
+    }
+    if (!best) {
+      let html = '';
+      for (const el of els) {
+        const ln = (el.localName || el.nodeName || '').toLowerCase();
+        if (ln === 'description' || ln === 'encoded' || ln === 'summary') html += ' ' + (el.textContent || '');
+      }
+      const m = html.match(/<img[^>]+src\s*=\s*["']([^"']+)["']/i);
+      if (m) best = normaliseImgUrl(m[1]);
+    }
+    return best;
+  }
+
   function parseRSSXML(xmlString) {
     const doc = new DOMParser().parseFromString(xmlString, 'application/xml');
     // Capture up to 30 items so date-filtering downstream has enough to work with
@@ -1350,7 +2003,8 @@ footer .accent { color: var(--accent); font-weight: 700; }
         link: link,
         desc: cleanText(stripHTML(item.querySelector('description')?.textContent || item.querySelector('summary')?.textContent || '')),
         source: extractSourceFromTitle(title) || cleanText(item.querySelector('source')?.textContent || 'News'),
-        pubDate: pubDate
+        pubDate: pubDate,
+        image: extractImage(item)
       };
     });
   }
@@ -1442,7 +2096,8 @@ footer .accent { color: var(--accent); font-weight: 700; }
             link: it.link,
             desc: cleanText(stripHTML(it.description || '')),
             source: extractSourceFromTitle(it.title) || it.author || 'News',
-            pubDate: it.pubDate
+            pubDate: it.pubDate,
+            image: normaliseImgUrl(it.thumbnail || (it.enclosure && it.enclosure.link) || '')
           }));
         } else if (proxy.type === 'allorigins-json') {
           // allorigins /get wraps the raw content in { contents: "..." }
@@ -1559,7 +2214,11 @@ footer .accent { color: var(--accent); font-weight: 700; }
     // (Google re-indexes old stories with fake-fresh pubDates — this catches them).
     const fresh = pool.filter(item => isFreshArticle(item, feed.maxAgeHours));
 
-    return fresh.slice(0, feed.maxItems || ITEMS_PER_FEED);
+    // Keep a deeper pool than the section shows — the surplus powers "Show more"
+    // and gives site-wide search something to search. maxItems still decides how
+    // many are visible on first paint.
+    const shown = feed.maxItems || ITEMS_PER_FEED;
+    return fresh.slice(0, Math.max(shown, feed.poolItems || 18));
   }
 
   // ---------- Freshness check (shared by single + multi URL paths) ----------
@@ -1613,13 +2272,109 @@ footer .accent { color: var(--accent); font-weight: 700; }
 
   function renderSkeletons(gridEl, count) {
     gridEl.innerHTML = Array(count).fill(0).map(() => `
-      <div class="skeleton-card">
-        <div class="skeleton-line" style="width:90%;height:16px;"></div>
-        <div class="skeleton-line"></div>
-        <div class="skeleton-line short"></div>
-        <div class="skeleton-line short" style="width:40%;margin-top:14px;"></div>
+      <div class="skeleton-card" aria-hidden="true">
+        <div class="skeleton-thumb"></div>
+        <div class="skeleton-body">
+          <div class="skeleton-line" style="width:90%;height:16px;"></div>
+          <div class="skeleton-line"></div>
+          <div class="skeleton-line short"></div>
+          <div class="skeleton-line short" style="width:40%;margin-top:14px;"></div>
+        </div>
       </div>
     `).join('');
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // v7.0 — CARD MODEL
+  // Every rendered article is registered by a stable id derived from its link,
+  // so the Save and Share buttons (and the Saved view, which must survive a
+  // reload) can find the article again without re-parsing the DOM.
+  // ─────────────────────────────────────────────────────────────────────────
+  const ITEM_INDEX = Object.create(null);
+  const SAVED_KEY = 'ibinews_saved_v1';
+  const MAX_SAVED = 200;
+
+  function hashStr(s) {
+    let h = 5381;
+    for (let i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) >>> 0;
+    return h.toString(36);
+  }
+  function itemId(it) { return 'a' + hashStr((it && (it.link || it.title)) || ''); }
+
+  let savedItems = (function () {
+    try { const v = JSON.parse(localStorage.getItem(SAVED_KEY)); return Array.isArray(v) ? v : []; }
+    catch { return []; }
+  })();
+  const savedIds = new Set(savedItems.map(it => it.id));
+
+  function persistSaved() {
+    try { localStorage.setItem(SAVED_KEY, JSON.stringify(savedItems.slice(0, MAX_SAVED))); } catch {}
+    updateSavedCount();
+  }
+  function updateSavedCount() {
+    const el = document.getElementById('saved-count');
+    if (!el) return;
+    el.textContent = savedItems.length > 99 ? '99+' : String(savedItems.length);
+    el.classList.toggle('show', savedItems.length > 0);
+  }
+
+  const ICON_BOOKMARK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>';
+  const ICON_SHARE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>';
+
+  // Wrap query terms in <mark>. Runs on ALREADY-ESCAPED text so it can never
+  // reintroduce markup from the feed.
+  function highlight(text, terms) {
+    let out = escapeHtml(text || '');
+    (terms || []).forEach(t => {
+      if (!t || t.length < 2) return;
+      const re = new RegExp('(' + t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
+      out = out.replace(re, '<mark class="hl">$1</mark>');
+    });
+    return out;
+  }
+
+  function cardHTML(it, opts) {
+    opts = opts || {};
+    const id = it.id || itemId(it);
+    ITEM_INDEX[id] = it;
+    const title = stripSourceFromTitle(it.title, it.source);
+    const desc = it.desc && it.desc.length > 5 ? it.desc : '';
+    const src = it.source || 'News';
+    const terms = opts.highlight;
+    const titleHTML = terms ? highlight(title, terms) : escapeHtml(title);
+    const descHTML  = terms ? highlight(desc, terms)  : escapeHtml(desc);
+    const isSaved = savedIds.has(id);
+    // The thumb slot is always present. A dead image URL just hides the <img>,
+    // uncovering the branded placeholder underneath — the card keeps its shape.
+    const thumb = `
+        <div class="card-thumb">
+          ${it.image ? `<img src="${escapeAttr(it.image)}" alt="" loading="lazy" decoding="async"
+               referrerpolicy="no-referrer" onerror="this.style.display='none'">
+          <span class="card-kicker">${escapeHtml(src)}</span>` : ''}
+        </div>`;
+    const cls = 'card' + (opts.lead ? ' card-lead' : '') + (opts.hidden ? ' is-hidden' : '');
+    return `
+      <article class="${cls}" data-id="${id}">
+        <a class="card-hit" href="${escapeAttr(it.link)}" target="_blank" rel="noopener noreferrer">
+          ${thumb}
+          <div class="card-body">
+            <h3 class="card-title">${titleHTML}</h3>
+            ${desc ? `<p class="card-desc">${descHTML}</p>` : ''}
+          </div>
+        </a>
+        <div class="card-meta">
+          <span class="card-source" title="${escapeAttr(src)}">${escapeHtml(src)}</span>
+          <span class="card-dot" aria-hidden="true">·</span>
+          <span class="card-time" data-ts="${escapeAttr(it.pubDate || '')}">${escapeHtml(relativeTime(it.pubDate))}</span>
+          <span class="card-actions">
+            <button class="card-act${isSaved ? ' saved' : ''}" type="button" data-save="${id}"
+                    aria-pressed="${isSaved ? 'true' : 'false'}"
+                    aria-label="${isSaved ? 'Remove from saved' : 'Save for later'}"
+                    title="${isSaved ? 'Remove from saved' : 'Save for later'}">${ICON_BOOKMARK}</button>
+            <button class="card-act" type="button" data-share="${id}" aria-label="Share story" title="Share">${ICON_SHARE}</button>
+          </span>
+        </div>
+      </article>`;
   }
 
   function renderItems(gridEl, items, feedKey) {
@@ -1637,20 +2392,21 @@ footer .accent { color: var(--accent); font-weight: 700; }
         </div>`;
       return;
     }
-    gridEl.innerHTML = items.map(it => {
-      const cleanTitle = stripSourceFromTitle(it.title, it.source);
-      const desc = it.desc && it.desc.length > 5 ? it.desc : '';
-      return `
-        <a class="card" href="${escapeAttr(it.link)}" target="_blank" rel="noopener noreferrer">
-          <div class="card-title">${escapeHtml(cleanTitle)}</div>
-          ${desc ? `<div class="card-desc">${escapeHtml(desc)}</div>` : ''}
-          <div class="card-meta">
-            <span class="card-source" title="${escapeAttr(it.source || '')}">${escapeHtml(it.source || 'News')}</span>
-            <span class="card-time">${escapeHtml(relativeTime(it.pubDate))}</span>
-          </div>
-        </a>
-      `;
-    }).join('');
+    // Sections hold a deeper pool than they show: the first `visible` cards
+    // render, the rest are in the DOM but hidden behind "Show more stories".
+    const visible = (FEEDS[feedKey] && FEEDS[feedKey].maxItems) || ITEMS_PER_FEED;
+    const html = items.map((it, i) => cardHTML(it, {
+      lead: i === 0 && !!it.image && items.length >= 3,
+      hidden: i >= visible
+    })).join('');
+
+    const extra = items.length - visible;
+    const more = extra > 0
+      ? `<div class="more-wrap"><button class="btn-more" type="button" data-more="${escapeAttr(gridEl.id)}">
+           Show ${extra} more ${extra === 1 ? 'story' : 'stories'}
+         </button></div>`
+      : '';
+    gridEl.innerHTML = html + more;
   }
   function renderError(gridEl, feedKey, errorDetails) {
     const detailsBlock = errorDetails ? `
@@ -1796,6 +2552,10 @@ footer .accent { color: var(--accent); font-weight: 700; }
     } finally {
       document.getElementById('refresh-btn').classList.remove('spinning');
       isRefreshing = false;
+      nextRefreshAt = Date.now() + REFRESH_INTERVAL_MS;
+      // Keep an open search view in sync with the freshly-fetched pool
+      const q = (document.getElementById('search-input') || {}).value || '';
+      if (currentView === 'search' && q.trim().length >= 2) runSearch(q.trim());
     }
   }
 
@@ -1824,6 +2584,10 @@ footer .accent { color: var(--accent); font-weight: 700; }
   function setTheme(theme) {
     document.documentElement.setAttribute('data-theme', theme);
     try { localStorage.setItem(THEME_KEY, theme); } catch {}
+    // Keep the browser/OS chrome (address bar, task switcher, PWA title bar) in
+    // step with the in-app theme — otherwise a dark app sits under a white bar.
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.setAttribute('content', theme === 'light' ? '#ffffff' : '#0a0a0a');
   }
   function initTheme() {
     let saved;
@@ -2069,7 +2833,7 @@ Respond ONLY with valid JSON (no markdown):
 
     if (provider === 'gemini1' || provider === 'gemini2') {
       const key = provider === 'gemini1' ? keys.gemini1 : keys.gemini2;
-      if (!key) throw new Error('No Gemini API key saved — click ⚙ to add one');
+      if (!key) throw new Error('No Gemini API key saved — open Settings in the top bar to add one');
       const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${key}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -2085,7 +2849,7 @@ Respond ONLY with valid JSON (no markdown):
 
     if (provider === 'deepseek') {
       const key = keys.deepseek;
-      if (!key) throw new Error('No DeepSeek API key saved — click ⚙ to add one');
+      if (!key) throw new Error('No DeepSeek API key saved — open Settings in the top bar to add one');
       const res = await fetch('https://api.deepseek.com/chat/completions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${key}` },
@@ -2106,7 +2870,7 @@ Respond ONLY with valid JSON (no markdown):
 
     if (provider === 'openai') {
       const key = keys.openai;
-      if (!key) throw new Error('No ChatGPT API key saved — click ⚙ to add one');
+      if (!key) throw new Error('No ChatGPT API key saved — open Settings in the top bar to add one');
       const res = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${key}` },
@@ -2123,7 +2887,7 @@ Respond ONLY with valid JSON (no markdown):
 
     if (provider === 'claude') {
       const key = keys.claude;
-      if (!key) throw new Error('No Claude API key saved — click ⚙ to add one');
+      if (!key) throw new Error('No Claude API key saved — open Settings in the top bar to add one');
       const res = await fetch('https://api.anthropic.com/v1/messages', {
         method: 'POST',
         headers: {
@@ -2299,6 +3063,335 @@ Respond ONLY with valid JSON (no markdown):
     });
   }
 
+  // ═══════════════════════════════════════════════════════════════════════
+  // v7.0 — READER FEATURES
+  // ═══════════════════════════════════════════════════════════════════════
+
+  // ---------- Toast ----------
+  function toast(msg, ms) {
+    const host = document.getElementById('toast-host');
+    if (!host) return;
+    const el = document.createElement('div');
+    el.className = 'toast';
+    el.textContent = msg;
+    host.appendChild(el);
+    setTimeout(() => {
+      el.classList.add('leaving');
+      setTimeout(() => el.remove(), 240);
+    }, ms || 2200);
+  }
+
+  // ---------- Views: feed / search / saved ----------
+  let currentView = 'feed';
+  function setView(name) {
+    currentView = name;
+    document.getElementById('view-feed').hidden = (name !== 'feed');
+    document.getElementById('view-search').classList.toggle('active', name === 'search');
+    document.getElementById('view-saved').classList.toggle('active', name === 'saved');
+    const sb = document.getElementById('saved-btn');
+    sb.classList.toggle('active', name === 'saved');
+    sb.setAttribute('aria-pressed', name === 'saved' ? 'true' : 'false');
+    if (name !== 'feed') window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // ---------- Search across every cached section ----------
+  function allCachedItems() {
+    const seen = new Set();
+    const out = [];
+    const push = (it) => {
+      const key = it && (it.link || it.title);
+      if (!key || seen.has(key)) return;
+      seen.add(key);
+      out.push(it);
+    };
+    Object.keys(cache).forEach(k => (cache[k] && cache[k].items || []).forEach(push));
+    savedItems.forEach(push);
+    return out;
+  }
+
+  function runSearch(q) {
+    const terms = q.toLowerCase().split(/\s+/).filter(Boolean);
+    const grid = document.getElementById('grid-search');
+    const countEl = document.getElementById('search-count');
+    const metaEl = document.getElementById('meta-search');
+    const hits = allCachedItems().filter(it => {
+      const hay = ((it.title || '') + ' ' + (it.desc || '') + ' ' + (it.source || '')).toLowerCase();
+      return terms.every(t => hay.indexOf(t) !== -1);
+    }).sort((a, b) => (new Date(b.pubDate || 0)) - (new Date(a.pubDate || 0)));
+
+    metaEl.textContent = '“' + q + '”';
+    if (!hits.length) {
+      countEl.innerHTML = 'No match for <strong>' + escapeHtml(q) + '</strong>';
+      grid.innerHTML = `
+        <div class="empty-state" style="grid-column: 1 / -1;">
+          <div style="font-weight:600;margin-bottom:4px;">Nothing found</div>
+          <div style="font-size:13px;opacity:0.75;">Search covers the headlines currently loaded (last 24 hours) plus your saved stories. Try a shorter word.</div>
+        </div>`;
+      return;
+    }
+    countEl.innerHTML = '<strong>' + hits.length + '</strong> ' + (hits.length === 1 ? 'story' : 'stories') + ' matching <strong>' + escapeHtml(q) + '</strong>';
+    grid.innerHTML = hits.slice(0, 60).map(it => cardHTML(it, { highlight: terms })).join('');
+  }
+
+  function initSearch() {
+    const wrap = document.getElementById('search-wrap');
+    const input = document.getElementById('search-input');
+    const clear = document.getElementById('search-clear');
+    let t = null;
+
+    const apply = () => {
+      const q = input.value.trim();
+      wrap.classList.toggle('has-value', q.length > 0);
+      if (q.length < 2) {
+        if (currentView === 'search') setView('feed');
+        return;
+      }
+      setView('search');
+      runSearch(q);
+    };
+
+    input.addEventListener('input', () => {
+      clearTimeout(t);
+      t = setTimeout(apply, 180);
+    });
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') { clearTimeout(t); apply(); input.blur(); }
+      if (e.key === 'Escape') { clearSearch(); }
+    });
+    clear.addEventListener('click', clearSearch);
+
+    function clearSearch() {
+      input.value = '';
+      wrap.classList.remove('has-value');
+      if (currentView === 'search') setView('feed');
+      input.focus();
+    }
+    window.__clearSearch = clearSearch;
+  }
+
+  // ---------- Saved stories ----------
+  function renderSaved() {
+    const grid = document.getElementById('grid-saved');
+    const sum = document.getElementById('saved-summary');
+    if (!savedItems.length) {
+      sum.textContent = 'Nothing saved yet';
+      grid.innerHTML = `
+        <div class="empty-state" style="grid-column: 1 / -1;">
+          <div style="font-weight:600;margin-bottom:4px;">No saved stories</div>
+          <div style="font-size:13px;opacity:0.75;">Tap the bookmark icon on any card to keep it here. Saved stories stay on this device and remain readable offline.</div>
+        </div>`;
+      return;
+    }
+    sum.innerHTML = '<strong>' + savedItems.length + '</strong> saved ' + (savedItems.length === 1 ? 'story' : 'stories');
+    grid.innerHTML = savedItems.map(it => cardHTML(it, {})).join('');
+  }
+
+  function syncSaveButtons(id) {
+    const on = savedIds.has(id);
+    document.querySelectorAll('[data-save="' + id + '"]').forEach(b => {
+      b.classList.toggle('saved', on);
+      b.setAttribute('aria-pressed', on ? 'true' : 'false');
+      b.setAttribute('aria-label', on ? 'Remove from saved' : 'Save for later');
+      b.title = on ? 'Remove from saved' : 'Save for later';
+    });
+  }
+
+  function toggleSave(id) {
+    if (savedIds.has(id)) {
+      savedIds.delete(id);
+      savedItems = savedItems.filter(s => s.id !== id);
+      toast('Removed from saved');
+    } else {
+      const it = ITEM_INDEX[id];
+      if (!it) return;
+      savedIds.add(id);
+      savedItems.unshift({
+        id: id,
+        title: it.title, link: it.link, desc: it.desc,
+        source: it.source, pubDate: it.pubDate, image: it.image || '',
+        savedAt: Date.now()
+      });
+      if (savedItems.length > MAX_SAVED) savedItems = savedItems.slice(0, MAX_SAVED);
+      toast('Saved for later');
+    }
+    persistSaved();
+    syncSaveButtons(id);
+    if (currentView === 'saved') renderSaved();
+  }
+
+  // ---------- Share ----------
+  async function shareItem(id) {
+    const it = ITEM_INDEX[id];
+    if (!it || !it.link) return;
+    const title = stripSourceFromTitle(it.title, it.source);
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: title, text: title + ' — via IBI News', url: it.link });
+        return;
+      } catch (e) {
+        if (e && e.name === 'AbortError') return;   // user dismissed the sheet
+      }
+    }
+    try {
+      await navigator.clipboard.writeText(it.link);
+      toast('Link copied to clipboard');
+    } catch {
+      window.open(it.link, '_blank', 'noopener');
+    }
+  }
+
+  // ---------- Sticky category nav + scroll-spy ----------
+  function initCatNav() {
+    const links = Array.from(document.querySelectorAll('.catnav a'));
+    const map = new Map();
+    links.forEach(a => {
+      const sec = document.getElementById(a.dataset.sec);
+      if (sec) map.set(sec, a);
+    });
+
+    const setActive = (link) => {
+      links.forEach(a => a.removeAttribute('aria-current'));
+      if (link) link.setAttribute('aria-current', 'true');
+    };
+
+    links.forEach(a => a.addEventListener('click', (e) => {
+      const sec = document.getElementById(a.dataset.sec);
+      if (!sec) return;
+      e.preventDefault();
+      if (currentView !== 'feed') setView('feed');
+      requestAnimationFrame(() => sec.scrollIntoView({ behavior: 'smooth', block: 'start' }));
+      setActive(a);
+      history.replaceState(null, '', '#' + a.dataset.sec);
+    }));
+
+    if (!('IntersectionObserver' in window) || !map.size) return;
+    const visible = new Set();
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(en => en.isIntersecting ? visible.add(en.target) : visible.delete(en.target));
+      const first = Array.from(map.keys()).find(s => visible.has(s));
+      if (first) setActive(map.get(first));
+    }, { rootMargin: '-70px 0px -72% 0px', threshold: 0 });
+    map.forEach((a, sec) => io.observe(sec));
+  }
+
+  // ---------- Scroll furniture: reading progress + back to top ----------
+  function initScrollUI() {
+    const bar = document.getElementById('read-progress');
+    const top = document.getElementById('to-top');
+    let ticking = false;
+    const update = () => {
+      const h = document.documentElement.scrollHeight - window.innerHeight;
+      const y = window.scrollY || document.documentElement.scrollTop;
+      bar.style.width = (h > 0 ? Math.min(100, (y / h) * 100) : 0) + '%';
+      top.classList.toggle('show', y > 600);
+      ticking = false;
+    };
+    window.addEventListener('scroll', () => {
+      if (!ticking) { ticking = true; requestAnimationFrame(update); }
+    }, { passive: true });
+    top.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+    update();
+  }
+
+  // ---------- Auto-refresh countdown ----------
+  let nextRefreshAt = Date.now() + REFRESH_INTERVAL_MS;
+  function startCountdown() {
+    const el = document.getElementById('next-update');
+    if (!el) return;
+    const tick = () => {
+      const ms = Math.max(0, nextRefreshAt - Date.now());
+      if (ms <= 0) { el.textContent = 'Auto-refresh due…'; return; }
+      const m = Math.floor(ms / 60000);
+      const s = Math.floor((ms % 60000) / 1000);
+      el.textContent = 'Next auto-refresh in ' + m + ':' + String(s).padStart(2, '0');
+    };
+    tick();
+    setInterval(tick, 1000);
+  }
+
+  // Relative stamps ("14m ago") go stale on a page left open — retick each minute.
+  function startTimeRefresher() {
+    setInterval(() => {
+      document.querySelectorAll('.card-time[data-ts]').forEach(el => {
+        const ts = el.getAttribute('data-ts');
+        if (ts) el.textContent = relativeTime(ts);
+      });
+    }, 60000);
+  }
+
+  // ---------- Connection state ----------
+  function initNetwork() {
+    const banner = document.getElementById('net-banner');
+    const sync = () => {
+      const off = !navigator.onLine;
+      banner.classList.toggle('show', off);
+      if (off) setStatus('error', 'Offline');
+    };
+    window.addEventListener('offline', () => { sync(); toast('You are offline'); });
+    window.addEventListener('online', () => {
+      sync();
+      toast('Back online — refreshing');
+      refreshAll(true);
+    });
+    sync();
+  }
+
+  // ---------- Service worker (installable + offline) ----------
+  function initServiceWorker() {
+    if (!('serviceWorker' in navigator) || location.protocol === 'file:') return;
+    navigator.serviceWorker.register('sw.js').then(reg => {
+      reg.addEventListener('updatefound', () => {
+        const nw = reg.installing;
+        if (!nw) return;
+        nw.addEventListener('statechange', () => {
+          // A waiting worker with an active controller means "new build ready".
+          // Never swap silently — the user could be mid-article.
+          if (nw.state === 'installed' && navigator.serviceWorker.controller) {
+            const box = document.getElementById('sw-update');
+            box.classList.add('show');
+            document.getElementById('sw-update-btn').onclick = () => {
+              box.classList.remove('show');
+              nw.postMessage({ type: 'SKIP_WAITING' });
+            };
+          }
+        });
+      });
+    }).catch(() => {});
+
+    let reloading = false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (reloading) return;
+      reloading = true;
+      location.reload();
+    });
+  }
+
+  // ---------- Keyboard shortcuts ----------
+  function initShortcuts() {
+    document.addEventListener('keydown', (e) => {
+      const el = e.target;
+      const tag = (el && el.tagName || '').toLowerCase();
+      const typing = tag === 'input' || tag === 'textarea' || tag === 'select' || (el && el.isContentEditable);
+
+      if (e.key === 'Escape') {
+        const overlay = document.getElementById('keys-modal-overlay');
+        if (overlay && overlay.classList.contains('open')) { overlay.classList.remove('open'); return; }
+        if (currentView !== 'feed') { if (window.__clearSearch) window.__clearSearch(); setView('feed'); }
+        return;
+      }
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      if (e.key === '/' && !typing) {
+        e.preventDefault();
+        document.getElementById('search-input').focus();
+        return;
+      }
+      if (typing) return;
+      if (e.key === 'r') { document.getElementById('refresh-btn').click(); }
+      else if (e.key === 't') { document.getElementById('theme-toggle').click(); }
+      else if (e.key === 's') { document.getElementById('saved-btn').click(); }
+    });
+  }
+
   // ---------- Wire-up ----------
   function init() {
     initTheme();
@@ -2306,6 +3399,17 @@ Respond ONLY with valid JSON (no markdown):
     initKeysModal();
     startLiveClock();
     document.getElementById('year').textContent = new Date().getFullYear();
+
+    // v7.0 reader features
+    updateSavedCount();
+    initSearch();
+    initCatNav();
+    initScrollUI();
+    initNetwork();
+    initShortcuts();
+    initServiceWorker();
+    startCountdown();
+    startTimeRefresher();
 
     // Tab clicks
     document.getElementById('politics-tabs').addEventListener('click', (e) => {
@@ -2317,7 +3421,7 @@ Respond ONLY with valid JSON (no markdown):
       if (tab) activateBusinessTab(tab.dataset.tab);
     });
 
-    // Retry clicks (delegated)
+    // Delegated card + view actions (retry, show-more, save, share, close view)
     document.body.addEventListener('click', (e) => {
       const r = e.target.closest('[data-retry]');
       if (r) {
@@ -2328,7 +3432,52 @@ Respond ONLY with valid JSON (no markdown):
                      : 'grid-' + fk;
         const grid = document.getElementById(gridId);
         if (grid) loadFeedAndRender(fk, grid, true).catch(()=>{});
+        return;
       }
+
+      const more = e.target.closest('[data-more]');
+      if (more) {
+        e.preventDefault();
+        const grid = document.getElementById(more.dataset.more);
+        if (grid) {
+          grid.querySelectorAll('.card.is-hidden').forEach(c => c.classList.remove('is-hidden'));
+          const wrap = more.closest('.more-wrap');
+          if (wrap) wrap.remove();
+        }
+        return;
+      }
+
+      const save = e.target.closest('[data-save]');
+      if (save) { e.preventDefault(); toggleSave(save.dataset.save); return; }
+
+      const share = e.target.closest('[data-share]');
+      if (share) { e.preventDefault(); shareItem(share.dataset.share); return; }
+
+      const closeView = e.target.closest('[data-close-view]');
+      if (closeView) {
+        e.preventDefault();
+        if (window.__clearSearch) window.__clearSearch();
+        document.getElementById('search-input').blur();
+        setView('feed');
+        return;
+      }
+    });
+
+    // Saved view toggle + clear
+    document.getElementById('saved-btn').addEventListener('click', () => {
+      if (currentView === 'saved') { setView('feed'); return; }
+      renderSaved();
+      setView('saved');
+    });
+    document.getElementById('saved-clear').addEventListener('click', () => {
+      if (!savedItems.length) return;
+      savedItems.forEach(s => savedIds.delete(s.id));
+      const ids = savedItems.map(s => s.id);
+      savedItems = [];
+      persistSaved();
+      ids.forEach(syncSaveButtons);
+      renderSaved();
+      toast('Saved stories cleared');
     });
 
     // Refresh button
