@@ -35,7 +35,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="ibi-build" content="v7.1.0-2026-08-14">
+<meta name="ibi-build" content="v7.2.0-2026-08-14">
 
 <!-- Favicon: IBI text in #00c5ff on black, Roboto -->
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='10' fill='black'/><text x='32' y='44' font-family='Roboto,Arial,sans-serif' font-size='26' font-weight='900' text-anchor='middle' fill='%2300c5ff' letter-spacing='-1'>IBI</text></svg>">
@@ -1398,7 +1398,7 @@ footer .accent { color: var(--accent); font-weight: 700; }
     <div class="brand">
       <div class="brand-mark"></div>
       <div class="brand-text">
-        <h1 class="brand-title">IBI <span class="accent">News</span> <span class="version-badge" id="version-badge">v7.1</span></h1>
+        <h1 class="brand-title">IBI <span class="accent">News</span> <span class="version-badge" id="version-badge">v7.2</span></h1>
         <div class="brand-sub">Live Briefings</div>
       </div>
     </div>
@@ -1621,7 +1621,7 @@ footer .accent { color: var(--accent); font-weight: 700; }
   <div style="margin-top:8px;font-size:12px;opacity:0.8;">
     Shortcuts: <kbd>/</kbd> search · <kbd>r</kbd> refresh · <kbd>t</kbd> theme · <kbd>s</kbd> saved · <kbd>Esc</kbd> close
   </div>
-  <div style="margin-top:8px;font-size:11px;opacity:0.5;font-family:monospace;">Build v7.1.0 · 2026-08-14</div>
+  <div style="margin-top:8px;font-size:11px;opacity:0.5;font-family:monospace;">Build v7.2.0 · 2026-08-14</div>
 </footer>
 
 <!-- ===================== APP LOGIC ===================== -->
@@ -2429,7 +2429,7 @@ footer .accent { color: var(--accent); font-weight: 700; }
     const thumb = `
         <div class="card-thumb">
           ${imgUrl ? `<img src="${escapeAttr(imgUrl)}" alt="" loading="lazy" decoding="async"
-               referrerpolicy="no-referrer" onerror="this.style.display='none'">
+               referrerpolicy="no-referrer" onerror="window.__ibiImgFail&&window.__ibiImgFail(this)">
           <span class="card-kicker">${escapeHtml(src)}</span>` : ''}
         </div>`;
     const cls = 'card' + (opts.lead ? ' card-lead' : '') + (opts.hidden ? ' is-hidden' : '');
@@ -3282,7 +3282,10 @@ Respond ONLY with valid JSON (no markdown):
       fetchHtmlViaProxy(job.link)
         .then(html => {
           const m = html && (html.match(OG_RE_1) || html.match(OG_RE_2));
-          const url = m ? normaliseImgUrl(decodeEntities(m[1])) : '';
+          let url = m ? normaliseImgUrl(decodeEntities(m[1])) : '';
+          // If og:image is the very URL that just failed to load, it is a miss —
+          // recording it would put the card in a retry loop.
+          if (url && failedImgUrls.has(url)) url = '';
           imgCache[job.link] = { u: url, t: Date.now() };   // '' = known imageless
           imgCacheDirty = true;
           if (url) applyImage(job.id, job.link, url);
@@ -3296,9 +3299,39 @@ Respond ONLY with valid JSON (no markdown):
     }
   }
 
+  // URLs that failed to load. A feed image that 404s must never be re-applied,
+  // and if the article's og:image turns out to BE that same dead URL we record a
+  // miss instead of looping.
+  const failedImgUrls = new Set();
+
+  // A dead feed image is a recovery opportunity, not just something to hide:
+  // drop the <img> so the branded placeholder shows immediately, then go and ask
+  // the article page for its og:image. Called from the inline onerror, so it has
+  // to live on window.
+  window.__ibiImgFail = function (imgEl) {
+    try {
+      const thumb = imgEl.closest('.card-thumb');
+      const card = imgEl.closest('.card');
+      if (imgEl.src) failedImgUrls.add(imgEl.src);
+      imgEl.remove();
+      if (thumb) {
+        const k = thumb.querySelector('.card-kicker');
+        if (k) k.remove();
+      }
+      if (!card) return;
+      const id = card.dataset.id;
+      const it = ITEM_INDEX[id];
+      if (!it || !it.link) return;
+      if (imgCache[it.link] && imgCache[it.link].u === imgEl.src) delete imgCache[it.link];
+      imgSeen.delete(it.link);
+      queueImageLookup(it.link, id);
+    } catch (e) {}
+  };
+
   // Paint the recovered image into every copy of the card (a story can be on
   // screen in the feed, in search results and in Saved at the same time).
   function applyImage(id, link, url) {
+    if (!url || failedImgUrls.has(url)) return;
     document.querySelectorAll('.card[data-id="' + id + '"] .card-thumb').forEach(thumb => {
       if (thumb.querySelector('img')) return;
       const item = ITEM_INDEX[id] || {};
@@ -3311,7 +3344,13 @@ Respond ONLY with valid JSON (no markdown):
       img.style.opacity = '0';
       img.style.transition = 'opacity .3s ease';
       img.onload = () => { img.style.opacity = '1'; };
-      img.onerror = () => { img.remove(); };
+      img.onerror = () => {
+        failedImgUrls.add(url);
+        if (imgCache[link] && imgCache[link].u === url) { imgCache[link] = { u: '', t: Date.now() }; imgCacheDirty = true; }
+        img.remove();
+        const k = thumb.querySelector('.card-kicker');
+        if (k) k.remove();
+      };
       thumb.appendChild(img);
       const kicker = document.createElement('span');
       kicker.className = 'card-kicker';
