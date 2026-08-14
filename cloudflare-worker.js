@@ -9,8 +9,8 @@
    identically on every version, so a smoke test proves it is alive, not that
    your new code shipped. GET /version reports these, so confirming a deploy
    is opening one URL instead of comparing version IDs in the dashboard. */
-const WORKER_VERSION = 'v6.1.0';
-const WORKER_BUILT   = '2026-08-04';
+const WORKER_VERSION = 'v7.3.0';
+const WORKER_BUILT   = '2026-08-14';
 
 // NOTE: matching is `hostname === h || hostname.endsWith('.' + h)`, so a bare
 // domain here also covers every subdomain of it.
