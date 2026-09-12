@@ -15,7 +15,7 @@
    shipping old JS under a new version badge. Always bypass the HTTP cache here.
    ═══════════════════════════════════════════════════════════════════════════ */
 
-const VERSION     = 'v7.4.0';
+const VERSION     = 'v7.4.1';
 const SHELL_CACHE = 'ibinews-shell-' + VERSION;
 const ASSET_CACHE = 'ibinews-assets-' + VERSION;
 const OFFLINE_URL = './index.html';

@@ -1398,7 +1398,7 @@ footer .accent { color: var(--accent); font-weight: 700; }
     <div class="brand">
       <div class="brand-mark"></div>
       <div class="brand-text">
-        <h1 class="brand-title">IBI <span class="accent">News</span> <span class="version-badge" id="version-badge">v7.4</span></h1>
+        <h1 class="brand-title">IBI <span class="accent">News</span> <span class="version-badge" id="version-badge">v7.4.1</span></h1>
         <div class="brand-sub">Live Briefings</div>
       </div>
     </div>
@@ -3060,10 +3060,11 @@ Respond ONLY with valid JSON (no markdown):
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${key}` },
         body: JSON.stringify({
-          // 'deepseek-chat' was retired 2026-07-24; thinking is disabled because
-          // v4 defaults it ON at high effort and reasoning tokens come out of
-          // the same 500-token budget — see cloudflare-worker.js.
-          model: 'deepseek-v4-flash',
+          // 'deepseek-flash' = DeepSeek V4.1 Flash, the canonical ID (the old
+          // aliases still work but are undocumented). thinking is disabled
+          // because v4 defaults it ON at high effort and reasoning tokens come
+          // out of the same 500-token budget — see cloudflare-worker.js.
+          model: 'deepseek-flash',
           messages: [{ role: 'user', content: prompt }],
           max_tokens: 500, temperature: 0.2, response_format: { type: 'json_object' },
           thinking: { type: 'disabled' }

@@ -211,8 +211,12 @@ async function callDeepSeek(apiKey, prompt) {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
     body: JSON.stringify({
-      // 'deepseek-chat' was retired on 2026-07-24 — calls naming it now fail.
-      model: 'deepseek-v4-flash',
+      // 'deepseek-flash' is DeepSeek V4.1 Flash, the current canonical ID.
+      // The legacy aliases ('deepseek-chat', 'deepseek-reasoner',
+      // 'deepseek-v4-flash') are still ACCEPTED and served by this same
+      // model — verified live 12 Sep 2026 — but they are undocumented, so
+      // name the real thing here.
+      model: 'deepseek-flash',
       messages: [{ role: 'user', content: prompt }],
       max_tokens: 500,
       temperature: 0.2,
