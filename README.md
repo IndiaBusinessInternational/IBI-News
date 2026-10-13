@@ -1,4 +1,7 @@
-# IBI-News — v7.6
+# IBI-News — v7.6.1
+
+v7.6.1 (13 Oct 2026, CEO: "fix the Politics summary too"): Politics opens on Tamil Nadu when Kanyakumari has no story in its window (the empty default tab was why Politics never had a summary); a tabbed section only paints its shared grid/summary for the tab on screen (a slow feed from a tab the reader left could overwrite the current one). Laptop gateway per-visitor limit raised 30 -> 60 new summaries an hour.
+
 
 v7.6 (13 Oct 2026): new section 4 **World — including China & Russia** with tabs All · China · Russia · Europe · Asia-Pacific · Africa & Americas (CEO: "update reliable news sources worldwide, including from China and Russia"). 18 new publishers, each probed live: SCMP, CGTN*, Global Times*, TASS*, RT*, Sputnik*, The Moscow Times, Meduza, DW, France 24, Euronews, The Straits Times, CNA, The Japan Times, ABC Australia, Africanews, PBS NewsHour, MercoPress (* = state media, shown with a "State media · China/Russia" label). Global Times dates shifted -8 h (Beijing time labelled GMT); RSS 1.0 <dc:date> now read (DW). Tabbed sections only summarise and show the tab on screen. Worker v7.6.0 allows the new hosts (41).
 
