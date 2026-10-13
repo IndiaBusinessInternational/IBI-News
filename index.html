@@ -35,7 +35,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="ibi-build" content="v7.8-2026-10-13">
+<meta name="ibi-build" content="v7.9-2026-10-13">
 
 <!-- Favicon: IBI text in #00c5ff on black, Roboto -->
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='10' fill='black'/><text x='32' y='44' font-family='Roboto,Arial,sans-serif' font-size='26' font-weight='900' text-anchor='middle' fill='%2300c5ff' letter-spacing='-1'>IBI</text></svg>">
@@ -1323,6 +1323,127 @@ footer .accent { color: var(--accent); font-weight: 700; }
   .ai-provider-badge { display: none; }
   .ai-provider-sel { font-size: 12px; padding: 8px 6px; max-width: 110px; }
 }
+
+/* =====================================================================
+   v7.9 - INTERNATIONAL NEWS-SITE DESIGN LAYER (CEO, 13 Oct 2026: "Make the Page clean,
+   neat and professional - as per current international industry standards for news").
+   The BBC / Reuters / Guardian / AP pattern: a calm page, a slim masthead, section titles
+   with a rule instead of coloured bars, borderless story blocks separated by hairlines,
+   serif headlines, small grey metadata, one accent colour. Light or dark follows the
+   reader's device (initTheme); the toggle still overrides.
+   ===================================================================== */
+:root[data-theme="light"] {
+  --bg: #ffffff; --bg-elev: #ffffff; --bg-card: #ffffff;
+  --border: #e3e3e3; --border-strong: #121212;
+  --text: #121212; --text-muted: #474747; --text-faint: #5f5f5f;
+  --accent-text: #0a5c8a; --shadow: 0 6px 24px rgba(0,0,0,0.10);
+  --summary-bg: #f3f6f9;
+}
+:root[data-theme="dark"] {
+  --bg: #0f1114; --bg-elev: #0f1114; --bg-card: #0f1114;
+  --border: #2b2f36; --border-strong: #e9e9e9;
+  --text: #ededed; --text-muted: #b9b9b9; --text-faint: #9c9c9c;
+  --shadow: 0 6px 24px rgba(0,0,0,0.45);
+  --summary-bg: #171b21;
+}
+.news-serif, .section-title, .card-title { font-family: Georgia, 'Times New Roman', Times, serif; }
+
+/* slim masthead: the logo banner stays (it is the brand) but no longer eats the first screen */
+.hero { padding: 6px 16px; border-bottom: 1px solid #1d1d1d; }
+.hero-logo { max-height: 56px; }
+
+/* sections: a rule and a title - no coloured bars, no number badges */
+.section { margin-bottom: 48px; }
+.section-header {
+  background: transparent; color: var(--text);
+  border: 0; border-top: 3px solid var(--border-strong); border-radius: 0;
+  padding: 12px 0 10px;
+}
+.section-breaking .section-header { border-top-color: #c8102e; }
+.section-title { font-size: 26px; font-weight: 700; letter-spacing: -0.2px; color: var(--text); }
+.section-title span[style] { color: var(--text-faint) !important; font-family: 'Roboto', Arial, sans-serif; }
+.section-title-num { display: none; }
+.section-meta { font-size: 12px; letter-spacing: 0.5px; text-transform: uppercase; color: var(--text-faint); }
+.tabs { background: transparent; border: 0; border-bottom: 1px solid var(--border); }
+.tab { padding: 10px 14px; color: var(--text-muted); }
+.tab.active { color: var(--text); border-bottom-color: var(--border-strong); }
+.news-body { background: transparent; border: 0; border-radius: 0; padding: 18px 0 0; }
+
+/* stories: no boxes - a hairline under each, image corners softened, title underlines on hover */
+.news-grid { gap: 28px 24px; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+.card {
+  background: transparent; border: 0; border-radius: 0;
+  border-bottom: 1px solid var(--border); overflow: visible;
+}
+.card::before { display: none; }
+.card:hover, .card:focus-within { transform: none; box-shadow: none; border-color: var(--border); }
+.card:hover .card-title { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; }
+.card-thumb { border-radius: 4px; }
+.card-kicker { display: none; }               /* the source is already in the metadata line */
+.card-body { padding: 12px 0 0; gap: 8px; }
+.card-title { font-size: 19px; font-weight: 700; line-height: 1.3; letter-spacing: -0.1px; }
+.card-lead .card-title { font-size: 28px; line-height: 1.2; }
+.card-desc { font-size: 15px; line-height: 1.55; }
+.card-meta { padding: 8px 0 6px; font-size: 13px; }
+.card-source { font-size: 12px; font-weight: 700; letter-spacing: 0.4px; text-transform: uppercase; color: var(--text); }
+.section-breaking .card-source { color: #c8102e; }
+
+/* AI summary: a quiet side-ruled panel */
+.ai-summary-box { border: 0; border-left: 3px solid var(--accent); border-radius: 0 6px 6px 0; background: var(--summary-bg); }
+.ai-summary-header { background: transparent; color: var(--text); border-bottom: 1px solid var(--border); }
+.ai-summary-content { background: transparent; }
+
+/* ---------- read aloud (v7.9) ---------- */
+.card.is-speaking .card-title { color: var(--accent-text); }
+.card.is-speaking { border-bottom-color: var(--accent); }
+.card-act.is-on { color: var(--accent-text); }
+.ai-listen {
+  margin-left: auto; font: inherit; font-size: 13px; font-weight: 700;
+  padding: 6px 12px; min-height: 34px; border-radius: 999px;
+  border: 1px solid var(--border-strong); background: transparent; color: var(--text); cursor: pointer;
+}
+.ai-listen:hover { background: var(--text); color: var(--bg); }
+.tts-bar {
+  position: fixed; z-index: 300; left: 50%; transform: translateX(-50%);
+  bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+  width: min(820px, calc(100% - 24px));
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  padding: 10px 12px; border-radius: 12px;
+  background: var(--bg-elev); color: var(--text);
+  border: 1px solid var(--border); box-shadow: var(--shadow);
+}
+.tts-bar[hidden] { display: none; }
+.tts-now { flex: 1 1 220px; min-width: 0; font-size: 14px; font-weight: 600;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tts-now small { display: block; font-size: 12px; font-weight: 400; color: var(--text-faint); }
+.tts-btn {
+  font: inherit; font-size: 14px; font-weight: 700; min-height: 44px; padding: 0 14px;
+  border-radius: 8px; border: 1px solid var(--border); background: transparent; color: var(--text); cursor: pointer;
+}
+.tts-btn:hover { border-color: var(--border-strong); }
+.tts-sel {
+  font: inherit; font-size: 14px; min-height: 44px; padding: 0 8px; max-width: 100%;
+  border-radius: 8px; border: 1px solid var(--border); background: var(--bg-elev); color: var(--text);
+}
+.tts-voice { flex: 1 1 240px; min-width: 0; }
+body.tts-on .to-top { bottom: 128px; }
+@media (max-width: 600px) {
+  .section-title { font-size: 22px; }
+  .card-lead .card-title { font-size: 23px; }
+  .tts-bar { bottom: 0; width: 100%; border-radius: 12px 12px 0 0; padding: 10px 10px calc(10px + env(safe-area-inset-bottom, 0px)); }
+  .tts-btn { flex: 1 1 auto; }
+  body.tts-on .to-top { bottom: 190px; }
+}
+/* phones: edge to edge - pictures full width, text 10px in (IBI mobile standard, 11 Oct 2026) */
+@media (max-width: 600px) {
+  .section-header { padding-left: 10px; padding-right: 10px; }
+  .tabs { padding: 0 2px; }
+  .news-body { padding-top: 14px; }
+  .card-body, .card-meta { padding-left: 10px; padding-right: 10px; }
+  .card-thumb { border-radius: 0; }
+  .ai-summary-header .ai-provider-tag { display: none; }
+}
+.ai-listen { white-space: nowrap; flex-shrink: 0; }
 </style>
 </head>
 <body>
@@ -1347,6 +1468,18 @@ footer .accent { color: var(--accent); font-weight: 700; }
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
 </button>
 
+<!-- Read-aloud player (v7.9) -->
+<div class="tts-bar" id="tts-bar" role="region" aria-label="Read aloud" hidden>
+  <div class="tts-now" id="tts-now">&nbsp;</div>
+  <button class="tts-btn" type="button" id="tts-pause">⏸ Pause</button>
+  <button class="tts-btn" type="button" id="tts-stop">■ Stop</button>
+  <select class="tts-sel tts-voice" id="tts-voice" aria-label="Voice"></select>
+  <select class="tts-sel" id="tts-rate" aria-label="Reading speed">
+    <option value="0.8">0.8×</option><option value="0.9">0.9×</option><option value="1" selected>1×</option>
+    <option value="1.1">1.1×</option><option value="1.25">1.25×</option><option value="1.5">1.5×</option>
+  </select>
+</div>
+
 <!-- Pull-to-refresh indicator (mobile only) -->
 <div class="ptr-indicator" id="ptr-indicator">
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -1368,7 +1501,7 @@ footer .accent { color: var(--accent); font-weight: 700; }
     <div class="brand">
       <div class="brand-mark"></div>
       <div class="brand-text">
-        <h1 class="brand-title">IBI <span class="accent">News</span> <span class="version-badge" id="version-badge">v7.8</span></h1>
+        <h1 class="brand-title">IBI <span class="accent">News</span> <span class="version-badge" id="version-badge">v7.9</span></h1>
         <div class="brand-sub">Live Briefings</div>
       </div>
     </div>
@@ -1615,7 +1748,7 @@ footer .accent { color: var(--accent); font-weight: 700; }
   <div style="margin-top:8px;font-size:12px;opacity:0.8;">
     Shortcuts: <kbd>/</kbd> search · <kbd>r</kbd> refresh · <kbd>t</kbd> theme · <kbd>s</kbd> saved · <kbd>Esc</kbd> close
   </div>
-  <div style="margin-top:8px;font-size:12px;opacity:0.5;font-family:monospace;">Build v7.8 · 2026-10-13</div>
+  <div style="margin-top:8px;font-size:12px;opacity:0.5;font-family:monospace;">Build v7.9 · 2026-10-13</div>
 </footer>
 
 <!-- ===================== APP LOGIC ===================== -->
@@ -2649,6 +2782,7 @@ footer .accent { color: var(--accent); font-weight: 700; }
   }
 
   const ICON_BOOKMARK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>';
+  const ICON_LISTEN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M19 5a10 10 0 0 1 0 14"/></svg>';
   const ICON_SHARE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>';
 
   // Wrap query terms in <mark>. Runs on ALREADY-ESCAPED text so it can never
@@ -2661,6 +2795,178 @@ footer .accent { color: var(--accent); font-weight: 700; }
       out = out.replace(re, '<mark class="hl">$1</mark>');
     });
     return out;
+  }
+
+  // ---------- Read aloud (v7.9) ----------
+  // CEO, 13 Oct 2026: "add a text to voice aloud feature to read any news" / "add maximum voices - both male and
+  // female. let the reader select the voice. Keep indian sharp male voice as default". Free, no key: the browser's
+  // own speechSynthesis, so the voice list is whatever THIS device has (Edge on Windows: Microsoft Prabhat = Indian
+  // male; Android/iPhone: Rishi etc.). Every English voice is offered, tagged Male/Female where the name is known;
+  // the default is an Indian (en-IN) male voice, else an Indian voice, else a British/US male one. The choice and
+  // the speed are remembered. The story's headline + summary are read (the full article lives on the publisher's
+  // site). Same engine as IBI Palmistry: one sentence at a time, Pause = cancel + resume from the same sentence
+  // (speechSynthesis.pause is unreliable), and a token so a cancelled utterance can never move the queue.
+  const TTS_VOICE_KEY = 'ibinews_tts_voice', TTS_RATE_KEY = 'ibinews_tts_rate';
+  const FEMALE_RE = /female|woman|heera|neerja|veena|zira|aria|jenny|sonia|libby|natasha|samantha|karen|moira|tessa|fiona|victoria|susan|hazel|catherine|serena|\bava\b|emma|michelle|clara|emily|isla|leah|sara|nancy|amber|ashley|cora|elizabeth|jane|jessa|monica|seraphina|swara|kalpana|kajal|aditi|raveena|priya|lekha|salli|kimberly|kendra|joanna|\bivy\b|olivia|nicole|matilda|ruby|allison|ana\b|sabina|paulina|hortense|julie|helena|elsa|linda|heather|kate|anna|laura/i;
+  const MALE_RE = /\bmale\b|\bman\b|prabhat|\bravi\b|rishi|hemant|madhur|valluvar|david|\bmark\b|george|\bguy\b|ryan|thomas|christopher|\beric\b|andrew|brian|roger|steffan|william|daniel|\balex\b|\bfred\b|arthur|oliver|aaron|gordon|\blee\b|\btom\b|james|liam|connor|brandon|davis|jacob|jason|tony|matthew|joey|justin|russell|kevin|richard|sean|stefan|paul|rajesh|arjun|kumar/i;
+  const TTS = { on: false, paused: false, token: 0, parts: [], idx: 0, el: null, title: '', voice: null, rate: 1 };
+  function ttsSupported() { return 'speechSynthesis' in window && typeof SpeechSynthesisUtterance !== 'undefined'; }
+  function voiceGender(v) {
+    const n = v.name || '';
+    if (FEMALE_RE.test(n)) return 'Female';
+    if (MALE_RE.test(n)) return 'Male';
+    return '';
+  }
+  function voiceRegion(v) {
+    const l = String(v.lang || '').replace('_', '-').toUpperCase();
+    const m = { 'EN-IN': 'India', 'EN-GB': 'UK', 'EN-US': 'US', 'EN-AU': 'Australia', 'EN-CA': 'Canada', 'EN-IE': 'Ireland',
+      'EN-NZ': 'New Zealand', 'EN-ZA': 'South Africa', 'EN-SG': 'Singapore', 'EN-PH': 'Philippines', 'EN-NG': 'Nigeria',
+      'EN-KE': 'Kenya', 'EN-HK': 'Hong Kong', 'EN-TZ': 'Tanzania' };
+    return m[l] || l;
+  }
+  function englishVoices() {
+    const vs = ttsSupported() ? speechSynthesis.getVoices() : [];
+    const rank = v => (/en[-_]IN/i.test(v.lang) ? 0 : /en[-_]GB/i.test(v.lang) ? 1 : /en[-_]US/i.test(v.lang) ? 2 : 3);
+    return vs.filter(v => /^en([-_]|$)/i.test(v.lang))
+      .sort((a, b) => rank(a) - rank(b) || (voiceGender(a) === 'Male' ? -1 : 0) - (voiceGender(b) === 'Male' ? -1 : 0) || a.name.localeCompare(b.name));
+  }
+  function defaultVoice(list) {
+    const ind = list.filter(v => /en[-_]IN/i.test(v.lang));
+    const sharp = /prabhat|rishi|ravi|hemant|madhur/i;      // natural Indian male voices first
+    return ind.find(v => sharp.test(v.name) && /natural|online|neural/i.test(v.name))
+        || ind.find(v => sharp.test(v.name))
+        || ind.find(v => voiceGender(v) === 'Male')
+        || ind[0]
+        || list.find(v => /en[-_]GB/i.test(v.lang) && voiceGender(v) === 'Male')
+        || list.find(v => voiceGender(v) === 'Male')
+        || list[0] || null;
+  }
+  function chosenVoice() {
+    const list = englishVoices();
+    let saved = '';
+    try { saved = localStorage.getItem(TTS_VOICE_KEY) || ''; } catch {}
+    return list.find(v => v.voiceURI === saved) || defaultVoice(list);
+  }
+  function fillVoiceMenu() {
+    const sel = document.getElementById('tts-voice');
+    if (!sel) return;
+    const list = englishVoices(), cur = chosenVoice();
+    sel.innerHTML = list.length ? list.map(v => {
+      const g = voiceGender(v);
+      const label = v.name.replace(/^(Microsoft|Google)\s+/i, '').replace(/\s*-\s*English.*$/i, '') + ' · ' + voiceRegion(v) + (g ? ' · ' + g : '');
+      return `<option value="${escapeAttr(v.voiceURI)}"${cur && v.voiceURI === cur.voiceURI ? ' selected' : ''}>${escapeHtml(label)}</option>`;
+    }).join('') : '<option value="">Device default voice</option>';
+  }
+  function ttsSplit(text) {
+    const out = [];
+    String(text || '').replace(/\s+/g, ' ').trim().split(/(?<=[.!?…])\s+/).forEach(sen => {
+      while (sen.length > 220) { const cut = sen.lastIndexOf(' ', 220) > 80 ? sen.lastIndexOf(' ', 220) : 220; out.push(sen.slice(0, cut)); sen = sen.slice(cut).trim(); }
+      if (sen) out.push(sen);
+    });
+    return out;
+  }
+  function paintTts() {
+    const bar = document.getElementById('tts-bar');
+    if (!bar) return;
+    bar.hidden = !TTS.on;
+    document.body.classList.toggle('tts-on', TTS.on);
+    document.getElementById('tts-pause').textContent = TTS.paused ? '▶ Resume' : '⏸ Pause';
+    document.getElementById('tts-now').innerHTML = TTS.on
+      ? `${escapeHtml(TTS.title)}<small>${TTS.paused ? 'Paused' : 'Reading aloud'} · ${TTS.idx + 1 > TTS.parts.length ? TTS.parts.length : TTS.idx + 1}/${TTS.parts.length}</small>` : '&nbsp;';
+    document.querySelectorAll('.card.is-speaking').forEach(c => c.classList.remove('is-speaking'));
+    document.querySelectorAll('.card-act.is-on').forEach(b => b.classList.remove('is-on'));
+    if (TTS.on && TTS.el) {
+      TTS.el.classList.add('is-speaking');
+      const b = TTS.el.querySelector('[data-listen]');
+      if (b) b.classList.add('is-on');
+    }
+  }
+  function ttsSpeak(token) {
+    if (token !== TTS.token) return;
+    if (TTS.idx >= TTS.parts.length) { stopListening(); return; }
+    const u = new SpeechSynthesisUtterance(TTS.parts[TTS.idx]);
+    TTS.voice = chosenVoice();
+    if (TTS.voice) { u.voice = TTS.voice; u.lang = TTS.voice.lang; } else u.lang = 'en-IN';
+    u.rate = TTS.rate; u.pitch = 1;
+    u.onend = () => { if (token !== TTS.token) return; TTS.idx++; paintTts(); ttsSpeak(token); };
+    u.onerror = ev => {
+      if (token !== TTS.token || ev.error === 'interrupted' || ev.error === 'canceled') return;
+      stopListening(); toast('The voice stopped. Tap Listen to try again.');
+    };
+    speechSynthesis.speak(u);
+  }
+  function startListening(title, text, el) {
+    if (!ttsSupported()) { toast('Reading aloud is not available in this browser. Try Chrome, Edge or Safari.'); return; }
+    const parts = ttsSplit(text);
+    if (!parts.length) return;
+    try { speechSynthesis.cancel(); } catch {}
+    Object.assign(TTS, { on: true, paused: false, parts, idx: 0, el: el || null, title });
+    const token = ++TTS.token;
+    fillVoiceMenu();
+    paintTts();
+    setTimeout(() => ttsSpeak(token), 60);   // Chrome can drop a speak() made in the same tick as cancel()
+  }
+  function stopListening() {
+    TTS.token++; TTS.on = false; TTS.paused = false; TTS.parts = []; TTS.idx = 0; TTS.el = null;
+    try { if (ttsSupported()) speechSynthesis.cancel(); } catch {}
+    paintTts();
+  }
+  function togglePauseListening() {
+    if (!TTS.on) return;
+    if (!TTS.paused) {
+      TTS.paused = true; TTS.token++;
+      try { speechSynthesis.cancel(); } catch {}
+      paintTts();
+    } else {
+      TTS.paused = false;
+      const token = ++TTS.token;
+      try { speechSynthesis.cancel(); } catch {}
+      paintTts();
+      setTimeout(() => ttsSpeak(token), 60);     // resumes at the start of the same sentence
+    }
+  }
+  function listenToItem(id) {
+    const it = ITEM_INDEX[id];
+    if (!it) return;
+    const el = document.querySelector('article.card[data-id="' + id + '"]');
+    if (TTS.on && TTS.el === el) { togglePauseListening(); return; }
+    const title = stripSourceFromTitle(it.title, it.source);
+    const desc = it.desc && it.desc.length > 5 ? it.desc : '';
+    startListening(title, title + '. ' + (desc ? desc + ' ' : '') + 'From ' + (it.source || 'the publisher') + '.', el);
+  }
+  window.__ibiListenSummary = function (boxId) {
+    const box = document.getElementById(boxId);
+    if (!box) return;
+    const lines = [...box.querySelectorAll('.ai-text')].map(x => x.textContent.trim()).filter(Boolean);
+    if (!lines.length) return;
+    const sec = box.closest('.section');
+    const name = sec ? (sec.querySelector('.section-title')?.childNodes[1]?.textContent || sec.querySelector('.section-title')?.textContent || '').trim() : '';
+    startListening((name || 'Section') + ' — summary', (name ? name + '. ' : '') + 'Five key points. ' + lines.map((l, i) => (i + 1) + '. ' + l).join(' '), null);
+  };
+  function initReadAloud() {
+    if (!ttsSupported()) return;
+    try { TTS.rate = parseFloat(localStorage.getItem(TTS_RATE_KEY)) || 1; } catch {}
+    const rate = document.getElementById('tts-rate');
+    if (rate) {
+      rate.value = String(TTS.rate);
+      if (rate.value !== String(TTS.rate)) rate.value = '1';
+      rate.addEventListener('change', () => {
+        TTS.rate = parseFloat(rate.value) || 1;
+        try { localStorage.setItem(TTS_RATE_KEY, String(TTS.rate)); } catch {}
+        if (TTS.on && !TTS.paused) { const t = ++TTS.token; try { speechSynthesis.cancel(); } catch {} setTimeout(() => ttsSpeak(t), 60); }
+      });
+    }
+    const sel = document.getElementById('tts-voice');
+    if (sel) sel.addEventListener('change', () => {
+      try { localStorage.setItem(TTS_VOICE_KEY, sel.value); } catch {}
+      if (TTS.on && !TTS.paused) { const t = ++TTS.token; try { speechSynthesis.cancel(); } catch {} setTimeout(() => ttsSpeak(t), 60); }
+    });
+    document.getElementById('tts-pause').addEventListener('click', togglePauseListening);
+    document.getElementById('tts-stop').addEventListener('click', stopListening);
+    speechSynthesis.getVoices();
+    try { speechSynthesis.addEventListener('voiceschanged', fillVoiceMenu); } catch {}
+    fillVoiceMenu();
+    window.addEventListener('pagehide', stopListening);
   }
 
   function cardHTML(it, opts) {
@@ -2706,6 +3012,7 @@ footer .accent { color: var(--accent); font-weight: 700; }
                     aria-pressed="${isSaved ? 'true' : 'false'}"
                     aria-label="${isSaved ? 'Remove from saved' : 'Save for later'}"
                     title="${isSaved ? 'Remove from saved' : 'Save for later'}">${ICON_BOOKMARK}</button>
+            <button class="card-act" type="button" data-listen="${id}" aria-label="Listen to this story" title="Listen">${ICON_LISTEN}</button>
             <button class="card-act" type="button" data-share="${id}" aria-label="Share story" title="Share">${ICON_SHARE}</button>
           </span>
         </div>
@@ -3214,6 +3521,7 @@ footer .accent { color: var(--accent); font-weight: 700; }
         <span class="ai-badge">AI</span>
         <span>Section Summary · 5 key points</span>
         <span class="ai-provider-tag">${pd.label}</span>
+        <button class="ai-listen" type="button" onclick="event.stopPropagation(); window.__ibiListenSummary && window.__ibiListenSummary('${boxId}')" aria-label="Listen to this summary">🔊 Listen</button>
         <span class="ai-toggle" id="ai-tog-${boxId}">▾</span>
       </div>
       <div id="ai-body-${boxId}">
@@ -3893,6 +4201,7 @@ footer .accent { color: var(--accent); font-weight: 700; }
   function init() {
     initTheme();
     purgeOldAiKeys();
+    initReadAloud();
     startLiveClock();
     document.getElementById('year').textContent = new Date().getFullYear();
 
@@ -3964,6 +4273,9 @@ footer .accent { color: var(--accent); font-weight: 700; }
 
       const save = e.target.closest('[data-save]');
       if (save) { e.preventDefault(); toggleSave(save.dataset.save); return; }
+
+      const lis = e.target.closest('[data-listen]');
+      if (lis) { e.preventDefault(); listenToItem(lis.dataset.listen); return; }
 
       const share = e.target.closest('[data-share]');
       if (share) { e.preventDefault(); shareItem(share.dataset.share); return; }
