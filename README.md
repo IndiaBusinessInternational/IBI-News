@@ -1,4 +1,7 @@
-# IBI-News — v7.5.1
+# IBI-News — v7.5.2
+
+v7.5.2 (13 Oct 2026): when the office laptop is off (or the AI is busy), the page stays SILENT — no summary box and no note (CEO: "do not expose it… Just keep quiet"); the "Writing summary…" box appears only once the laptop has taken the job. start-local.vbs serves this folder permanently on http://localhost:9122/ (office laptop only), started by the IBI SocialFlow Keep Alive task.
+
 
 v7.5.1 (13 Oct 2026): IBI News is now a PUBLIC site (CEO: "Make it public."). Footer carries the copyright & fair dealing notice (Section 52(1)(a)(iii) of the Copyright Act, 1957 (India) first, then US Section 107) and the corrections/grievances contact (acknowledged within 24 hours, resolved within 15 days); AI summaries are labelled as written from headlines only.
 
