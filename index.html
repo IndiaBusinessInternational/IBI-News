@@ -35,7 +35,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="ibi-build" content="v7.6.1-2026-10-13">
+<meta name="ibi-build" content="v7.6.2-2026-10-13">
 
 <!-- Favicon: IBI text in #00c5ff on black, Roboto -->
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='10' fill='black'/><text x='32' y='44' font-family='Roboto,Arial,sans-serif' font-size='26' font-weight='900' text-anchor='middle' fill='%2300c5ff' letter-spacing='-1'>IBI</text></svg>">
@@ -1368,7 +1368,7 @@ footer .accent { color: var(--accent); font-weight: 700; }
     <div class="brand">
       <div class="brand-mark"></div>
       <div class="brand-text">
-        <h1 class="brand-title">IBI <span class="accent">News</span> <span class="version-badge" id="version-badge">v7.6.1</span></h1>
+        <h1 class="brand-title">IBI <span class="accent">News</span> <span class="version-badge" id="version-badge">v7.6.2</span></h1>
         <div class="brand-sub">Live Briefings</div>
       </div>
     </div>
@@ -1520,7 +1520,6 @@ footer .accent { color: var(--accent); font-weight: 700; }
       <button class="tab active" data-tab="kanyakumari">Kanyakumari</button>
       <button class="tab" data-tab="tamilnadu">Tamil Nadu</button>
       <button class="tab" data-tab="india">India</button>
-      <button class="tab" data-tab="world">World</button>
     </div>
     <div class="news-body">
       <div class="ai-summary-box" id="ai-box-politics" style="display:none;"></div>
@@ -1616,7 +1615,7 @@ footer .accent { color: var(--accent); font-weight: 700; }
   <div style="margin-top:8px;font-size:12px;opacity:0.8;">
     Shortcuts: <kbd>/</kbd> search · <kbd>r</kbd> refresh · <kbd>t</kbd> theme · <kbd>s</kbd> saved · <kbd>Esc</kbd> close
   </div>
-  <div style="margin-top:8px;font-size:12px;opacity:0.5;font-family:monospace;">Build v7.6.1 · 2026-10-13</div>
+  <div style="margin-top:8px;font-size:12px;opacity:0.5;font-family:monospace;">Build v7.6.2 · 2026-10-13</div>
 </footer>
 
 <!-- ===================== APP LOGIC ===================== -->
@@ -1742,8 +1741,11 @@ footer .accent { color: var(--accent); font-weight: 700; }
     //   the future and was rejected by isFreshArticle) — the fetcher shifts it back.
     'world_all': {
       urls: [
+        { u: 'https://feeds.bbci.co.uk/news/world/rss.xml', src: 'BBC' },          // v7.6.2: moved here from the old Politics › World tab
         { u: 'https://www.scmp.com/rss/5/feed', src: 'SCMP' },
         { u: 'https://rss.dw.com/rdf/rss-en-world', src: 'DW' },
+        { u: 'https://www.theguardian.com/world/rss', src: 'The Guardian', bonus: true },
+        { u: 'https://www.aljazeera.com/xml/rss/all.xml', src: 'Al Jazeera', bonus: true },
         { u: 'https://tass.com/rss/v2.xml', src: 'TASS', state: 'Russia' },
         { u: 'https://www.cgtn.com/subscribe/rss/section/world.xml', src: 'CGTN', state: 'China', bonus: true },
         { u: 'https://www.france24.com/en/rss', src: 'France 24', bonus: true },
@@ -1753,7 +1755,7 @@ footer .accent { color: var(--accent); font-weight: 700; }
       ],
       maxAgeHours: 24,
       widenTo: [72],
-      label: 'World · SCMP · DW · TASS · CGTN · France 24 · Straits Times · Africanews · PBS'
+      label: 'World · BBC · Guardian · Al Jazeera · SCMP · DW · TASS · CGTN · France 24 · Straits Times · Africanews · PBS'
     },
     'world_china': {
       urls: [
@@ -1859,17 +1861,6 @@ footer .accent { color: var(--accent); font-weight: 700; }
       maxAgeHours: 24,
       label: 'India · The Hindu · NDTV · Indian Express · TOI'
     },
-    'politics_world': {
-      urls: [
-        { u: 'https://feeds.bbci.co.uk/news/world/rss.xml', src: 'BBC' },
-        { u: 'https://www.aljazeera.com/xml/rss/all.xml', src: 'Al Jazeera' },
-        { u: 'https://www.theguardian.com/world/rss', src: 'The Guardian', bonus: true },     // needs Worker allow-list
-        { u: 'https://feeds.abcnews.com/abcnews/internationalheadlines', src: 'ABC News', bonus: true } // needs Worker allow-list
-      ],
-      maxAgeHours: 24,
-      label: 'World · BBC · Guardian · ABC · Al Jazeera'
-    },
-
     // ── SECTION 1 — eCommerce & Marketplaces ───────────────────────────────
     // ETRetail's own site carries a dedicated /rss/e-commerce section; ETtech
     // is where most Flipkart / Meesho / quick-commerce reporting actually

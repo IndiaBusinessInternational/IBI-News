@@ -1,4 +1,7 @@
-# IBI-News — v7.6.1
+# IBI-News — v7.6.2
+
+v7.6.2 (13 Oct 2026, CEO: "World news - politics & government repeats 2 times" / "combine into under 1"): the Politics › World tab is removed; its sources (BBC World, The Guardian, Al Jazeera) now feed World › All. One World place only.
+
 
 v7.6.1 (13 Oct 2026, CEO: "fix the Politics summary too"): Politics opens on Tamil Nadu when Kanyakumari has no story in its window (the empty default tab was why Politics never had a summary); a tabbed section only paints its shared grid/summary for the tab on screen (a slow feed from a tab the reader left could overwrite the current one). Laptop gateway per-visitor limit raised 30 -> 60 new summaries an hour.
 
