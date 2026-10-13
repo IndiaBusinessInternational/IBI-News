@@ -35,7 +35,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="ibi-build" content="v7.9-2026-10-13">
+<meta name="ibi-build" content="v7.9.1-2026-10-13">
 
 <!-- Favicon: IBI text in #00c5ff on black, Roboto -->
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='10' fill='black'/><text x='32' y='44' font-family='Roboto,Arial,sans-serif' font-size='26' font-weight='900' text-anchor='middle' fill='%2300c5ff' letter-spacing='-1'>IBI</text></svg>">
@@ -1444,6 +1444,13 @@ body.tts-on .to-top { bottom: 128px; }
   .ai-summary-header .ai-provider-tag { display: none; }
 }
 .ai-listen { white-space: nowrap; flex-shrink: 0; }
+.sec-listen {
+  font: inherit; font-size: 13px; font-weight: 700; white-space: nowrap;
+  padding: 0 14px; min-height: 36px; border-radius: 999px; cursor: pointer;
+  border: 1px solid var(--border-strong); background: transparent; color: var(--text);
+}
+.sec-listen:hover, .sec-listen.is-on { background: var(--text); color: var(--bg); }
+.tts-btn[hidden] { display: none; }
 </style>
 </head>
 <body>
@@ -1471,7 +1478,9 @@ body.tts-on .to-top { bottom: 128px; }
 <!-- Read-aloud player (v7.9) -->
 <div class="tts-bar" id="tts-bar" role="region" aria-label="Read aloud" hidden>
   <div class="tts-now" id="tts-now">&nbsp;</div>
+  <button class="tts-btn" type="button" id="tts-prev" aria-label="Previous story" hidden>⏮</button>
   <button class="tts-btn" type="button" id="tts-pause">⏸ Pause</button>
+  <button class="tts-btn" type="button" id="tts-next" aria-label="Next story" hidden>⏭</button>
   <button class="tts-btn" type="button" id="tts-stop">■ Stop</button>
   <select class="tts-sel tts-voice" id="tts-voice" aria-label="Voice"></select>
   <select class="tts-sel" id="tts-rate" aria-label="Reading speed">
@@ -1501,7 +1510,7 @@ body.tts-on .to-top { bottom: 128px; }
     <div class="brand">
       <div class="brand-mark"></div>
       <div class="brand-text">
-        <h1 class="brand-title">IBI <span class="accent">News</span> <span class="version-badge" id="version-badge">v7.9</span></h1>
+        <h1 class="brand-title">IBI <span class="accent">News</span> <span class="version-badge" id="version-badge">v7.9.1</span></h1>
         <div class="brand-sub">Live Briefings</div>
       </div>
     </div>
@@ -1748,7 +1757,7 @@ body.tts-on .to-top { bottom: 128px; }
   <div style="margin-top:8px;font-size:12px;opacity:0.8;">
     Shortcuts: <kbd>/</kbd> search · <kbd>r</kbd> refresh · <kbd>t</kbd> theme · <kbd>s</kbd> saved · <kbd>Esc</kbd> close
   </div>
-  <div style="margin-top:8px;font-size:12px;opacity:0.5;font-family:monospace;">Build v7.9 · 2026-10-13</div>
+  <div style="margin-top:8px;font-size:12px;opacity:0.5;font-family:monospace;">Build v7.9.1 · 2026-10-13</div>
 </footer>
 
 <!-- ===================== APP LOGIC ===================== -->
@@ -2865,26 +2874,60 @@ body.tts-on .to-top { bottom: 128px; }
     });
     return out;
   }
+  // Every spoken piece is { text, el, story }: `el` is the card to highlight, `story` numbers the stories of a
+  // section playlist (v7.9.1, CEO: "add listen to the whole section too"); 0 = an intro or a single story.
+  function storyParts(el, it, n, total) {
+    const title = stripSourceFromTitle(it.title, it.source);
+    const desc = it.desc && it.desc.length > 5 ? it.desc : '';
+    const lead = total > 1 ? 'Story ' + n + ' of ' + total + '. ' : '';
+    return ttsSplit(lead + title + '. ' + (desc ? desc + ' ' : '') + 'From ' + (it.source || 'the publisher') + '.')
+      .map(text => ({ text, el, story: total > 1 ? n : 0 }));
+  }
+  function sectionName(sec) {
+    const h = sec && sec.querySelector('.section-title');
+    if (!h) return '';
+    const c = h.cloneNode(true);
+    c.querySelectorAll('.section-title-num, span[style], .breaking-pill, .breaking-pulse').forEach(x => x.remove());
+    return c.textContent.replace(/\s+/g, ' ').trim();
+  }
+  function currentPart() { return TTS.parts[Math.min(TTS.idx, TTS.parts.length - 1)] || null; }
   function paintTts() {
     const bar = document.getElementById('tts-bar');
     if (!bar) return;
     bar.hidden = !TTS.on;
     document.body.classList.toggle('tts-on', TTS.on);
     document.getElementById('tts-pause').textContent = TTS.paused ? '▶ Resume' : '⏸ Pause';
+    const p = TTS.on ? currentPart() : null;
+    const where = !p ? '' : TTS.stories > 1
+      ? (p.story ? 'Story ' + p.story + ' of ' + TTS.stories : 'Introduction')
+      : (Math.min(TTS.idx + 1, TTS.parts.length) + '/' + TTS.parts.length);
     document.getElementById('tts-now').innerHTML = TTS.on
-      ? `${escapeHtml(TTS.title)}<small>${TTS.paused ? 'Paused' : 'Reading aloud'} · ${TTS.idx + 1 > TTS.parts.length ? TTS.parts.length : TTS.idx + 1}/${TTS.parts.length}</small>` : '&nbsp;';
+      ? `${escapeHtml(TTS.title)}<small>${TTS.paused ? 'Paused' : 'Reading aloud'} · ${where}</small>` : '&nbsp;';
+    const playlist = TTS.on && TTS.stories > 1;
+    document.getElementById('tts-prev').hidden = !playlist;
+    document.getElementById('tts-next').hidden = !playlist;
     document.querySelectorAll('.card.is-speaking').forEach(c => c.classList.remove('is-speaking'));
-    document.querySelectorAll('.card-act.is-on').forEach(b => b.classList.remove('is-on'));
-    if (TTS.on && TTS.el) {
-      TTS.el.classList.add('is-speaking');
-      const b = TTS.el.querySelector('[data-listen]');
-      if (b) b.classList.add('is-on');
+    document.querySelectorAll('.card-act.is-on, .sec-listen.is-on').forEach(x => x.classList.remove('is-on'));
+    document.querySelectorAll('.sec-listen').forEach(x => {
+      const mine = TTS.on && TTS.key === 'sec:' + x.dataset.listenSection;
+      x.textContent = mine ? (TTS.paused ? '▶ Resume section' : '⏸ Pause section') : '🔊 Listen to section';
+      if (mine) x.classList.add('is-on');
+    });
+    const el = p && p.el;
+    if (el) {
+      el.classList.add('is-speaking');
+      const btn = el.querySelector('[data-listen]');
+      if (btn) btn.classList.add('is-on');
+      if (playlist && TTS.lastEl !== el) {                   // follow the story being read
+        try { el.scrollIntoView({ block: 'center', behavior: 'smooth' }); } catch {}
+      }
     }
+    TTS.lastEl = el || null;
   }
   function ttsSpeak(token) {
     if (token !== TTS.token) return;
     if (TTS.idx >= TTS.parts.length) { stopListening(); return; }
-    const u = new SpeechSynthesisUtterance(TTS.parts[TTS.idx]);
+    const u = new SpeechSynthesisUtterance(TTS.parts[TTS.idx].text);
     TTS.voice = chosenVoice();
     if (TTS.voice) { u.voice = TTS.voice; u.lang = TTS.voice.lang; } else u.lang = 'en-IN';
     u.rate = TTS.rate; u.pitch = 1;
@@ -2895,19 +2938,19 @@ body.tts-on .to-top { bottom: 128px; }
     };
     speechSynthesis.speak(u);
   }
-  function startListening(title, text, el) {
+  function startParts(title, parts, key) {
     if (!ttsSupported()) { toast('Reading aloud is not available in this browser. Try Chrome, Edge or Safari.'); return; }
-    const parts = ttsSplit(text);
     if (!parts.length) return;
     try { speechSynthesis.cancel(); } catch {}
-    Object.assign(TTS, { on: true, paused: false, parts, idx: 0, el: el || null, title });
+    Object.assign(TTS, { on: true, paused: false, parts, idx: 0, title, key, lastEl: null,
+      stories: parts.reduce((m, p) => Math.max(m, p.story || 0), 0) });
     const token = ++TTS.token;
     fillVoiceMenu();
     paintTts();
     setTimeout(() => ttsSpeak(token), 60);   // Chrome can drop a speak() made in the same tick as cancel()
   }
   function stopListening() {
-    TTS.token++; TTS.on = false; TTS.paused = false; TTS.parts = []; TTS.idx = 0; TTS.el = null;
+    TTS.token++; Object.assign(TTS, { on: false, paused: false, parts: [], idx: 0, key: '', stories: 0, lastEl: null });
     try { if (ttsSupported()) speechSynthesis.cancel(); } catch {}
     paintTts();
   }
@@ -2925,23 +2968,46 @@ body.tts-on .to-top { bottom: 128px; }
       setTimeout(() => ttsSpeak(token), 60);     // resumes at the start of the same sentence
     }
   }
+  function jumpStory(dir) {                       // ⏮ / ⏭ in a section playlist
+    if (!TTS.on || TTS.stories < 2) return;
+    const cur = (currentPart() || {}).story || 0;
+    const target = Math.min(TTS.stories, Math.max(1, cur + dir));
+    const i = TTS.parts.findIndex(p => p.story === target);
+    if (i < 0) return;
+    TTS.idx = i; TTS.paused = false;
+    const token = ++TTS.token;
+    try { speechSynthesis.cancel(); } catch {}
+    paintTts();
+    setTimeout(() => ttsSpeak(token), 60);
+  }
   function listenToItem(id) {
     const it = ITEM_INDEX[id];
     if (!it) return;
+    if (TTS.on && TTS.key === 'card:' + id) { togglePauseListening(); return; }
     const el = document.querySelector('article.card[data-id="' + id + '"]');
-    if (TTS.on && TTS.el === el) { togglePauseListening(); return; }
-    const title = stripSourceFromTitle(it.title, it.source);
-    const desc = it.desc && it.desc.length > 5 ? it.desc : '';
-    startListening(title, title + '. ' + (desc ? desc + ' ' : '') + 'From ' + (it.source || 'the publisher') + '.', el);
+    startParts(stripSourceFromTitle(it.title, it.source), storyParts(el, it, 0, 1), 'card:' + id);
+  }
+  function listenToSection(sectionId) {
+    const sec = document.getElementById(sectionId);
+    if (!sec) return;
+    if (TTS.on && TTS.key === 'sec:' + sectionId) { togglePauseListening(); return; }
+    const cards = [...sec.querySelectorAll('.news-grid article.card')].filter(c => ITEM_INDEX[c.dataset.id]);
+    if (!cards.length) { toast('No stories in this section yet.'); return; }
+    const name = sectionName(sec) || 'This section';
+    const tab = sec.querySelector('.tabs .tab.active');
+    const label = name + (tab ? ' · ' + tab.textContent.trim() : '');
+    const parts = [{ text: label + '. ' + cards.length + (cards.length === 1 ? ' story.' : ' stories.'), el: null, story: 0 }];
+    cards.forEach((c, i) => parts.push(...storyParts(c, ITEM_INDEX[c.dataset.id], i + 1, cards.length)));
+    startParts(label, parts, 'sec:' + sectionId);
   }
   window.__ibiListenSummary = function (boxId) {
     const box = document.getElementById(boxId);
     if (!box) return;
     const lines = [...box.querySelectorAll('.ai-text')].map(x => x.textContent.trim()).filter(Boolean);
     if (!lines.length) return;
-    const sec = box.closest('.section');
-    const name = sec ? (sec.querySelector('.section-title')?.childNodes[1]?.textContent || sec.querySelector('.section-title')?.textContent || '').trim() : '';
-    startListening((name || 'Section') + ' — summary', (name ? name + '. ' : '') + 'Five key points. ' + lines.map((l, i) => (i + 1) + '. ' + l).join(' '), null);
+    const name = sectionName(box.closest('.section'));
+    const text = (name ? name + '. ' : '') + 'Five key points. ' + lines.map((l, i) => (i + 1) + '. ' + l).join(' ');
+    startParts((name || 'Section') + ' — summary', ttsSplit(text).map(t => ({ text: t, el: null, story: 0 })), 'sum:' + boxId);
   };
   function initReadAloud() {
     if (!ttsSupported()) return;
@@ -2962,6 +3028,17 @@ body.tts-on .to-top { bottom: 128px; }
       if (TTS.on && !TTS.paused) { const t = ++TTS.token; try { speechSynthesis.cancel(); } catch {} setTimeout(() => ttsSpeak(t), 60); }
     });
     document.getElementById('tts-pause').addEventListener('click', togglePauseListening);
+    document.getElementById('tts-prev').addEventListener('click', () => jumpStory(-1));
+    document.getElementById('tts-next').addEventListener('click', () => jumpStory(1));
+    document.querySelectorAll('.section[id] .section-header').forEach(h => {
+      if (h.querySelector('.sec-listen')) return;
+      const btn = document.createElement('button');
+      btn.type = 'button'; btn.className = 'sec-listen';
+      btn.dataset.listenSection = h.closest('.section').id;
+      btn.textContent = '🔊 Listen to section';
+      btn.setAttribute('aria-label', 'Listen to every story in this section');
+      h.appendChild(btn);
+    });
     document.getElementById('tts-stop').addEventListener('click', stopListening);
     speechSynthesis.getVoices();
     try { speechSynthesis.addEventListener('voiceschanged', fillVoiceMenu); } catch {}
@@ -4273,6 +4350,9 @@ body.tts-on .to-top { bottom: 128px; }
 
       const save = e.target.closest('[data-save]');
       if (save) { e.preventDefault(); toggleSave(save.dataset.save); return; }
+
+      const ls = e.target.closest('[data-listen-section]');
+      if (ls) { e.preventDefault(); listenToSection(ls.dataset.listenSection); return; }
 
       const lis = e.target.closest('[data-listen]');
       if (lis) { e.preventDefault(); listenToItem(lis.dataset.listen); return; }

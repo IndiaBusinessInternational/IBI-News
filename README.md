@@ -1,4 +1,7 @@
-# IBI-News — v7.9
+# IBI-News — v7.9.1
+
+v7.9.1 (13 Oct 2026, CEO: "add listen to the whole section too"): "Listen to section" on every section (and on Saved stories / Search results) reads every story in order - an introduction, then "Story N of M", headline, summary, source - highlighting and scrolling to the story being read; the player gains Previous / Next story.
+
 
 v7.9 (13 Oct 2026): (1) international news-site design (CEO: "clean, neat and professional - as per current international industry standards for news"): slim masthead, section titles with a rule (red for Breaking) instead of coloured bars and number badges, borderless stories with hairlines, serif headlines, uppercase source line, side-ruled AI summary panel; phones edge to edge (pictures full width, text 10 px in). (2) Read aloud (CEO: "add a text to voice aloud feature" / "add maximum voices - both male and female. let the reader select the voice. Keep indian sharp male voice as default"): Listen on every story and every AI summary, bottom player with Pause/Resume, Stop, every English voice on the device (tagged Male/Female) and speed 0.8-1.5x, remembered; default = Indian (en-IN) male (Prabhat/Rishi/Ravi/Hemant), else Indian, else UK/US male. Free (browser speechSynthesis), no key.
 
