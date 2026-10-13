@@ -35,7 +35,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="ibi-build" content="v7.9.1-2026-10-13">
+<meta name="ibi-build" content="v7.9.2-2026-10-13">
 
 <!-- Favicon: IBI text in #00c5ff on black, Roboto -->
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='10' fill='black'/><text x='32' y='44' font-family='Roboto,Arial,sans-serif' font-size='26' font-weight='900' text-anchor='middle' fill='%2300c5ff' letter-spacing='-1'>IBI</text></svg>">
@@ -1451,6 +1451,14 @@ body.tts-on .to-top { bottom: 128px; }
 }
 .sec-listen:hover, .sec-listen.is-on { background: var(--text); color: var(--bg); }
 .tts-btn[hidden] { display: none; }
+.card-act.card-listen {
+  width: auto; height: 36px; padding: 0 12px 0 10px; gap: 6px;
+  border: 1px solid var(--border); border-radius: 999px;
+  font: inherit; font-size: 13px; font-weight: 700; color: var(--text);
+}
+.card-act.card-listen svg { width: 15px; height: 15px; flex-shrink: 0; }
+.card-act.card-listen:hover { border-color: var(--border-strong); }
+.card-act.card-listen.is-on { background: var(--text); color: var(--bg); border-color: var(--text); }
 </style>
 </head>
 <body>
@@ -1510,7 +1518,7 @@ body.tts-on .to-top { bottom: 128px; }
     <div class="brand">
       <div class="brand-mark"></div>
       <div class="brand-text">
-        <h1 class="brand-title">IBI <span class="accent">News</span> <span class="version-badge" id="version-badge">v7.9.1</span></h1>
+        <h1 class="brand-title">IBI <span class="accent">News</span> <span class="version-badge" id="version-badge">v7.9.2</span></h1>
         <div class="brand-sub">Live Briefings</div>
       </div>
     </div>
@@ -1757,7 +1765,7 @@ body.tts-on .to-top { bottom: 128px; }
   <div style="margin-top:8px;font-size:12px;opacity:0.8;">
     Shortcuts: <kbd>/</kbd> search · <kbd>r</kbd> refresh · <kbd>t</kbd> theme · <kbd>s</kbd> saved · <kbd>Esc</kbd> close
   </div>
-  <div style="margin-top:8px;font-size:12px;opacity:0.5;font-family:monospace;">Build v7.9.1 · 2026-10-13</div>
+  <div style="margin-top:8px;font-size:12px;opacity:0.5;font-family:monospace;">Build v7.9.2 · 2026-10-13</div>
 </footer>
 
 <!-- ===================== APP LOGIC ===================== -->
@@ -2792,6 +2800,8 @@ body.tts-on .to-top { bottom: 128px; }
 
   const ICON_BOOKMARK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>';
   const ICON_LISTEN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M19 5a10 10 0 0 1 0 14"/></svg>';
+  const ICON_PLAY = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.4-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5z"/></svg>';
+  const ICON_PAUSE = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>';
   const ICON_SHARE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>';
 
   // Wrap query terms in <mark>. Runs on ALREADY-ESCAPED text so it can never
@@ -2914,10 +2924,11 @@ body.tts-on .to-top { bottom: 128px; }
       if (mine) x.classList.add('is-on');
     });
     const el = p && p.el;
+    document.querySelectorAll('.card-listen').forEach(b => { if (!el || !el.contains(b)) setListenBtn(b, 'idle'); });
     if (el) {
       el.classList.add('is-speaking');
-      const btn = el.querySelector('[data-listen]');
-      if (btn) btn.classList.add('is-on');
+      const btn = el.querySelector('.card-listen');
+      if (btn) setListenBtn(btn, TTS.paused ? 'paused' : 'playing');
       if (playlist && TTS.lastEl !== el) {                   // follow the story being read
         try { el.scrollIntoView({ block: 'center', behavior: 'smooth' }); } catch {}
       }
@@ -2980,12 +2991,35 @@ body.tts-on .to-top { bottom: 128px; }
     paintTts();
     setTimeout(() => ttsSpeak(token), 60);
   }
+  // v7.9.2 (CEO: "add pause and play buttons for each news"): the story's own button plays, pauses and
+  // resumes it. Inside a section that is being read, Play on another story jumps the playlist to it.
   function listenToItem(id) {
     const it = ITEM_INDEX[id];
     if (!it) return;
-    if (TTS.on && TTS.key === 'card:' + id) { togglePauseListening(); return; }
     const el = document.querySelector('article.card[data-id="' + id + '"]');
+    const cur = TTS.on ? currentPart() : null;
+    if (cur && el && cur.el === el) { togglePauseListening(); return; }
+    if (TTS.on && el && TTS.stories > 1) {
+      const i = TTS.parts.findIndex(p => p.el === el);
+      if (i >= 0) {
+        TTS.idx = i; TTS.paused = false;
+        const token = ++TTS.token;
+        try { speechSynthesis.cancel(); } catch {}
+        paintTts();
+        setTimeout(() => ttsSpeak(token), 60);
+        return;
+      }
+    }
     startParts(stripSourceFromTitle(it.title, it.source), storyParts(el, it, 0, 1), 'card:' + id);
+  }
+  function setListenBtn(b, state) {
+    const label = state === 'playing' ? 'Pause' : state === 'paused' ? 'Resume' : 'Listen';
+    b.classList.toggle('is-on', state !== 'idle');
+    if (b.dataset.state === state) return;
+    b.dataset.state = state;
+    b.innerHTML = (state === 'playing' ? ICON_PAUSE : ICON_PLAY) + '<span>' + label + '</span>';
+    b.setAttribute('aria-label', label === 'Listen' ? 'Listen to this story' : label + ' this story');
+    b.title = label;
   }
   function listenToSection(sectionId) {
     const sec = document.getElementById(sectionId);
@@ -3089,7 +3123,7 @@ body.tts-on .to-top { bottom: 128px; }
                     aria-pressed="${isSaved ? 'true' : 'false'}"
                     aria-label="${isSaved ? 'Remove from saved' : 'Save for later'}"
                     title="${isSaved ? 'Remove from saved' : 'Save for later'}">${ICON_BOOKMARK}</button>
-            <button class="card-act" type="button" data-listen="${id}" aria-label="Listen to this story" title="Listen">${ICON_LISTEN}</button>
+            <button class="card-act card-listen" type="button" data-listen="${id}" aria-label="Listen to this story" title="Listen">${ICON_PLAY}<span>Listen</span></button>
             <button class="card-act" type="button" data-share="${id}" aria-label="Share story" title="Share">${ICON_SHARE}</button>
           </span>
         </div>

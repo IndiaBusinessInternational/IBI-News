@@ -1,4 +1,6 @@
-# IBI-News — v7.9.1
+# IBI-News — v7.9.2
+
+v7.9.2 (13 Oct 2026, CEO: "add pause and play buttons for each news"): every story has its own Play / Pause button - "Listen" starts it, "Pause" while it is being read, "Resume" when paused. Inside a section being read aloud, Listen on another story jumps the playlist to that story.
 
 v7.9.1 (13 Oct 2026, CEO: "add listen to the whole section too"): "Listen to section" on every section (and on Saved stories / Search results) reads every story in order - an introduction, then "Story N of M", headline, summary, source - highlighting and scrolling to the story being read; the player gains Previous / Next story.
 
