@@ -10,7 +10,7 @@
    identically on every version, so a smoke test proves it is alive, not that
    your new code shipped. GET /version reports these, so confirming a deploy
    is opening one URL instead of comparing version IDs in the dashboard. */
-const WORKER_VERSION = 'v7.6.0';
+const WORKER_VERSION = 'v7.8.0';
 const WORKER_BUILT   = '2026-10-13';
 
 // NOTE: matching is `hostname === h || hostname.endsWith('.' + h)`, so a bare
@@ -47,15 +47,49 @@ const ALLOWED_HOSTS = [
   'tass.com','rt.com','sputnikglobe.com','themoscowtimes.com','meduza.io',
   'dw.com','france24.com','euronews.com',
   'japantimes.co.jp','channelnewsasia.com','straitstimes.com','abc.net.au',
-  'africanews.com','pbs.org','mercopress.com'
+  'africanews.com','pbs.org','mercopress.com',
+  // added v7.8 (13 Oct 2026, CEO: "all news should be fully read by anyone") - free-to-read replacements
+  // for The Hindu / SCMP / The Japan Times, each probed free (no paywall marker) and fresh that day.
+  'hongkongfp.com','thefederal.com','businesstoday.in','mongabay.com'
 ];
 
+/* v7.8 - FREE-TO-READ CHECK. Publishers that mix free and subscriber-only articles mark the paid ones
+   for Google with schema.org "isAccessibleForFree": false. GET /free?url=<article> opens the article once
+   and answers {free:true|false}; the answer is kept at the edge for a day, so each article is fetched at
+   most once a day however many readers see it. Only these hosts may be checked. */
+const FREE_CHECK_HOSTS = ['indianexpress.com','timesofindia.indiatimes.com','straitstimes.com','hindustantimes.com','livemint.com'];
+
 export default {
-  async fetch(request, env) {
+  async fetch(request, env, ctx) {
     if (request.method === 'OPTIONS') {
       return new Response(null, { status: 204, headers: corsHeaders() });
     }
     const url = new URL(request.url);
+
+    if (url.pathname === '/free') {
+      const target = url.searchParams.get('url') || '';
+      let t;
+      try { t = new URL(target); } catch { return jsonError('Invalid url parameter', 400); }
+      if (t.protocol !== 'https:' || !FREE_CHECK_HOSTS.some(h => t.hostname === h || t.hostname.endsWith('.' + h))) {
+        return jsonError('Host not checked: ' + t.hostname, 403);
+      }
+      const key = new Request('https://free-check.ibi-news.invalid/' + encodeURIComponent(t.href));
+      const cache = caches.default;
+      const hit = await cache.match(key);
+      if (hit) return hit;
+      let free = true, status = 0;
+      try {
+        const r = await fetch(t.href, { headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Safari/537.36', 'Accept': 'text/html' } });
+        status = r.status;
+        const html = (await r.text()).slice(0, 3000000);
+        free = !/"isAccessibleForFree"\s*:\s*"?false"?/i.test(html);
+      } catch (e) { free = true; status = -1; }   // unreachable article: not proven paid, so not hidden
+      const res = new Response(JSON.stringify({ free, status }), {
+        headers: { ...corsHeaders(), 'Content-Type': 'application/json', 'Cache-Control': 'public, max-age=86400' }
+      });
+      if (ctx && status > 0) ctx.waitUntil(cache.put(key, res.clone()));
+      return res;
+    }
 
     // GET /version — "which build is actually live?" (v7.5: this Worker holds no AI keys at all)
     if (url.pathname === '/version') {

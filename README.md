@@ -1,4 +1,7 @@
-# IBI-News — v7.7.1
+# IBI-News — v7.8
+
+v7.8 (13 Oct 2026): every story free to read in full (CEO: "avoid those news that if opened for reading - say The Hindu, stops mid way and ask for subscription" / "all news should be fully read by anyone"). Removed: The Hindu (metered), SCMP (all paid), The Japan Times (metered; blocks checks); their hosts are blocked even in old caches. Added free: Hong Kong Free Press (China), Indian Express Chennai/Health, Business Today, Guardian Environment, Mongabay. Mixed publishers (Indian Express, Times of India, Straits Times, Hindustan Times, Mint): each article is checked by the Worker (/free reads schema.org isAccessibleForFree, edge-cached 24 h) and paid ones are removed; premium-looking addresses never show. The Federal was tried and dropped (403 to Cloudflare and every public relay). Measured: 143 stories, 47 checked, 2 paid removed, 0 paid/paywalled on page. Worker v7.8.0 (45 hosts).
+
 
 v7.7.1 (13 Oct 2026, CEO: "Why do we need to click each time to expand the news. Do expand it by default."): every story in a section shows; no "Show more stories" button.
 
