@@ -35,7 +35,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="ibi-build" content="v7.4.3-2026-10-11">
+<meta name="ibi-build" content="v7.5-2026-10-13">
 
 <!-- Favicon: IBI text in #00c5ff on black, Roboto -->
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='10' fill='black'/><text x='32' y='44' font-family='Roboto,Arial,sans-serif' font-size='26' font-weight='900' text-anchor='middle' fill='%2300c5ff' letter-spacing='-1'>IBI</text></svg>">
@@ -1345,60 +1345,6 @@ footer .accent { color: var(--accent); font-weight: 700; }
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
 </button>
 
-<!-- API Keys Modal -->
-<div class="keys-modal-overlay" id="keys-modal-overlay">
-  <div class="keys-modal">
-    <div class="keys-modal-header">
-      <span>⚙ Settings — AI Summaries</span>
-      <button class="keys-modal-close" id="keys-modal-close" aria-label="Close">✕</button>
-    </div>
-    <div class="keys-modal-body">
-      <label class="keys-field">
-        <span class="keys-label">AI summary provider</span>
-        <select class="ai-provider-sel" id="ai-provider-sel" aria-label="AI Summary provider" style="width:100%;max-width:none;">
-          <option value="gemini1">Gemini Key 1 (free tier)</option>
-          <option value="gemini2">Gemini Key 2 (free tier)</option>
-          <option value="openai">ChatGPT (GPT-4o mini)</option>
-          <option value="claude">Claude (Haiku)</option>
-          <option value="deepseek">DeepSeek (free tier)</option>
-        </select>
-      </label>
-
-      <div class="keys-warn">
-        <strong>⚠ Security note:</strong> Keys are stored in this browser only (localStorage) and are sent directly to each AI provider.
-        <span style="color:#ef4444;font-weight:700;">Gemini &amp; DeepSeek have free tiers (safe). ChatGPT &amp; Claude are pay-per-use — only add those if you accept billing risk.</span>
-      </div>
-
-      <label class="keys-field">
-        <span class="keys-label">Gemini API Key 1 <em>(free tier)</em></span>
-        <input type="password" id="key-gemini1" placeholder="AIzaSy..." autocomplete="off">
-      </label>
-      <label class="keys-field">
-        <span class="keys-label">Gemini API Key 2 <em>(free tier)</em></span>
-        <input type="password" id="key-gemini2" placeholder="AIzaSy..." autocomplete="off">
-      </label>
-      <label class="keys-field">
-        <span class="keys-label">DeepSeek API Key <em>(free tier)</em></span>
-        <input type="password" id="key-deepseek" placeholder="sk-..." autocomplete="off">
-      </label>
-      <label class="keys-field">
-        <span class="keys-label" style="color:#ef4444;">ChatGPT API Key <em>(⚠ paid)</em></span>
-        <input type="password" id="key-openai" placeholder="sk-..." autocomplete="off">
-      </label>
-      <label class="keys-field">
-        <span class="keys-label" style="color:#ef4444;">Claude API Key <em>(⚠ paid)</em></span>
-        <input type="password" id="key-claude" placeholder="sk-ant-..." autocomplete="off">
-      </label>
-
-      <div class="keys-actions">
-        <button class="keys-save" id="keys-save">Save Keys</button>
-        <button class="keys-clear" id="keys-clear">Clear All</button>
-      </div>
-      <div class="keys-status" id="keys-status"></div>
-    </div>
-  </div>
-</div>
-
 <!-- Pull-to-refresh indicator (mobile only) -->
 <div class="ptr-indicator" id="ptr-indicator">
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -1420,7 +1366,7 @@ footer .accent { color: var(--accent); font-weight: 700; }
     <div class="brand">
       <div class="brand-mark"></div>
       <div class="brand-text">
-        <h1 class="brand-title">IBI <span class="accent">News</span> <span class="version-badge" id="version-badge">v7.4.3</span></h1>
+        <h1 class="brand-title">IBI <span class="accent">News</span> <span class="version-badge" id="version-badge">v7.5</span></h1>
         <div class="brand-sub">Live Briefings</div>
       </div>
     </div>
@@ -1445,9 +1391,6 @@ footer .accent { color: var(--accent); font-weight: 700; }
           <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
         </svg>
         <span>Refresh</span>
-      </button>
-      <button class="icon-btn" id="ai-keys-btn" type="button" title="Settings — AI summaries &amp; API keys" aria-label="Settings">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/></svg>
       </button>
       <button class="theme-toggle" id="theme-toggle" title="Toggle theme" aria-label="Toggle theme">
         <span class="theme-toggle-knob">
@@ -1643,7 +1586,7 @@ footer .accent { color: var(--accent); font-weight: 700; }
   <div style="margin-top:8px;font-size:12px;opacity:0.8;">
     Shortcuts: <kbd>/</kbd> search · <kbd>r</kbd> refresh · <kbd>t</kbd> theme · <kbd>s</kbd> saved · <kbd>Esc</kbd> close
   </div>
-  <div style="margin-top:8px;font-size:11px;opacity:0.5;font-family:monospace;">Build v7.4.3 · 2026-10-11</div>
+  <div style="margin-top:8px;font-size:11px;opacity:0.5;font-family:monospace;">Build v7.5 · 2026-10-13</div>
 </footer>
 
 <!-- ===================== APP LOGIC ===================== -->
@@ -2875,10 +2818,9 @@ footer .accent { color: var(--accent); font-weight: 700; }
   }
 
   // ---------- AI Summary Queue (rate-limit safe) ----------
-  // Gemini 2.5 Flash free tier = 5 RPM → space requests 14s apart = 4.3/min
-  // 7s ≈ 8.5 requests/min — under the Gemini free tier's 10 RPM with margin,
-  // and it gets all 8 sections summarised in ~1 min instead of ~2.
-  const AI_QUEUE_DELAY_MS = 7000;
+  // v7.5: the laptop writes one summary at a time and each request already waits for its answer,
+  // so only a short breather is needed between sections.
+  const AI_QUEUE_DELAY_MS = 1500;
   const AI_LAST_REQ_KEY   = 'ibinews_ai_last_req';
   let aiQueue = [];
   let aiQueueRunning = false;
@@ -2917,6 +2859,7 @@ footer .accent { color: var(--accent); font-weight: 700; }
     // instant the first one lands would summarise whatever happened to arrive
     // first — the priority sort needs a moment's worth of arrivals to order.
     if (!aiQueueRunning) {
+      localAiOffline = false;   /* a new round of feeds: try the laptop again */
       clearTimeout(aiStartTimer);
       aiStartTimer = setTimeout(runAiQueue, 600);
     }
@@ -2927,7 +2870,7 @@ footer .accent { color: var(--accent); font-weight: 700; }
     try {
       const cached = JSON.parse(localStorage.getItem(AI_CACHE_KEY_PREFIX + feedKey) || '{}');
       if (cached.ts && Date.now() - cached.ts < CACHE_TTL_MS && cached.data) {
-        renderAiSummary(aiBoxId(feedKey), feedKey, cached.data, cached.provider || getAiProvider());
+        renderAiSummary(aiBoxId(feedKey), feedKey, cached.data, 'local');
         return true;
       }
     } catch {}
@@ -2961,8 +2904,8 @@ footer .accent { color: var(--accent); font-weight: 700; }
     }
   }
 
-  // ---------- AI Summary (Gemini / OpenAI / Claude via Cloudflare Worker) ----------
-  const AI_CACHE_KEY_PREFIX = 'ibinews_ai_v1_';
+  // ---------- AI Summary boxes (v7.5: written by IBI's own AI, see LOCAL_SUMMARY_URL) ----------
+  const AI_CACHE_KEY_PREFIX = 'ibinews_ai_v2_';
 
   // Map feedKey → summary box ID
   function aiBoxId(feedKey) {
@@ -2979,8 +2922,8 @@ footer .accent { color: var(--accent); font-weight: 700; }
     box.innerHTML = `
       <div class="ai-summary-header">
         <span class="ai-badge">AI</span>
-        <span>Generating summary…</span>
-        <span class="ai-provider-tag">${(PROVIDER_DISPLAY[getAiProvider()]||{label:'AI'}).label}</span>
+        <span>Writing summary on IBI's own AI…</span>
+        <span class="ai-provider-tag">${AI_LABEL.label}</span>
       </div>
       <div class="ai-skel-wrap">
         ${[95,85,90,80,75].map(w => `<div class="ai-skel" style="width:${w}%"></div>`).join('')}
@@ -2989,7 +2932,7 @@ footer .accent { color: var(--accent); font-weight: 700; }
 
   // Render completed summary
   function renderAiSummary(boxId, feedKey, data, provider) {
-    const pd = PROVIDER_DISPLAY[provider] || { label: 'AI', footer: 'AI' };
+    const pd = AI_LABEL;
     const box = document.getElementById(boxId);
     if (!box || !data) return;
     const lines  = (data.summary    || []).slice(0, 5);
@@ -3031,272 +2974,108 @@ footer .accent { color: var(--accent); font-weight: 700; }
   }
   window.toggleAiBox = toggleAiBox;
 
-  // Main entry: fetch AI summary for a section after news items load
-  // Browser-side API key storage (localStorage)
-  const AI_KEYS_STORAGE = 'ibinews_ai_keys';
-  function getAiKeys() {
-    try { return JSON.parse(localStorage.getItem(AI_KEYS_STORAGE) || '{}'); }
-    catch { return {}; }
+  // ---------- v7.5: summaries written by IBI's own AI (the office laptop) ----------
+  // CEO, 13 Oct 2026: "no need of AI API key for summary for IBI News. Delete all API keys." and
+  // "shall we direct the news summary work to local AI?" → no keys anywhere. The page sends ONLY the
+  // section's headlines to the gateway on IBI's laptop (/news/summary); the gateway builds the fixed
+  // prompt, writes the summary with the on-device model and caches it 30 min, so every visitor who
+  // sees the same headlines shares one summary. Reply is 202 "pending" while it is written (~25–40 s
+  // a section), then 200 "ok". The laptop is switched off 10 PM–6 AM: "unreachable" is shown as
+  // "summaries resume at 6 AM", never as an error.
+  const LOCAL_SUMMARY_URL = 'https://ai-local.indiabusinessinternational.online/news/summary';
+  const AI_LABEL = { label: "IBI's own AI", footer: "IBI's own AI (on our office server)" };
+  const SUMMARY_POLL_MS = 6000;
+  const SUMMARY_WAIT_MS = 6 * 60 * 1000;
+  let localAiOffline = false;   // once the laptop is found off, the remaining sections don't each try
+
+  // Wipe every API key and provider choice an older version saved in this browser, and the old
+  // cloud-written summaries (v1 cache).
+  function purgeOldAiKeys() {
+    try {
+      ['ibinews_ai_keys', 'ibinews_ai_provider'].forEach(k => localStorage.removeItem(k));
+      Object.keys(localStorage).forEach(k => { if (k.indexOf('ibinews_ai_v1_') === 0) localStorage.removeItem(k); });
+    } catch {}
   }
-  function saveAiKeys(keys) {
-    try { localStorage.setItem(AI_KEYS_STORAGE, JSON.stringify(keys)); } catch {}
-  }
 
-  function buildAiPrompt(section, headlines) {
-    return `You are a senior news analyst for IBI News (India Business International).
-Analyse these ${section} news items and write a crisp 5-point executive summary.
-Rules: Exactly 5 lines. English only. Each line = one key insight (max 25 words). Neutral, factual. No repetition.
-
-News items:
-${headlines.map((h, i) => `${i + 1}. "${h.title}" — ${h.source}`).join('\n')}
-
-Respond ONLY with valid JSON (no markdown):
-{"summary":["Line 1.","Line 2.","Line 3.","Line 4.","Line 5."],"references":["Source 1","Source 2","Source 3"]}`;
-  }
-
-  // Direct browser → AI provider calls (keys from localStorage)
-  async function callAiProvider(provider, prompt) {
-    const keys = getAiKeys();
-    const parseJson = (raw) => JSON.parse((raw || '{}').replace(/```json|```/g, '').trim());
-
-    if (provider === 'gemini1' || provider === 'gemini2') {
-      const key = provider === 'gemini1' ? keys.gemini1 : keys.gemini2;
-      if (!key) throw new Error('No Gemini API key saved — open Settings in the top bar to add one');
-      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${key}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: { temperature: 0.2, maxOutputTokens: 500, responseMimeType: 'application/json' }
-        })
-      });
-      if (!res.ok) throw new Error((await res.text()).substring(0, 200));
-      const data = await res.json();
-      return parseJson(data.candidates?.[0]?.content?.parts?.[0]?.text);
+  async function askLocalSummary(section, headlines) {
+    const started = Date.now();
+    const offline = () => { const e = new Error('offline'); e.offline = true; return e; };
+    while (Date.now() - started < SUMMARY_WAIT_MS) {
+      let res;
+      try {
+        res = await fetch(LOCAL_SUMMARY_URL, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' }, cache: 'no-store',
+          body: JSON.stringify({ section, items: headlines })
+        });
+      } catch (e) { throw offline(); }            // laptop off: Cloudflare's error page has no CORS header
+      if ([502, 503, 504, 521, 522, 523, 530].includes(res.status)) throw offline();
+      let j = {};
+      try { j = await res.json(); } catch {}
+      if (j.status === 'ok' && j.data) return j.data;
+      if (j.status === 'error') throw new Error(j.message || 'the summary could not be written');
+      if (j.status === 'busy') throw new Error("IBI's AI is busy just now (" + (j.message || 'try later') + ')');
+      if (j.status !== 'pending') throw new Error(j.message || ('HTTP ' + res.status));
+      await new Promise(r => setTimeout(r, SUMMARY_POLL_MS));
     }
-
-    if (provider === 'deepseek') {
-      const key = keys.deepseek;
-      if (!key) throw new Error('No DeepSeek API key saved — open Settings in the top bar to add one');
-      const res = await fetch('https://api.deepseek.com/chat/completions', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${key}` },
-        body: JSON.stringify({
-          // 'deepseek-flash' = DeepSeek V4.1 Flash, the canonical ID (the old
-          // aliases still work but are undocumented). thinking is disabled
-          // because v4 defaults it ON at high effort and reasoning tokens come
-          // out of the same 500-token budget — see cloudflare-worker.js.
-          model: 'deepseek-flash',
-          messages: [{ role: 'user', content: prompt }],
-          max_tokens: 500, temperature: 0.2, response_format: { type: 'json_object' },
-          thinking: { type: 'disabled' }
-        })
-      });
-      if (!res.ok) throw new Error((await res.text()).substring(0, 200));
-      const data = await res.json();
-      return parseJson(data.choices?.[0]?.message?.content);
-    }
-
-    if (provider === 'openai') {
-      const key = keys.openai;
-      if (!key) throw new Error('No ChatGPT API key saved — open Settings in the top bar to add one');
-      const res = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${key}` },
-        body: JSON.stringify({
-          model: 'gpt-4o-mini',
-          messages: [{ role: 'user', content: prompt }],
-          max_tokens: 500, temperature: 0.2, response_format: { type: 'json_object' }
-        })
-      });
-      if (!res.ok) throw new Error((await res.text()).substring(0, 200));
-      const data = await res.json();
-      return parseJson(data.choices?.[0]?.message?.content);
-    }
-
-    if (provider === 'claude') {
-      const key = keys.claude;
-      if (!key) throw new Error('No Claude API key saved — open Settings in the top bar to add one');
-      const res = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': key,
-          'anthropic-version': '2023-06-01',
-          'anthropic-dangerous-direct-browser-access': 'true'
-        },
-        body: JSON.stringify({
-          model: 'claude-haiku-4-5-20251001',
-          max_tokens: 500,
-          messages: [{ role: 'user', content: prompt }]
-        })
-      });
-      if (!res.ok) throw new Error((await res.text()).substring(0, 200));
-      const data = await res.json();
-      return parseJson(data.content?.[0]?.text);
-    }
-
-    throw new Error('Unknown provider: ' + provider);
+    throw new Error('the summary is taking longer than usual');
   }
 
   async function summariseSection(feedKey, items) {
     if (!items || !items.length) return;
     const boxId = aiBoxId(feedKey);
     const cKey  = AI_CACHE_KEY_PREFIX + feedKey;
-    const provider = getAiProvider();
-
-    // Serve from cache if fresh (runAiQueue drains these before waiting, but a
-    // direct call can still land here)
     if (renderCachedAiSummary(feedKey)) return;
-
+    if (localAiOffline) { showAiOffline(boxId); return; }
     showAiSkeleton(boxId);
-
     const headlines = items.slice(0, 8).map(it => ({
       title:  (it.title  || '').substring(0, 120),
       source: (it.source || 'News').substring(0, 40)
     }));
-    const prompt = buildAiPrompt(FEEDS[feedKey]?.label || feedKey, headlines);
-
     try {
-      const data = await callAiProvider(provider, prompt);
-      if (!data.summary) throw new Error('No summary in AI response');
-      try { localStorage.setItem(cKey, JSON.stringify({ ts: Date.now(), data, provider })); } catch {}
-      renderAiSummary(boxId, feedKey, data, provider);
+      const data = await askLocalSummary(FEEDS[feedKey]?.label || feedKey, headlines);
+      if (!data.summary) throw new Error('No summary in the answer');
+      try { localStorage.setItem(cKey, JSON.stringify({ ts: Date.now(), data, provider: 'local' })); } catch {}
+      renderAiSummary(boxId, feedKey, data, 'local');
     } catch (e) {
+      if (e.offline) { localAiOffline = true; showAiOffline(boxId); return; }
       console.warn('[IBI News AI]', feedKey, e.message);
       showAiError(boxId, e.message, feedKey);
     }
   }
 
-  // The old copy here sent people to Cloudflare — "Worker code updated? GEMINI
-  // secret added? cache purged?" — but the page calls the provider DIRECTLY from
-  // the browser with the key saved in Settings. The Worker's /summarise endpoint
-  // is dormant, so none of that advice could ever fix a failed summary.
-  function showAiError(boxId, msg, feedKey) {
+  function showAiOffline(boxId) {
     const box = document.getElementById(boxId);
     if (!box) return;
-    const needsKey = /key saved|API key/i.test(msg);
-    const isQuota  = /429|quota|rate|RESOURCE_EXHAUSTED|limit/i.test(msg);
-    const hint = needsKey
-      ? 'Summaries run on your own API key, stored only in this browser. Open <strong>Settings</strong> in the top bar to add one — Gemini and DeepSeek have free tiers.'
-      : isQuota
-        ? 'The provider is rate-limiting or out of free quota. Wait a minute and retry, or switch provider in <strong>Settings</strong>.'
-        : 'The provider call failed. Retry, or switch provider in <strong>Settings</strong>.';
     box.style.display = 'block';
     box.innerHTML = `
       <div class="ai-summary-header">
         <span class="ai-badge">AI</span>
         <span>Section Summary</span>
-        <span class="ai-provider-tag">${needsKey ? 'Setup needed' : 'Unavailable'}</span>
+        <span class="ai-provider-tag">Resting</span>
+      </div>
+      <div class="ai-summary-content" style="padding:12px 16px;font-size:13px;color:var(--text-muted);line-height:1.5;">
+        Summaries are written by IBI's own AI between 6 AM and 10 PM (India time). The news below is live.
+      </div>`;
+  }
+
+  function showAiError(boxId, msg, feedKey) {
+    const box = document.getElementById(boxId);
+    if (!box) return;
+    box.style.display = 'block';
+    box.innerHTML = `
+      <div class="ai-summary-header">
+        <span class="ai-badge">AI</span>
+        <span>Section Summary</span>
+        <span class="ai-provider-tag">Unavailable</span>
       </div>
       <div class="ai-summary-content" style="display:flex;align-items:flex-start;gap:10px;padding:12px 16px;">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2.5" stroke-linecap="round" style="flex-shrink:0;margin-top:2px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
         <span style="font-size:13px;color:var(--text-muted);line-height:1.5;">
           <strong style="color:var(--text);">Summary unavailable:</strong> ${escapeHtml(msg)}<br>
-          <span style="font-size:12px;">${hint}</span>
+          <span style="font-size:12px;">IBI's own AI could not write this summary just now. The news below is live.</span>
           ${feedKey ? `<br><span class="retry" data-ai-retry="${escapeAttr(feedKey)}" style="display:inline-block;margin-top:6px;color:var(--accent-text);cursor:pointer;font-weight:600;text-decoration:underline;">Retry summary</span>` : ''}
         </span>
       </div>`;
-  }
-
-  // Provider display labels (used in summary header and footer)
-  const PROVIDER_DISPLAY = {
-    gemini1:  { label: 'Gemini 2.5', footer: 'Gemini AI' },
-    gemini2:  { label: 'Gemini 2.5', footer: 'Gemini AI' },
-    openai:   { label: 'ChatGPT',    footer: 'ChatGPT'   },
-    claude:   { label: 'Claude AI',  footer: 'Claude AI'  },
-    deepseek: { label: 'DeepSeek',   footer: 'DeepSeek'   }
-  };
-
-  // ---------- AI Provider selector ----------
-  const AI_PROVIDER_KEY = 'ibinews_ai_provider';
-
-  function initAiProvider() {
-    const sel = document.getElementById('ai-provider-sel');
-    if (!sel) return;
-    const saved = localStorage.getItem(AI_PROVIDER_KEY) || 'gemini1';
-    sel.value = saved;
-    sel.addEventListener('change', () => {
-      localStorage.setItem(AI_PROVIDER_KEY, sel.value);
-      // Clear queue and cached summaries so sections refresh with new provider
-      aiQueue = [];
-      aiQueueRunning = false;
-      Object.keys(localStorage).forEach(k => {
-        if (k.startsWith(AI_CACHE_KEY_PREFIX)) localStorage.removeItem(k);
-      });
-      // Re-summarise visible sections
-      document.querySelectorAll('[id^="ai-box-"]').forEach(box => {
-        box.style.display = 'none';
-      });
-      // Auto-refresh to regenerate summaries with new provider
-      setTimeout(() => refreshAll(false), 400);
-    });
-  }
-
-  function getAiProvider() {
-    return document.getElementById('ai-provider-sel')?.value ||
-           localStorage.getItem(AI_PROVIDER_KEY) ||
-           'gemini1';
-  }
-
-  // ---------- API Keys modal ----------
-  function initKeysModal() {
-    const overlay = document.getElementById('keys-modal-overlay');
-    const openBtn = document.getElementById('ai-keys-btn');
-    const closeBtn = document.getElementById('keys-modal-close');
-    const saveBtn = document.getElementById('keys-save');
-    const clearBtn = document.getElementById('keys-clear');
-    const status = document.getElementById('keys-status');
-    if (!overlay || !openBtn) return;
-
-    const fields = {
-      gemini1: document.getElementById('key-gemini1'),
-      gemini2: document.getElementById('key-gemini2'),
-      deepseek: document.getElementById('key-deepseek'),
-      openai: document.getElementById('key-openai'),
-      claude: document.getElementById('key-claude')
-    };
-
-    function loadIntoFields() {
-      const keys = getAiKeys();
-      Object.keys(fields).forEach(k => { if (fields[k]) fields[k].value = keys[k] || ''; });
-    }
-
-    openBtn.addEventListener('click', () => {
-      loadIntoFields();
-      status.textContent = '';
-      status.className = 'keys-status';
-      overlay.classList.add('open');
-    });
-    closeBtn.addEventListener('click', () => overlay.classList.remove('open'));
-    overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.classList.remove('open'); });
-
-    saveBtn.addEventListener('click', () => {
-      const keys = {};
-      Object.keys(fields).forEach(k => {
-        const v = fields[k] ? fields[k].value.trim() : '';
-        if (v) keys[k] = v;
-      });
-      saveAiKeys(keys);
-      // Clear AI summary cache so summaries regenerate with new keys
-      Object.keys(localStorage).forEach(k => {
-        if (k.startsWith(AI_CACHE_KEY_PREFIX)) localStorage.removeItem(k);
-      });
-      status.textContent = '✓ Keys saved. Refreshing summaries…';
-      status.className = 'keys-status ok';
-      setTimeout(() => {
-        overlay.classList.remove('open');
-        document.querySelectorAll('[id^="ai-box-"]').forEach(box => box.style.display = 'none');
-        refreshAll(false);
-      }, 900);
-    });
-
-    clearBtn.addEventListener('click', () => {
-      try { localStorage.removeItem(AI_KEYS_STORAGE); } catch {}
-      Object.keys(fields).forEach(k => { if (fields[k]) fields[k].value = ''; });
-      status.textContent = 'All keys cleared.';
-      status.className = 'keys-status err';
-    });
   }
 
   // ═══════════════════════════════════════════════════════════════════════
@@ -3837,8 +3616,6 @@ Respond ONLY with valid JSON (no markdown):
       const typing = tag === 'input' || tag === 'textarea' || tag === 'select' || (el && el.isContentEditable);
 
       if (e.key === 'Escape') {
-        const overlay = document.getElementById('keys-modal-overlay');
-        if (overlay && overlay.classList.contains('open')) { overlay.classList.remove('open'); return; }
         if (currentView !== 'feed') { if (window.__clearSearch) window.__clearSearch(); setView('feed'); }
         return;
       }
@@ -3858,8 +3635,7 @@ Respond ONLY with valid JSON (no markdown):
   // ---------- Wire-up ----------
   function init() {
     initTheme();
-    initAiProvider();
-    initKeysModal();
+    purgeOldAiKeys();
     startLiveClock();
     document.getElementById('year').textContent = new Date().getFullYear();
 
@@ -3959,7 +3735,7 @@ Respond ONLY with valid JSON (no markdown):
 
     // Refresh button
     document.getElementById('refresh-btn').addEventListener('click', () => {
-      // Manual refresh = force fresh fetch: clear news + AI caches first
+      // Manual refresh = force fresh fetch: clear news + summary caches first
       cache = {};
       try { localStorage.removeItem(STORAGE_KEY); } catch {}
       Object.keys(localStorage).forEach(k => {
