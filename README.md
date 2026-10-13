@@ -1,4 +1,7 @@
-# IBI-News — v7.5.2
+# IBI-News — v7.6
+
+v7.6 (13 Oct 2026): new section 4 **World — including China & Russia** with tabs All · China · Russia · Europe · Asia-Pacific · Africa & Americas (CEO: "update reliable news sources worldwide, including from China and Russia"). 18 new publishers, each probed live: SCMP, CGTN*, Global Times*, TASS*, RT*, Sputnik*, The Moscow Times, Meduza, DW, France 24, Euronews, The Straits Times, CNA, The Japan Times, ABC Australia, Africanews, PBS NewsHour, MercoPress (* = state media, shown with a "State media · China/Russia" label). Global Times dates shifted -8 h (Beijing time labelled GMT); RSS 1.0 <dc:date> now read (DW). Tabbed sections only summarise and show the tab on screen. Worker v7.6.0 allows the new hosts (41).
+
 
 v7.5.2 (13 Oct 2026): when the office laptop is off (or the AI is busy), the page stays SILENT — no summary box and no note (CEO: "do not expose it… Just keep quiet"); the "Writing summary…" box appears only once the laptop has taken the job. start-local.vbs serves this folder permanently on http://localhost:9122/ (office laptop only), started by the IBI SocialFlow Keep Alive task.
 

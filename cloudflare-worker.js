@@ -10,7 +10,7 @@
    identically on every version, so a smoke test proves it is alive, not that
    your new code shipped. GET /version reports these, so confirming a deploy
    is opening one URL instead of comparing version IDs in the dashboard. */
-const WORKER_VERSION = 'v7.5.0';
+const WORKER_VERSION = 'v7.6.0';
 const WORKER_BUILT   = '2026-10-13';
 
 // NOTE: matching is `hostname === h || hostname.endsWith('.' + h)`, so a bare
@@ -38,7 +38,16 @@ const ALLOWED_HOSTS = [
   // within the last 24h on 14 Aug 2026 (not just returning HTTP 200)
   'theguardian.com','feeds.abcnews.com','abcnews.go.com',
   'www.hindustantimes.com',
-  'feeds.npr.org','feeds.skynews.com'
+  'feeds.npr.org','feeds.skynews.com',
+  // added v7.6 (13 Oct 2026, CEO: "reliable news sources worldwide, including from China and Russia") —
+  // each probed live that day: HTTP 200, 10-100 items, newest story < 24 h (CGTN 12.5 h; the rest < 5 h).
+  // China: CGTN + Global Times (state media, labelled on the page), SCMP (Hong Kong, independent).
+  // Russia: TASS, RT, Sputnik (state media, labelled), The Moscow Times + Meduza (independent).
+  'cgtn.com','globaltimes.cn','scmp.com',
+  'tass.com','rt.com','sputnikglobe.com','themoscowtimes.com','meduza.io',
+  'dw.com','france24.com','euronews.com',
+  'japantimes.co.jp','channelnewsasia.com','straitstimes.com','abc.net.au',
+  'africanews.com','pbs.org','mercopress.com'
 ];
 
 export default {

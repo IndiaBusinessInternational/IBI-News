@@ -35,7 +35,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="ibi-build" content="v7.5.2-2026-10-13">
+<meta name="ibi-build" content="v7.6-2026-10-13">
 
 <!-- Favicon: IBI text in #00c5ff on black, Roboto -->
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='10' fill='black'/><text x='32' y='44' font-family='Roboto,Arial,sans-serif' font-size='26' font-weight='900' text-anchor='middle' fill='%2300c5ff' letter-spacing='-1'>IBI</text></svg>">
@@ -396,7 +396,9 @@ a { color: inherit; text-decoration: none; -webkit-tap-highlight-color: transpar
 /* Cards inside breaking section get a stronger red left-border to signal urgency */
 .section-breaking .card::before { background: #ef4444; }
 .section-breaking .card:hover { border-color: #ef4444; }
-.section-breaking .card-source { color: #ef4444; }
+.section-breaking .card-state { display: inline-block; font-size: 12px; font-weight: 700; line-height: 1.3; padding: 1px 7px; border-radius: 999px; border: 1px solid #f59e0b; color: #b45309; background: rgba(245,158,11,0.12); white-space: nowrap; }
+[data-theme="dark"] .card-state { color: #fbbf24; }
+.card-source { color: #ef4444; }
 
 /* ---------- Main layout ---------- */
 main {
@@ -1366,7 +1368,7 @@ footer .accent { color: var(--accent); font-weight: 700; }
     <div class="brand">
       <div class="brand-mark"></div>
       <div class="brand-text">
-        <h1 class="brand-title">IBI <span class="accent">News</span> <span class="version-badge" id="version-badge">v7.5.2</span></h1>
+        <h1 class="brand-title">IBI <span class="accent">News</span> <span class="version-badge" id="version-badge">v7.6</span></h1>
         <div class="brand-sub">Live Briefings</div>
       </div>
     </div>
@@ -1422,6 +1424,7 @@ footer .accent { color: var(--accent); font-weight: 700; }
     <a href="#section-ecom"     data-sec="section-ecom">eCommerce</a>
     <a href="#section-ai"       data-sec="section-ai">AI</a>
     <a href="#section-politics" data-sec="section-politics">Politics</a>
+    <a href="#section-world"    data-sec="section-world">World</a>
     <a href="#section-business" data-sec="section-business">Business</a>
     <a href="#section-health"   data-sec="section-health">Health</a>
     <a href="#section-tech"     data-sec="section-tech">Technology</a>
@@ -1525,10 +1528,30 @@ footer .accent { color: var(--accent); font-weight: 700; }
     </div>
   </section>
 
-  <!-- Section 4: Business & Economy -->
+  <!-- Section 4: World (v7.6) -->
+  <section class="section" id="section-world">
+    <div class="section-header">
+      <h2 class="section-title"><span class="section-title-num">4</span>World <span style="opacity:0.7;font-weight:500;font-size:15px;">— including China &amp; Russia</span></h2>
+      <span class="section-meta" id="meta-world">—</span>
+    </div>
+    <div class="tabs" id="world-tabs">
+      <button class="tab active" data-tab="all">All</button>
+      <button class="tab" data-tab="china">China</button>
+      <button class="tab" data-tab="russia">Russia</button>
+      <button class="tab" data-tab="europe">Europe</button>
+      <button class="tab" data-tab="asia">Asia-Pacific</button>
+      <button class="tab" data-tab="afram">Africa &amp; Americas</button>
+    </div>
+    <div class="news-body">
+      <div class="ai-summary-box" id="ai-box-world" style="display:none;"></div>
+      <div class="news-grid" id="grid-world"></div>
+    </div>
+  </section>
+
+  <!-- Section 5: Business & Economy -->
   <section class="section" id="section-business">
     <div class="section-header">
-      <h2 class="section-title"><span class="section-title-num">4</span>Business &amp; Economy</h2>
+      <h2 class="section-title"><span class="section-title-num">5</span>Business &amp; Economy</h2>
       <span class="section-meta" id="meta-business">—</span>
     </div>
     <div class="tabs" id="business-tabs">
@@ -1541,10 +1564,10 @@ footer .accent { color: var(--accent); font-weight: 700; }
     </div>
   </section>
 
-  <!-- Section 5: Health & Wellness -->
+  <!-- Section 6: Health & Wellness -->
   <section class="section" id="section-health">
     <div class="section-header">
-      <h2 class="section-title"><span class="section-title-num">5</span>Health &amp; Wellness</h2>
+      <h2 class="section-title"><span class="section-title-num">6</span>Health &amp; Wellness</h2>
       <span class="section-meta" id="meta-health">—</span>
     </div>
     <div class="news-body" style="border-top: 1px solid var(--border); border-radius: 0 0 8px 8px;">
@@ -1553,10 +1576,10 @@ footer .accent { color: var(--accent); font-weight: 700; }
     </div>
   </section>
 
-  <!-- Section 6: Technology -->
+  <!-- Section 7: Technology -->
   <section class="section" id="section-tech">
     <div class="section-header">
-      <h2 class="section-title"><span class="section-title-num">6</span>Technology</h2>
+      <h2 class="section-title"><span class="section-title-num">7</span>Technology</h2>
       <span class="section-meta" id="meta-tech">—</span>
     </div>
     <div class="news-body" style="border-top: 1px solid var(--border); border-radius: 0 0 8px 8px;">
@@ -1565,10 +1588,10 @@ footer .accent { color: var(--accent); font-weight: 700; }
     </div>
   </section>
 
-  <!-- Section 7: Environment & Science -->
+  <!-- Section 8: Environment & Science -->
   <section class="section" id="section-env">
     <div class="section-header">
-      <h2 class="section-title"><span class="section-title-num">7</span>Environment &amp; Science</h2>
+      <h2 class="section-title"><span class="section-title-num">8</span>Environment &amp; Science</h2>
       <span class="section-meta" id="meta-env">—</span>
     </div>
     <div class="news-body" style="border-top: 1px solid var(--border); border-radius: 0 0 8px 8px;">
@@ -1593,7 +1616,7 @@ footer .accent { color: var(--accent); font-weight: 700; }
   <div style="margin-top:8px;font-size:12px;opacity:0.8;">
     Shortcuts: <kbd>/</kbd> search · <kbd>r</kbd> refresh · <kbd>t</kbd> theme · <kbd>s</kbd> saved · <kbd>Esc</kbd> close
   </div>
-  <div style="margin-top:8px;font-size:12px;opacity:0.5;font-family:monospace;">Build v7.5.2 · 2026-10-13</div>
+  <div style="margin-top:8px;font-size:12px;opacity:0.5;font-family:monospace;">Build v7.6 · 2026-10-13</div>
 </footer>
 
 <!-- ===================== APP LOGIC ===================== -->
@@ -1703,6 +1726,89 @@ footer .accent { color: var(--accent); font-weight: 700; }
       ],
       maxAgeHours: 24,
       label: 'India & World · NDTV · TOI · BBC · ABC · HT · Al Jazeera'
+    },
+
+    // ── World (v7.6) ───────────────────────────────────────────────────────
+    // CEO, 13 Oct 2026: "update reliable news sources worldwide, including from China and Russia",
+    // state media INCLUDED WITH A LABEL (the YouTube / Google News convention) and balanced by an
+    // independent outlet from the same country. Every URL probed live 13 Oct 2026 (HTTP 200, newest
+    // story < 24 h; CGTN 12.5 h). Dead/unusable that day — don't re-add without re-probing:
+    //   Xinhua english.news.cn/rss/*.xml  — TLS certificate fails verification
+    //   China Daily /rss/world_rss.xml, /rss/china_rss.xml — 404 (feeds withdrawn)
+    //   Caixin Global /rss/latest.xml — 404 · NHK World feeds — timed out
+    //   CBC rss-world — timed out · Arab News /rss.xml — 403 to bots
+    // `state` = state-affiliated media → a "State media · <country>" chip on the card.
+    // `tzFixHours` = Global Times stamps Beijing time but labels it GMT (every story looked 8 h in
+    //   the future and was rejected by isFreshArticle) — the fetcher shifts it back.
+    'world_all': {
+      urls: [
+        { u: 'https://www.scmp.com/rss/5/feed', src: 'SCMP' },
+        { u: 'https://rss.dw.com/rdf/rss-en-world', src: 'DW' },
+        { u: 'https://tass.com/rss/v2.xml', src: 'TASS', state: 'Russia' },
+        { u: 'https://www.cgtn.com/subscribe/rss/section/world.xml', src: 'CGTN', state: 'China', bonus: true },
+        { u: 'https://www.france24.com/en/rss', src: 'France 24', bonus: true },
+        { u: 'https://www.straitstimes.com/news/world/rss.xml', src: 'The Straits Times', bonus: true },
+        { u: 'https://www.africanews.com/feed/rss', src: 'Africanews', bonus: true },
+        { u: 'https://www.pbs.org/newshour/feeds/rss/world', src: 'PBS NewsHour', bonus: true }
+      ],
+      maxAgeHours: 24,
+      widenTo: [72],
+      label: 'World · SCMP · DW · TASS · CGTN · France 24 · Straits Times · Africanews · PBS'
+    },
+    'world_china': {
+      urls: [
+        { u: 'https://www.scmp.com/rss/4/feed', src: 'SCMP' },
+        { u: 'https://www.cgtn.com/subscribe/rss/section/china.xml', src: 'CGTN', state: 'China' },
+        { u: 'https://www.globaltimes.cn/rss/outbrain.xml', src: 'Global Times', state: 'China', tzFixHours: -8, bonus: true },
+        { u: 'https://www.cgtn.com/subscribe/rss/section/world.xml', src: 'CGTN', state: 'China', bonus: true }
+      ],
+      maxAgeHours: 24,
+      widenTo: [72],
+      label: 'China · SCMP (Hong Kong) · CGTN · Global Times'
+    },
+    'world_russia': {
+      urls: [
+        { u: 'https://www.themoscowtimes.com/rss/news', src: 'The Moscow Times' },
+        { u: 'https://tass.com/rss/v2.xml', src: 'TASS', state: 'Russia' },
+        { u: 'https://meduza.io/rss/en/all', src: 'Meduza', bonus: true },
+        { u: 'https://www.rt.com/rss/news/', src: 'RT', state: 'Russia', bonus: true },
+        { u: 'https://sputnikglobe.com/export/rss2/archive/index.xml', src: 'Sputnik', state: 'Russia', bonus: true }
+      ],
+      maxAgeHours: 24,
+      widenTo: [72],
+      label: 'Russia · The Moscow Times · Meduza · TASS · RT · Sputnik'
+    },
+    'world_europe': {
+      urls: [
+        { u: 'https://rss.dw.com/rdf/rss-en-world', src: 'DW' },
+        { u: 'https://www.france24.com/en/rss', src: 'France 24' },
+        { u: 'https://www.euronews.com/rss?level=theme&name=news', src: 'Euronews', bonus: true }
+      ],
+      maxAgeHours: 24,
+      widenTo: [72],
+      label: 'Europe · DW · France 24 · Euronews'
+    },
+    'world_asia': {
+      urls: [
+        { u: 'https://www.straitstimes.com/news/world/rss.xml', src: 'The Straits Times' },
+        { u: 'https://www.channelnewsasia.com/api/v1/rss-outbound-feed?_format=xml&category=6511', src: 'CNA' },
+        { u: 'https://www.japantimes.co.jp/feed/', src: 'The Japan Times', bonus: true },
+        { u: 'https://www.abc.net.au/news/feed/2942460/rss.xml', src: 'ABC Australia', bonus: true },
+        { u: 'https://rss.dw.com/rdf/rss-en-asia', src: 'DW Asia', bonus: true }
+      ],
+      maxAgeHours: 24,
+      widenTo: [72],
+      label: 'Asia-Pacific · Straits Times · CNA · Japan Times · ABC Australia · DW'
+    },
+    'world_afram': {
+      urls: [
+        { u: 'https://www.africanews.com/feed/rss', src: 'Africanews' },
+        { u: 'https://www.pbs.org/newshour/feeds/rss/world', src: 'PBS NewsHour' },
+        { u: 'https://en.mercopress.com/rss/', src: 'MercoPress', bonus: true }
+      ],
+      maxAgeHours: 24,
+      widenTo: [72],
+      label: 'Africa & Americas · Africanews · PBS NewsHour · MercoPress'
     },
 
     // ── Politics & Government ──────────────────────────────────────────────
@@ -2030,10 +2136,11 @@ footer .accent { color: var(--accent); font-weight: 700; }
     const items = Array.from(doc.querySelectorAll('item, entry')).slice(0, 60);
     return items.map(item => {
       const title = cleanText(item.querySelector('title')?.textContent || '');
-      // RSS uses <pubDate>; Atom uses <published> or <updated>
+      // RSS uses <pubDate>; Atom uses <published> or <updated>; RSS 1.0 (RDF — DW, v7.6) uses <dc:date>
       const pubDate = item.querySelector('pubDate')?.textContent
                    || item.querySelector('published')?.textContent
                    || item.querySelector('updated')?.textContent
+                   || item.getElementsByTagName('dc:date')[0]?.textContent
                    || '';
       // Atom <link href="...">  vs RSS <link>text</link>
       let link = cleanText(item.querySelector('link')?.textContent || '');
@@ -2213,7 +2320,17 @@ footer .accent { color: var(--accent); font-weight: 700; }
     // Fetch all in parallel; partial success is fine
     const results = await Promise.allSettled(
       entries.map(en => {
-        const p = fetchSingleUrl(en.u, feedKey, en.src);
+        const p = fetchSingleUrl(en.u, feedKey, en.src).then(items => (en.state || en.tzFixHours)
+          ? (items || []).map(it => {
+              const o = { ...it };
+              if (en.state) o.state = en.state;
+              if (en.tzFixHours && it.pubDate) {
+                const t = new Date(it.pubDate).getTime();
+                if (!isNaN(t)) o.pubDate = new Date(t + en.tzFixHours * 3600000).toUTCString();
+              }
+              return o;
+            })
+          : items);
         if (!en.bonus) return p;
         return Promise.race([
           p,
@@ -2475,6 +2592,7 @@ footer .accent { color: var(--accent); font-weight: 700; }
         </a>
         <div class="card-meta">
           <span class="card-source" title="${escapeAttr(src)}">${escapeHtml(src)}</span>
+          ${it.state ? `<span class="card-state" title="State-affiliated media (${escapeAttr(it.state)})">State media · ${escapeHtml(it.state)}</span>` : ''}
           <span class="card-dot" aria-hidden="true">·</span>
           <span class="card-time" data-ts="${escapeAttr(it.pubDate || '')}">${escapeHtml(relativeTime(it.pubDate))}</span>
           <span class="card-actions">
@@ -2548,7 +2666,8 @@ footer .accent { color: var(--accent); font-weight: 700; }
   let cache = loadCache();
   const activeTabs = {
     politics: 'kanyakumari',
-    business: 'india_biz'   // eCommerce moved out to its own section 1 (v6.0)
+    business: 'india_biz',  // eCommerce moved out to its own section 1 (v6.0)
+    world: 'all'            // v7.6 World section
   };
 
   // ---------- Section loaders ----------
@@ -2564,6 +2683,7 @@ footer .accent { color: var(--accent); font-weight: 700; }
   // widened feed had to reach further back than its normal cutoff.
   function metaElFor(feedKey) {
     const id = feedKey.startsWith('politics_') ? 'meta-politics'
+             : feedKey.startsWith('world_') ? 'meta-world'
              : feedKey.startsWith('business_') ? 'meta-business'
              : 'meta-' + feedKey;
     return document.getElementById(id);
@@ -2620,6 +2740,19 @@ footer .accent { color: var(--accent); font-weight: 700; }
     const meta = document.getElementById('meta-politics');
     const feedKey = 'politics_' + name;
     meta.textContent = FEEDS[feedKey]?.label || '';
+    hideAiBox('ai-box-politics');   /* v7.6: never leave the previous tab's summary on screen */
+    loadFeedAndRender(feedKey, grid, false).catch(()=>{});
+  }
+  function activateWorldTab(name) {
+    activeTabs.world = name;
+    document.querySelectorAll('#world-tabs .tab').forEach(t => {
+      t.classList.toggle('active', t.dataset.tab === name);
+    });
+    const grid = document.getElementById('grid-world');
+    const meta = document.getElementById('meta-world');
+    const feedKey = 'world_' + name;
+    meta.textContent = FEEDS[feedKey]?.label || '';
+    hideAiBox('ai-box-world');   /* v7.6: never leave the previous tab's summary on screen */
     loadFeedAndRender(feedKey, grid, false).catch(()=>{});
   }
   function activateBusinessTab(name) {
@@ -2631,6 +2764,7 @@ footer .accent { color: var(--accent); font-weight: 700; }
     const meta = document.getElementById('meta-business');
     const feedKey = 'business_' + name;
     meta.textContent = FEEDS[feedKey]?.label || '';
+    hideAiBox('ai-box-business');   /* v7.6: never leave the previous tab's summary on screen */
     loadFeedAndRender(feedKey, grid, false).catch(()=>{});
   }
 
@@ -2657,6 +2791,7 @@ footer .accent { color: var(--accent); font-weight: 700; }
     document.getElementById('meta-breaking').textContent = FEEDS.breaking.label;
     document.getElementById('meta-politics').textContent = FEEDS['politics_' + activeTabs.politics].label;
     document.getElementById('meta-business').textContent = FEEDS['business_' + activeTabs.business].label;
+    document.getElementById('meta-world').textContent = FEEDS['world_' + activeTabs.world].label;
 
     // Only fetch what's actually visible: 8 feeds instead of 12.
     // Inactive politics/business tabs are loaded lazily when the user clicks them.
@@ -2668,6 +2803,7 @@ footer .accent { color: var(--accent); font-weight: 700; }
       ['ai',                                      document.getElementById('grid-ai')],
       ['breaking',                                document.getElementById('grid-breaking')],
       ['politics_' + activeTabs.politics,         document.getElementById('grid-politics')],
+      ['world_' + activeTabs.world,               document.getElementById('grid-world')],
       ['business_' + activeTabs.business,         document.getElementById('grid-business')],
       ['health',                                  document.getElementById('grid-health')],
       ['tech',                                    document.getElementById('grid-tech')],
@@ -2847,9 +2983,10 @@ footer .accent { color: var(--accent); font-weight: 700; }
   // finish loading. init() activates the Politics and Business tabs before
   // refreshAll() runs, so those two used to enqueue first and Breaking — the
   // section at the very top of the page — ended up 5th in line.
-  const AI_PRIORITY = ['breaking', 'ecom', 'ai', 'politics', 'business', 'health', 'tech', 'env'];
+  const AI_PRIORITY = ['breaking', 'ecom', 'ai', 'politics', 'world', 'business', 'health', 'tech', 'env'];
   function aiPriority(feedKey) {
     const base = feedKey.startsWith('politics_') ? 'politics'
+               : feedKey.startsWith('world_') ? 'world'
                : feedKey.startsWith('business_') ? 'business'
                : feedKey;
     const i = AI_PRIORITY.indexOf(base);
@@ -2877,7 +3014,7 @@ footer .accent { color: var(--accent); font-weight: 700; }
     try {
       const cached = JSON.parse(localStorage.getItem(AI_CACHE_KEY_PREFIX + feedKey) || '{}');
       if (cached.ts && Date.now() - cached.ts < CACHE_TTL_MS && cached.data) {
-        renderAiSummary(aiBoxId(feedKey), feedKey, cached.data, 'local');
+        if (isShownFeed(feedKey)) renderAiSummary(aiBoxId(feedKey), feedKey, cached.data, 'local');
         return true;
       }
     } catch {}
@@ -2917,6 +3054,7 @@ footer .accent { color: var(--accent); font-weight: 700; }
   // Map feedKey → summary box ID
   function aiBoxId(feedKey) {
     if (feedKey.startsWith('politics_'))  return 'ai-box-politics';
+    if (feedKey.startsWith('world_'))     return 'ai-box-world';
     if (feedKey.startsWith('business_')) return 'ai-box-business';
     return 'ai-box-' + feedKey;
   }
@@ -3031,8 +3169,18 @@ footer .accent { color: var(--accent); font-weight: 700; }
     throw new Error('the summary is taking longer than usual');
   }
 
+  // Tabbed sections (Politics, Business, World) share ONE summary box: only the tab on screen may
+  // use it, and a tab the reader has already left is not summarised at all (v7.6).
+  function isShownFeed(feedKey) {
+    for (const sec of ['politics', 'business', 'world']) {
+      if (feedKey.startsWith(sec + '_')) return feedKey === sec + '_' + activeTabs[sec];
+    }
+    return true;
+  }
+
   async function summariseSection(feedKey, items) {
     if (!items || !items.length) return;
+    if (!isShownFeed(feedKey)) return;
     const boxId = aiBoxId(feedKey);
     const cKey  = AI_CACHE_KEY_PREFIX + feedKey;
     if (renderCachedAiSummary(feedKey)) return;
@@ -3042,16 +3190,16 @@ footer .accent { color: var(--accent); font-weight: 700; }
       source: (it.source || 'News').substring(0, 40)
     }));
     try {
-      const data = await askLocalSummary(FEEDS[feedKey]?.label || feedKey, headlines, () => showAiSkeleton(boxId));
+      const data = await askLocalSummary(FEEDS[feedKey]?.label || feedKey, headlines, () => { if (isShownFeed(feedKey)) showAiSkeleton(boxId); });
       if (!data.summary) throw new Error('No summary in the answer');
       try { localStorage.setItem(cKey, JSON.stringify({ ts: Date.now(), data, provider: 'local' })); } catch {}
-      renderAiSummary(boxId, feedKey, data, 'local');
+      if (isShownFeed(feedKey)) renderAiSummary(boxId, feedKey, data, 'local');
     } catch (e) {
       // CEO, 13 Oct 2026: "In case of laptop shutdown, do not expose it by telling that news summary is
       // not available. Just keep quiet." Any failure (laptop off, busy, error) hides the box silently.
       if (e.offline) localAiOffline = true;
       else console.warn('[IBI News AI]', feedKey, e.message);
-      hideAiBox(boxId);
+      if (isShownFeed(feedKey)) hideAiBox(boxId);
     }
   }
 
@@ -3434,7 +3582,7 @@ footer .accent { color: var(--accent); font-weight: 700; }
       savedItems.unshift({
         id: id,
         title: it.title, link: it.link, desc: it.desc,
-        source: it.source, pubDate: it.pubDate, image: it.image || '',
+        source: it.source, pubDate: it.pubDate, image: it.image || '', state: it.state || '',
         savedAt: Date.now()
       });
       if (savedItems.length > MAX_SAVED) savedItems = savedItems.slice(0, MAX_SAVED);
@@ -3639,6 +3787,10 @@ footer .accent { color: var(--accent); font-weight: 700; }
       const tab = e.target.closest('.tab');
       if (tab) activatePoliticsTab(tab.dataset.tab);
     });
+    document.getElementById('world-tabs').addEventListener('click', (e) => {
+      const tab = e.target.closest('.tab');
+      if (tab) activateWorldTab(tab.dataset.tab);
+    });
     document.getElementById('business-tabs').addEventListener('click', (e) => {
       const tab = e.target.closest('.tab');
       if (tab) activateBusinessTab(tab.dataset.tab);
@@ -3651,6 +3803,7 @@ footer .accent { color: var(--accent); font-weight: 700; }
         e.preventDefault();
         const fk = r.dataset.retry;
         const gridId = fk.startsWith('politics_') ? 'grid-politics'
+                     : fk.startsWith('world_') ? 'grid-world'
                      : fk.startsWith('business_') ? 'grid-business'
                      : 'grid-' + fk;
         const grid = document.getElementById(gridId);
@@ -3737,6 +3890,7 @@ footer .accent { color: var(--accent); font-weight: 700; }
     // Initial set of metadata labels & active tabs
     activatePoliticsTab('kanyakumari');
     activateBusinessTab('india_biz');
+    activateWorldTab('all');
 
     // Initial full load
     refreshAll(false);
