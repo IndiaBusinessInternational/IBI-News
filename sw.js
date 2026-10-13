@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════════════
-   IBI News — service worker (v7.6.2)
+   IBI News — service worker (v7.7)
 
    Strategy
    ────────
@@ -15,7 +15,7 @@
    shipping old JS under a new version badge. Always bypass the HTTP cache here.
    ═══════════════════════════════════════════════════════════════════════════ */
 
-const VERSION     = 'v7.6.2';
+const VERSION     = 'v7.7';
 const SHELL_CACHE = 'ibinews-shell-' + VERSION;
 const ASSET_CACHE = 'ibinews-assets-' + VERSION;
 const OFFLINE_URL = './index.html';

@@ -1,4 +1,7 @@
-# IBI-News — v7.6.2
+# IBI-News — v7.7
+
+v7.7 (13 Oct 2026): every story at most 24 hours old (CEO: "all news should be of 24 hours" / "no delayed news should appear": the widenTo 72 h / 1-week escalation is gone, feedWindow capped at 24 h, cache key v4). One story, one appearance (CEO: "no repetition of news" / "in case of many sources saying same news. use standard reliable sources only"): same link or headlines sharing 3+ content-word roots (60% of the shorter) = one story; the most reliable source is kept (tier 1 public broadcasters / papers of record, tier 2 major commercial, state media last); a story shown in a higher section is not repeated lower down. Measured: 143 stories, 0 repeats, oldest 24.0 h.
+
 
 v7.6.2 (13 Oct 2026, CEO: "World news - politics & government repeats 2 times" / "combine into under 1"): the Politics › World tab is removed; its sources (BBC World, The Guardian, Al Jazeera) now feed World › All. One World place only.
 
