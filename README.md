@@ -1,4 +1,6 @@
-# IBI-News — v7.9.2
+# IBI-News — v7.9.3
+
+v7.9.3 (13 Oct 2026, CEO: "images should be upscaled and shown neat and crisp clear" + "Make edge to edge screen in laptop view and others"): pictures are fetched at the publisher's full size instead of the feed thumbnail (ETRetail 100 px -> 1000 px, BBC 240 -> 976 px, Economic Times 294 -> 1000 px; falls back to the feed picture if the large one fails); any picture still smaller than its box is shown whole and sharp over a blurred copy of itself, never stretched. The 1280 px page cap is gone - content runs the full screen width with a 20 px edge on laptops, 16 px on tablets, edge to edge on phones; wide screens get more columns (5 at 1912 px).
 
 v7.9.2 (13 Oct 2026, CEO: "add pause and play buttons for each news"): every story has its own Play / Pause button - "Listen" starts it, "Pause" while it is being read, "Resume" when paused. Inside a section being read aloud, Listen on another story jumps the playlist to that story.
 
