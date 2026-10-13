@@ -35,7 +35,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="ibi-build" content="v7.5-2026-10-13">
+<meta name="ibi-build" content="v7.5.1-2026-10-13">
 
 <!-- Favicon: IBI text in #00c5ff on black, Roboto -->
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='10' fill='black'/><text x='32' y='44' font-family='Roboto,Arial,sans-serif' font-size='26' font-weight='900' text-anchor='middle' fill='%2300c5ff' letter-spacing='-1'>IBI</text></svg>">
@@ -1112,7 +1112,7 @@ footer .accent { color: var(--accent); font-weight: 700; }
 }
 .ai-refs-label { font-size: 12px; font-weight: 700; color: var(--text-muted); }
 .ai-ref-chip { background: var(--bg-elev); border: 1px solid var(--border); border-radius: 4px; font-size: 11px; color: var(--text-muted); padding: 3px 8px; }
-.ai-footer { margin-top: 8px; font-size: 11px; color: var(--text-faint); text-align: right; }
+.ai-footer { margin-top: 8px; font-size: 12px; color: var(--text-faint); text-align: right; }
 .ai-skel-wrap { padding: 14px 16px; background: var(--bg-card); display: flex; flex-direction: column; gap: 9px; }
 .ai-skel { height: 13px; background: var(--skeleton); border-radius: 4px; animation: shimmer 1.2s infinite; }
 
@@ -1366,7 +1366,7 @@ footer .accent { color: var(--accent); font-weight: 700; }
     <div class="brand">
       <div class="brand-mark"></div>
       <div class="brand-text">
-        <h1 class="brand-title">IBI <span class="accent">News</span> <span class="version-badge" id="version-badge">v7.5</span></h1>
+        <h1 class="brand-title">IBI <span class="accent">News</span> <span class="version-badge" id="version-badge">v7.5.1</span></h1>
         <div class="brand-sub">Live Briefings</div>
       </div>
     </div>
@@ -1583,10 +1583,17 @@ footer .accent { color: var(--accent); font-weight: 700; }
 <footer>
   <div>© <span id="year"></span> <span class="accent">India Business International (IBI)</span> — Kanyakumari, Tamil Nadu</div>
   <div style="margin-top:6px;font-size:13px;opacity:0.7;">Live news aggregated from direct publisher RSS feeds. Headlines, images and excerpts remain the property of their publishers; every card links to the original article.</div>
+  <div class="legal-notice" style="margin-top:10px;font-size:12px;opacity:0.85;line-height:1.55;max-width:760px;margin-left:auto;margin-right:auto;">
+    <strong>COPYRIGHT &amp; FAIR DEALING NOTICE</strong><br>
+    IBI News reports current events under Section 52(1)(a)(iii) of the Copyright Act, 1957 (India) and Section 107 of the US Copyright Act, 1976.
+    All headlines, images and quoted material remain the property of their respective owners and are credited on every card, which links to the original story.
+    Section summaries are written by IBI's own AI from the headlines only — always read the original story for the full facts.<br>
+    Rights holders, corrections or grievances: <a href="mailto:indiabusinessinternational@gmail.com" style="color:var(--accent-text);">indiabusinessinternational@gmail.com</a> — acknowledged within 24 hours, resolved within 15 days.
+  </div>
   <div style="margin-top:8px;font-size:12px;opacity:0.8;">
     Shortcuts: <kbd>/</kbd> search · <kbd>r</kbd> refresh · <kbd>t</kbd> theme · <kbd>s</kbd> saved · <kbd>Esc</kbd> close
   </div>
-  <div style="margin-top:8px;font-size:11px;opacity:0.5;font-family:monospace;">Build v7.5 · 2026-10-13</div>
+  <div style="margin-top:8px;font-size:12px;opacity:0.5;font-family:monospace;">Build v7.5.1 · 2026-10-13</div>
 </footer>
 
 <!-- ===================== APP LOGIC ===================== -->
@@ -2956,7 +2963,7 @@ footer .accent { color: var(--accent); font-weight: 700; }
             <span class="ai-refs-label">References:</span>
             ${refs.map(r => `<span class="ai-ref-chip">${escapeHtml(r)}</span>`).join('')}
           </div>` : ''}
-          <div class="ai-footer">Summarised by ${pd.footer} · IBI News</div>
+          <div class="ai-footer">AI-written from these headlines by ${pd.footer} · read the stories below for the full facts</div>
         </div>
       </div>`;
   }
