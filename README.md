@@ -1,4 +1,6 @@
-# IBI-News — v7.9.3
+# IBI-News — v8.0
+
+v8.0 (15 Oct 2026, CEO: "Add a feature to increase voice sound to 300 %. Now the sound is low."): read-aloud now uses IBI voices — free Microsoft neural voices (Prabhat, Neerja, Jenny, Ryan, Sonia and more) made sentence by sentence on IBI's laptop (gateway POST /news/tts) and played through a volume control of 100–300% (default 300%) with a limiter, so it gets louder without crackling. Pause now stops mid-word and resumes from there. When the laptop is off (10 PM – 6 AM) the nearest device voice reads at normal volume, quietly. A reader's earlier device-voice choice carries over to the nearest IBI voice.
 
 v7.9.3 (13 Oct 2026, CEO: "images should be upscaled and shown neat and crisp clear" + "Make edge to edge screen in laptop view and others"): pictures are fetched at the publisher's full size instead of the feed thumbnail (ETRetail 100 px -> 1000 px, BBC 240 -> 976 px, Economic Times 294 -> 1000 px; falls back to the feed picture if the large one fails); any picture still smaller than its box is shown whole and sharp over a blurred copy of itself, never stretched. The 1280 px page cap is gone - content runs the full screen width with a 20 px edge on laptops, 16 px on tablets, edge to edge on phones; wide screens get more columns (5 at 1912 px).
 

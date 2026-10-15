@@ -35,7 +35,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="ibi-build" content="v7.9.3-2026-10-13">
+<meta name="ibi-build" content="v8.0-2026-10-15">
 
 <!-- Favicon: IBI text in #00c5ff on black, Roboto -->
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='10' fill='black'/><text x='32' y='44' font-family='Roboto,Arial,sans-serif' font-size='26' font-weight='900' text-anchor='middle' fill='%2300c5ff' letter-spacing='-1'>IBI</text></svg>">
@@ -1414,7 +1414,7 @@ footer .accent { color: var(--accent); font-weight: 700; }
 .tts-bar {
   position: fixed; z-index: 300; left: 50%; transform: translateX(-50%);
   bottom: calc(14px + env(safe-area-inset-bottom, 0px));
-  width: min(820px, calc(100% - 24px));
+  width: min(940px, calc(100% - 24px));
   display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
   padding: 10px 12px; border-radius: 12px;
   background: var(--bg-elev); color: var(--text);
@@ -1517,6 +1517,10 @@ body.tts-on .to-top { bottom: 128px; }
     <option value="0.8">0.8×</option><option value="0.9">0.9×</option><option value="1" selected>1×</option>
     <option value="1.1">1.1×</option><option value="1.25">1.25×</option><option value="1.5">1.5×</option>
   </select>
+  <select class="tts-sel" id="tts-vol" aria-label="Volume" title="Volume">
+    <option value="1">🔊 100%</option><option value="1.5">🔊 150%</option><option value="2">🔊 200%</option>
+    <option value="2.5">🔊 250%</option><option value="3" selected>🔊 300%</option>
+  </select>
 </div>
 
 <!-- Pull-to-refresh indicator (mobile only) -->
@@ -1540,7 +1544,7 @@ body.tts-on .to-top { bottom: 128px; }
     <div class="brand">
       <div class="brand-mark"></div>
       <div class="brand-text">
-        <h1 class="brand-title">IBI <span class="accent">News</span> <span class="version-badge" id="version-badge">v7.9.3</span></h1>
+        <h1 class="brand-title">IBI <span class="accent">News</span> <span class="version-badge" id="version-badge">v8.0</span></h1>
         <div class="brand-sub">Live Briefings</div>
       </div>
     </div>
@@ -1787,7 +1791,7 @@ body.tts-on .to-top { bottom: 128px; }
   <div style="margin-top:8px;font-size:12px;opacity:0.8;">
     Shortcuts: <kbd>/</kbd> search · <kbd>r</kbd> refresh · <kbd>t</kbd> theme · <kbd>s</kbd> saved · <kbd>Esc</kbd> close
   </div>
-  <div style="margin-top:8px;font-size:12px;opacity:0.5;font-family:monospace;">Build v7.9.3 · 2026-10-13</div>
+  <div style="margin-top:8px;font-size:12px;opacity:0.5;font-family:monospace;">Build v8.0 · 2026-10-15</div>
 </footer>
 
 <!-- ===================== APP LOGIC ===================== -->
@@ -2916,21 +2920,147 @@ body.tts-on .to-top { bottom: 128px; }
         || list.find(v => voiceGender(v) === 'Male')
         || list[0] || null;
   }
+  // ---------- IBI voices + volume boost (v8.0) ----------
+  // CEO, 15 Oct 2026: "Add a feature to increase voice sound to 300 %. Now the sound is low." A device voice
+  // (speechSynthesis) is capped at 100% and a page cannot amplify it, so the default voices are now IBI's own:
+  // free Microsoft neural voices made per sentence by IBI's laptop (gateway POST /news/tts, edge-tts) and played
+  // through Web Audio: gain (100–300%) → limiter (a compressor, so 300% gets louder without crackling) → speakers.
+  // Laptop off (22:00–06:00) or unreachable → the nearest device voice reads at normal volume, quietly, and the
+  // IBI voice is tried again after IBI_REST_MS. Menu values: 'ibi:<voice id>' or a device voiceURI.
+  const IBI_TTS_URL = 'https://ai-local.indiabusinessinternational.online/news/tts';
+  const TTS_VOICE_KEY2 = 'ibinews_tts_voice_v2', TTS_VOL_KEY = 'ibinews_tts_vol', IBI_REST_MS = 2 * 60 * 1000;
+  const IBI_VOICES = [
+    ['en-IN-PrabhatNeural', 'Prabhat', 'India', 'Male'], ['en-IN-NeerjaNeural', 'Neerja', 'India', 'Female'],
+    ['en-GB-RyanNeural', 'Ryan', 'UK', 'Male'], ['en-GB-SoniaNeural', 'Sonia', 'UK', 'Female'],
+    ['en-US-AndrewNeural', 'Andrew', 'US', 'Male'], ['en-US-GuyNeural', 'Guy', 'US', 'Male'],
+    ['en-US-JennyNeural', 'Jenny', 'US', 'Female'], ['en-US-AriaNeural', 'Aria', 'US', 'Female'],
+    ['en-AU-WilliamNeural', 'William', 'Australia', 'Male'], ['en-AU-NatashaNeural', 'Natasha', 'Australia', 'Female']
+  ].map(([id, name, region, g]) => ({ id, name, region, g, lang: id.slice(0, 5) }));
+  const IBI_DEFAULT = 'ibi:en-IN-PrabhatNeural';            // "Keep indian sharp male voice as default"
+  const AUD = { ctx: null, gain: null, src: null, cache: new Map(), restUntil: 0, vol: 3 };
+  function ibiVoiceOk() { return !!(window.AudioContext || window.webkitAudioContext) && typeof fetch === 'function'; }
+  function savedVoiceValue() {
+    let v = '';
+    try { v = localStorage.getItem(TTS_VOICE_KEY2) || ''; } catch {}
+    if (v) return v;
+    // First visit on v8.0: carry the old device-voice choice over to the nearest IBI voice, so nobody picks twice.
+    let old = '';
+    try { old = localStorage.getItem(TTS_VOICE_KEY) || ''; } catch {}
+    if (!old) return IBI_DEFAULT;
+    const region = /en[-_]IN|India|Prabhat|Neerja|Heera|Ravi|Rishi|Hemant|Kalpana/i.test(old) ? 'India'
+      : /en[-_]GB|UK English|Hazel|George|Susan|Sonia|Ryan|Libby/i.test(old) ? 'UK'
+      : /en[-_]AU|Australia|Natasha|William|Karen/i.test(old) ? 'Australia'
+      : /en[-_]US|US English|David|Zira|Mark|Jenny|Aria|Guy/i.test(old) ? 'US' : 'India';
+    const female = FEMALE_RE.test(old) || /Google US English$/i.test(old);   // Google's "US English" is a female voice
+    const m = IBI_VOICES.find(x => x.region === region && x.g === (female ? 'Female' : 'Male'));
+    v = m ? 'ibi:' + m.id : IBI_DEFAULT;
+    try { localStorage.setItem(TTS_VOICE_KEY2, v); } catch {}
+    return v;
+  }
+  function ibiVoiceById(id) { return IBI_VOICES.find(x => x.id === id) || null; }
+  // { ibi } when an IBI voice is chosen, else { device }. A saved device voice that this device no longer has
+  // falls back to the IBI default.
   function chosenVoice() {
+    const v = savedVoiceValue();
+    if (v.startsWith('ibi:') && ibiVoiceOk()) { const x = ibiVoiceById(v.slice(4)); if (x) return { ibi: x }; }
     const list = englishVoices();
-    let saved = '';
-    try { saved = localStorage.getItem(TTS_VOICE_KEY) || ''; } catch {}
-    return list.find(v => v.voiceURI === saved) || defaultVoice(list);
+    const dev = list.find(d => d.voiceURI === v);
+    if (dev) return { device: dev };
+    if (ibiVoiceOk()) return { ibi: ibiVoiceById(IBI_DEFAULT.slice(4)) };
+    return { device: defaultVoice(list) };
+  }
+  // The device voice nearest to an IBI voice (same language and gender), for when the laptop is off.
+  function deviceStandIn(x) {
+    const list = englishVoices();
+    const lang = new RegExp('^' + x.lang.replace('-', '[-_]'), 'i');
+    return list.find(d => lang.test(d.lang) && voiceGender(d) === x.g) || list.find(d => lang.test(d.lang))
+      || list.find(d => voiceGender(d) === x.g) || defaultVoice(list);
   }
   function fillVoiceMenu() {
     const sel = document.getElementById('tts-voice');
     if (!sel) return;
     const list = englishVoices(), cur = chosenVoice();
-    sel.innerHTML = list.length ? list.map(v => {
+    const curVal = cur.ibi ? 'ibi:' + cur.ibi.id : (cur.device ? cur.device.voiceURI : '');
+    const opt = (val, label) => `<option value="${escapeAttr(val)}"${val === curVal ? ' selected' : ''}>${escapeHtml(label)}</option>`;
+    const ibi = ibiVoiceOk() ? IBI_VOICES.map(x => opt('ibi:' + x.id, x.name + ' · ' + x.region + ' · ' + x.g)).join('') : '';
+    const dev = list.map(v => {
       const g = voiceGender(v);
-      const label = v.name.replace(/^(Microsoft|Google)\s+/i, '').replace(/\s*-\s*English.*$/i, '') + ' · ' + voiceRegion(v) + (g ? ' · ' + g : '');
-      return `<option value="${escapeAttr(v.voiceURI)}"${cur && v.voiceURI === cur.voiceURI ? ' selected' : ''}>${escapeHtml(label)}</option>`;
-    }).join('') : '<option value="">Device default voice</option>';
+      return opt(v.voiceURI, v.name.replace(/^(Microsoft|Google)\s+/i, '').replace(/\s*-\s*English.*$/i, '') + ' · ' + voiceRegion(v) + (g ? ' · ' + g : ''));
+    }).join('');
+    sel.innerHTML = (ibi ? `<optgroup label="IBI voices — clear, up to 300% volume">${ibi}</optgroup>` : '')
+      + (dev ? (ibi ? `<optgroup label="This device's voices — normal volume">${dev}</optgroup>` : dev) : '')
+      || '<option value="">Device default voice</option>';
+  }
+  function ensureAudio() {                       // called from a tap, so phones allow the sound to start
+    if (!ibiVoiceOk()) return null;
+    if (!AUD.ctx) {
+      const C = window.AudioContext || window.webkitAudioContext;
+      AUD.ctx = new C();
+      AUD.gain = AUD.ctx.createGain();
+      const lim = AUD.ctx.createDynamicsCompressor();          // limiter: peaks are held down, never clipped
+      lim.threshold.value = -6; lim.knee.value = 4; lim.ratio.value = 20; lim.attack.value = 0.002; lim.release.value = 0.2;
+      AUD.gain.connect(lim); lim.connect(AUD.ctx.destination);
+    }
+    AUD.gain.gain.value = AUD.vol;
+    if (AUD.ctx.state === 'suspended' && !TTS.paused) AUD.ctx.resume().catch(() => {});
+    return AUD.ctx;
+  }
+  function ttsHalt() {                           // silence whatever is speaking, on either engine
+    try { if (ttsSupported()) speechSynthesis.cancel(); } catch {}
+    if (AUD.src) { const s = AUD.src; AUD.src = null; s.onended = null; try { s.stop(); } catch {} }
+    if (AUD.ctx && AUD.ctx.state === 'suspended') AUD.ctx.resume().catch(() => {});
+  }
+  function ibiAudio(i, x) {                      // Promise<AudioBuffer> for part i, made once and kept
+    const part = TTS.parts[i];
+    if (!part) return Promise.reject(new Error('no part'));
+    const rate = Math.round((TTS.rate - 1) * 100);
+    const key = x.id + '|' + rate + '|' + part.text;
+    if (AUD.cache.has(key)) return AUD.cache.get(key);
+    const ac = new AbortController();
+    const timer = setTimeout(() => ac.abort(), 25000);
+    // text/plain body = a "simple" request, so no CORS preflight per sentence
+    const p = fetch(IBI_TTS_URL, { method: 'POST', body: JSON.stringify({ text: part.text.slice(0, 320), voice: x.id, rate }), signal: ac.signal })
+      .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.arrayBuffer(); })
+      .then(b => new Promise((ok, bad) => AUD.ctx.decodeAudioData(b, ok, bad)))
+      .finally(() => clearTimeout(timer));
+    p.catch(() => AUD.cache.delete(key));
+    AUD.cache.set(key, p);
+    if (AUD.cache.size > 80) AUD.cache.delete(AUD.cache.keys().next().value);
+    return p;
+  }
+  function ibiSpeak(token, x) {
+    TTS.engine = 'ibi';
+    if (!ensureAudio()) return deviceSpeak(token, deviceStandIn(x));
+    paintTts();                                  // re-enables the Volume menu after a device-voice spell
+    const i = TTS.idx;
+    ibiAudio(i, x).then(buf => {
+      if (token !== TTS.token) return;
+      const src = AUD.ctx.createBufferSource();
+      src.buffer = buf; src.connect(AUD.gain);
+      src.onended = () => { if (AUD.src === src) AUD.src = null; if (token !== TTS.token) return; TTS.idx++; paintTts(); ttsSpeak(token); };
+      AUD.src = src;
+      src.start();                               // if paused meanwhile, the context is suspended and it waits
+    }).catch(() => {
+      if (token !== TTS.token) return;
+      AUD.restUntil = Date.now() + IBI_REST_MS;  // laptop off or busy: device voice for now, quietly
+      console.info('[IBI News] IBI voice unavailable — using this device\'s voice for now');
+      deviceSpeak(token, deviceStandIn(x));
+    });
+    [i + 1, i + 2].forEach(n => { if (n < TTS.parts.length) ibiAudio(n, x).catch(() => {}); });   // read ahead
+  }
+  function deviceSpeak(token, voice) {
+    TTS.engine = 'device';
+    paintTts();
+    if (TTS.paused || !ttsSupported()) { if (!ttsSupported()) stopListening(); return; }
+    const u = new SpeechSynthesisUtterance(TTS.parts[TTS.idx].text);
+    if (voice) { u.voice = voice; u.lang = voice.lang; } else u.lang = 'en-IN';
+    u.rate = TTS.rate; u.pitch = 1;
+    u.onend = () => { if (token !== TTS.token) return; TTS.idx++; paintTts(); ttsSpeak(token); };
+    u.onerror = ev => {
+      if (token !== TTS.token || ev.error === 'interrupted' || ev.error === 'canceled') return;
+      stopListening(); toast('The voice stopped. Tap Listen to try again.');
+    };
+    speechSynthesis.speak(u);
   }
   function ttsSplit(text) {
     const out = [];
@@ -2969,6 +3099,13 @@ body.tts-on .to-top { bottom: 128px; }
       : (Math.min(TTS.idx + 1, TTS.parts.length) + '/' + TTS.parts.length);
     document.getElementById('tts-now').innerHTML = TTS.on
       ? `${escapeHtml(TTS.title)}<small>${TTS.paused ? 'Paused' : 'Reading aloud'} · ${where}</small>` : '&nbsp;';
+    // The boost only exists for IBI voices; with a device voice (or the laptop off) the menu says so, greyed out.
+    const volSel = document.getElementById('tts-vol');
+    if (volSel) {
+      const boost = TTS.on ? TTS.engine === 'ibi' : !!chosenVoice().ibi;
+      volSel.disabled = !boost;
+      volSel.title = boost ? 'Volume' : 'Volume boost works with the IBI voices (6 AM – 10 PM India time)';
+    }
     const playlist = TTS.on && TTS.stories > 1;
     document.getElementById('tts-prev').hidden = !playlist;
     document.getElementById('tts-next').hidden = !playlist;
@@ -2994,21 +3131,16 @@ body.tts-on .to-top { bottom: 128px; }
   function ttsSpeak(token) {
     if (token !== TTS.token) return;
     if (TTS.idx >= TTS.parts.length) { stopListening(); return; }
-    const u = new SpeechSynthesisUtterance(TTS.parts[TTS.idx].text);
-    TTS.voice = chosenVoice();
-    if (TTS.voice) { u.voice = TTS.voice; u.lang = TTS.voice.lang; } else u.lang = 'en-IN';
-    u.rate = TTS.rate; u.pitch = 1;
-    u.onend = () => { if (token !== TTS.token) return; TTS.idx++; paintTts(); ttsSpeak(token); };
-    u.onerror = ev => {
-      if (token !== TTS.token || ev.error === 'interrupted' || ev.error === 'canceled') return;
-      stopListening(); toast('The voice stopped. Tap Listen to try again.');
-    };
-    speechSynthesis.speak(u);
+    const pick = chosenVoice();
+    if (pick.ibi && Date.now() >= AUD.restUntil) return ibiSpeak(token, pick.ibi);
+    deviceSpeak(token, pick.ibi ? deviceStandIn(pick.ibi) : pick.device);
   }
   function startParts(title, parts, key) {
-    if (!ttsSupported()) { toast('Reading aloud is not available in this browser. Try Chrome, Edge or Safari.'); return; }
+    if (!ttsSupported() && !ibiVoiceOk()) { toast('Reading aloud is not available in this browser. Try Chrome, Edge or Safari.'); return; }
     if (!parts.length) return;
-    try { speechSynthesis.cancel(); } catch {}
+    TTS.paused = false;
+    ttsHalt();
+    ensureAudio();
     Object.assign(TTS, { on: true, paused: false, parts, idx: 0, title, key, lastEl: null,
       stories: parts.reduce((m, p) => Math.max(m, p.story || 0), 0) });
     const token = ++TTS.token;
@@ -3018,19 +3150,25 @@ body.tts-on .to-top { bottom: 128px; }
   }
   function stopListening() {
     TTS.token++; Object.assign(TTS, { on: false, paused: false, parts: [], idx: 0, key: '', stories: 0, lastEl: null });
-    try { if (ttsSupported()) speechSynthesis.cancel(); } catch {}
+    ttsHalt();
     paintTts();
   }
   function togglePauseListening() {
     if (!TTS.on) return;
+    if (TTS.engine === 'ibi' && AUD.ctx) {        // IBI voice: a true pause, mid-word, and resume from there
+      TTS.paused = !TTS.paused;
+      (TTS.paused ? AUD.ctx.suspend() : AUD.ctx.resume()).catch(() => {});
+      paintTts();
+      return;
+    }
     if (!TTS.paused) {
       TTS.paused = true; TTS.token++;
-      try { speechSynthesis.cancel(); } catch {}
+      ttsHalt();
       paintTts();
     } else {
       TTS.paused = false;
       const token = ++TTS.token;
-      try { speechSynthesis.cancel(); } catch {}
+      ttsHalt();
       paintTts();
       setTimeout(() => ttsSpeak(token), 60);     // resumes at the start of the same sentence
     }
@@ -3043,7 +3181,7 @@ body.tts-on .to-top { bottom: 128px; }
     if (i < 0) return;
     TTS.idx = i; TTS.paused = false;
     const token = ++TTS.token;
-    try { speechSynthesis.cancel(); } catch {}
+    ttsHalt();
     paintTts();
     setTimeout(() => ttsSpeak(token), 60);
   }
@@ -3060,7 +3198,7 @@ body.tts-on .to-top { bottom: 128px; }
       if (i >= 0) {
         TTS.idx = i; TTS.paused = false;
         const token = ++TTS.token;
-        try { speechSynthesis.cancel(); } catch {}
+        ttsHalt();
         paintTts();
         setTimeout(() => ttsSpeak(token), 60);
         return;
@@ -3100,8 +3238,19 @@ body.tts-on .to-top { bottom: 128px; }
     startParts((name || 'Section') + ' — summary', ttsSplit(text).map(t => ({ text: t, el: null, story: 0 })), 'sum:' + boxId);
   };
   function initReadAloud() {
-    if (!ttsSupported()) return;
+    if (!ttsSupported() && !ibiVoiceOk()) return;
     try { TTS.rate = parseFloat(localStorage.getItem(TTS_RATE_KEY)) || 1; } catch {}
+    try { const v = parseFloat(localStorage.getItem(TTS_VOL_KEY)); if (v >= 1 && v <= 3) AUD.vol = v; } catch {}
+    const vol = document.getElementById('tts-vol');
+    if (vol) {
+      vol.value = String(AUD.vol);
+      if (vol.value !== String(AUD.vol)) { vol.value = '3'; AUD.vol = 3; }
+      vol.addEventListener('change', () => {          // takes effect at once, mid-sentence
+        AUD.vol = parseFloat(vol.value) || 3;
+        try { localStorage.setItem(TTS_VOL_KEY, String(AUD.vol)); } catch {}
+        if (AUD.gain) AUD.gain.gain.value = AUD.vol;
+      });
+    }
     const rate = document.getElementById('tts-rate');
     if (rate) {
       rate.value = String(TTS.rate);
@@ -3109,13 +3258,16 @@ body.tts-on .to-top { bottom: 128px; }
       rate.addEventListener('change', () => {
         TTS.rate = parseFloat(rate.value) || 1;
         try { localStorage.setItem(TTS_RATE_KEY, String(TTS.rate)); } catch {}
-        if (TTS.on && !TTS.paused) { const t = ++TTS.token; try { speechSynthesis.cancel(); } catch {} setTimeout(() => ttsSpeak(t), 60); }
+        if (TTS.on && !TTS.paused) { const t = ++TTS.token; ttsHalt(); setTimeout(() => ttsSpeak(t), 60); }
       });
     }
     const sel = document.getElementById('tts-voice');
     if (sel) sel.addEventListener('change', () => {
-      try { localStorage.setItem(TTS_VOICE_KEY, sel.value); } catch {}
-      if (TTS.on && !TTS.paused) { const t = ++TTS.token; try { speechSynthesis.cancel(); } catch {} setTimeout(() => ttsSpeak(t), 60); }
+      try { localStorage.setItem(TTS_VOICE_KEY2, sel.value); } catch {}
+      AUD.restUntil = 0;                              // a fresh choice tries the IBI voice again at once
+      if (sel.value.startsWith('ibi:')) ensureAudio();
+      paintTts();
+      if (TTS.on && !TTS.paused) { const t = ++TTS.token; ttsHalt(); setTimeout(() => ttsSpeak(t), 60); }
     });
     document.getElementById('tts-pause').addEventListener('click', togglePauseListening);
     document.getElementById('tts-prev').addEventListener('click', () => jumpStory(-1));
@@ -3130,8 +3282,10 @@ body.tts-on .to-top { bottom: 128px; }
       h.appendChild(btn);
     });
     document.getElementById('tts-stop').addEventListener('click', stopListening);
-    speechSynthesis.getVoices();
-    try { speechSynthesis.addEventListener('voiceschanged', fillVoiceMenu); } catch {}
+    if (ttsSupported()) {
+      speechSynthesis.getVoices();
+      try { speechSynthesis.addEventListener('voiceschanged', fillVoiceMenu); } catch {}
+    }
     fillVoiceMenu();
     window.addEventListener('pagehide', stopListening);
   }
