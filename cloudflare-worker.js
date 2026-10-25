@@ -10,8 +10,8 @@
    identically on every version, so a smoke test proves it is alive, not that
    your new code shipped. GET /version reports these, so confirming a deploy
    is opening one URL instead of comparing version IDs in the dashboard. */
-const WORKER_VERSION = 'v7.8.0';
-const WORKER_BUILT   = '2026-10-13';
+const WORKER_VERSION = 'v8.1.0';
+const WORKER_BUILT   = '2026-10-25';
 
 // NOTE: matching is `hostname === h || hostname.endsWith('.' + h)`, so a bare
 // domain here also covers every subdomain of it.
@@ -50,7 +50,10 @@ const ALLOWED_HOSTS = [
   'africanews.com','pbs.org','mercopress.com',
   // added v7.8 (13 Oct 2026, CEO: "all news should be fully read by anyone") - free-to-read replacements
   // for The Hindu / SCMP / The Japan Times, each probed free (no paywall marker) and fresh that day.
-  'hongkongfp.com','thefederal.com','businesstoday.in','mongabay.com'
+  'hongkongfp.com','thefederal.com','businesstoday.in','mongabay.com',
+  // added v8.1 (25 Oct 2026, Weather Reports): IMD's official warnings from the NDMA SACHET public
+  // alert RSS (public domain). It sends no CORS header, so the page reads it through this Worker.
+  'sachet.ndma.gov.in'
 ];
 
 /* v7.8 - FREE-TO-READ CHECK. Publishers that mix free and subscriber-only articles mark the paid ones

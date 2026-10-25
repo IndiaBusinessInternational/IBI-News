@@ -35,7 +35,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="ibi-build" content="v8.0-2026-10-15">
+<meta name="ibi-build" content="v8.1-2026-10-25">
 
 <!-- Favicon: IBI text in #00c5ff on black, Roboto -->
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='10' fill='black'/><text x='32' y='44' font-family='Roboto,Arial,sans-serif' font-size='26' font-weight='900' text-anchor='middle' fill='%2300c5ff' letter-spacing='-1'>IBI</text></svg>">
@@ -1481,6 +1481,95 @@ body.tts-on .to-top { bottom: 128px; }
   main { padding-left: 20px; padding-right: 20px; }
   .news-grid { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
 }
+
+/* ---------- v8.1 Weather Reports (Founder, 25 Oct 2026: "We need to add Weather Reports") ----------
+   City cards on the left, IMD warnings on the right on laptops; one column on phones, edge to edge. */
+:root[data-theme="light"] { --wx-warn: #b45309; --wx-warn-bg: #fff8ed; }
+:root[data-theme="dark"]  { --wx-warn: #f59e0b; --wx-warn-bg: #1d1910; }
+.wx-layout { display: grid; grid-template-columns: minmax(0, 1fr); gap: 24px; }
+.wx-tool { margin-bottom: 16px; }
+.wx-tool[hidden] { display: none; }
+.wx-form { display: flex; gap: 8px; flex-wrap: wrap; }
+.wx-input {
+  flex: 1 1 220px; min-width: 0; font: inherit; font-size: 16px; min-height: 44px; padding: 0 12px;
+  border: 1px solid var(--border-strong); border-radius: 8px; background: var(--bg-card); color: var(--text);
+}
+.wx-btn {
+  font: inherit; font-size: 14px; font-weight: 700; min-height: 44px; padding: 0 16px; white-space: nowrap;
+  border-radius: 8px; border: 1px solid var(--border-strong); background: var(--text); color: var(--bg); cursor: pointer;
+}
+.wx-btn.ghost { background: transparent; color: var(--text); }
+.wx-btn:disabled { opacity: 0.55; cursor: progress; }
+.wx-note { font-size: 14px; color: var(--text-muted); margin: 8px 0 0; line-height: 1.5; }
+.wx-grid { display: grid; gap: 0 24px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 290px), 1fr)); }
+.wx-card { border-bottom: 1px solid var(--border); padding: 14px 0 12px; min-width: 0; }
+.wx-card.is-speaking { border-bottom-color: var(--accent); }
+.wx-card.is-speaking .wx-place { color: var(--accent-text); }
+.wx-head { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.wx-place { font-family: Georgia, 'Times New Roman', Times, serif; font-size: 20px; font-weight: 700; margin: 0; }
+.wx-region { font-size: 12px; letter-spacing: 0.4px; text-transform: uppercase; color: var(--text-faint); }
+.wx-now { display: flex; align-items: center; gap: 12px; margin-top: 8px; }
+.wx-icon { font-size: 40px; line-height: 1; }
+.wx-temp { font-size: 40px; font-weight: 700; line-height: 1; letter-spacing: -1px; }
+.wx-cond { font-size: 16px; font-weight: 600; }
+.wx-feels { font-size: 14px; color: var(--text-muted); }
+.wx-facts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px 14px; margin: 12px 0 0; font-size: 14px; }
+.wx-facts div { display: flex; justify-content: space-between; gap: 8px; border-bottom: 1px dotted var(--border); padding-bottom: 4px; }
+.wx-facts dt { color: var(--text-muted); }
+.wx-facts dd { margin: 0; font-weight: 600; text-align: right; }
+.wx-days { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-top: 12px; }
+.wx-day { text-align: center; font-size: 14px; padding: 8px 4px; border-radius: 6px; background: var(--summary-bg); }
+.wx-day b { display: block; font-size: 13px; }
+.wx-day .wx-di { font-size: 22px; display: block; margin: 2px 0; }
+.wx-day small { display: block; font-size: 12px; color: var(--text-muted); }
+.wx-actions { display: flex; align-items: center; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+.wx-time { font-size: 13px; color: var(--text-faint); margin-right: auto; }
+.wx-more {
+  font: inherit; font-size: 13px; font-weight: 700; height: 36px; padding: 0 12px; border-radius: 999px; cursor: pointer;
+  border: 1px solid var(--border); background: transparent; color: var(--text); white-space: nowrap;
+}
+.wx-more:hover { border-color: var(--border-strong); }
+.wx-week { margin-top: 10px; border-top: 1px solid var(--border); }
+.wx-week[hidden] { display: none; }
+.wx-week-row { display: grid; grid-template-columns: 5.5em 1.8em minmax(0, 1fr) auto; align-items: center; gap: 8px; padding: 7px 0; border-bottom: 1px solid var(--border); font-size: 14px; }
+.wx-week-row .wx-di { font-size: 20px; }
+.wx-week-row .wx-wc { color: var(--text-muted); overflow-wrap: break-word; }
+.wx-week-row .wx-wt { font-weight: 700; white-space: nowrap; text-align: right; }
+.wx-week-row .wx-wt small { display: block; font-weight: 400; font-size: 12px; color: var(--text-muted); }
+.wx-msg { grid-column: 1 / -1; padding: 16px 0; font-size: 15px; color: var(--text-muted); line-height: 1.5; }
+.wx-msg button { margin-top: 10px; }
+.wx-skel { height: 300px; border-bottom: 1px solid var(--border); background: linear-gradient(90deg, transparent, var(--summary-bg), transparent); background-size: 200% 100%; animation: wxShimmer 1.4s infinite; }
+@keyframes wxShimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
+.wx-credit { font-size: 12px; color: var(--text-faint); margin: 12px 0 0; line-height: 1.5; }
+.wx-credit a { color: var(--accent-text); }
+.wx-alerts { min-width: 0; }
+.wx-alerts-head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
+.wx-alerts-head h3 { margin: 0; font-size: 17px; font-weight: 700; margin-right: auto; }
+.wx-chips { display: flex; gap: 6px; flex-wrap: wrap; }
+.wx-chip {
+  font: inherit; font-size: 13px; font-weight: 700; min-height: 36px; padding: 0 12px; border-radius: 999px; cursor: pointer;
+  border: 1px solid var(--border); background: transparent; color: var(--text-muted); white-space: nowrap;
+}
+.wx-chip[aria-pressed="true"] { background: var(--text); color: var(--bg); border-color: var(--text); }
+.wx-alert-list { list-style: none; margin: 0; padding: 0; }
+.wx-alert { border-left: 3px solid var(--wx-warn); background: var(--wx-warn-bg); padding: 10px 12px; margin-top: 10px; border-radius: 0 6px 6px 0; }
+.wx-alert.is-speaking { outline: 2px solid var(--accent); }
+.wx-alert.is-ended { border-left-color: var(--border); background: transparent; }
+.wx-alert.is-ended p { color: var(--text-muted); }
+.wx-alert.is-ended .wx-alert-meta b { color: var(--text-muted); }
+.wx-alert p { margin: 0; font-size: 15px; line-height: 1.5; overflow-wrap: break-word; }
+.wx-alert-meta { font-size: 12px; color: var(--text-muted); margin-top: 6px; letter-spacing: 0.2px; }
+.wx-alert-meta b { color: var(--wx-warn); text-transform: uppercase; letter-spacing: 0.4px; }
+.wx-alert-list .wx-msg { padding: 12px 0; }
+@media (min-width: 1000px) {
+  .wx-layout { grid-template-columns: minmax(0, 1fr) minmax(300px, 30%); gap: 32px; }
+  .wx-alerts { position: sticky; top: 60px; align-self: start; max-height: calc(100vh - 80px); overflow-y: auto; }
+}
+@media (max-width: 600px) {
+  .wx-card, .wx-tool, .wx-credit, .wx-alerts-head, .wx-msg { padding-left: 10px; padding-right: 10px; }
+  .wx-alert { margin-left: 0; margin-right: 0; border-radius: 0; }
+  .wx-temp, .wx-icon { font-size: 36px; }
+}
 </style>
 </head>
 <body>
@@ -1544,7 +1633,7 @@ body.tts-on .to-top { bottom: 128px; }
     <div class="brand">
       <div class="brand-mark"></div>
       <div class="brand-text">
-        <h1 class="brand-title">IBI <span class="accent">News</span> <span class="version-badge" id="version-badge">v8.0</span></h1>
+        <h1 class="brand-title">IBI <span class="accent">News</span> <span class="version-badge" id="version-badge">v8.1</span></h1>
         <div class="brand-sub">Live Briefings</div>
       </div>
     </div>
@@ -1597,6 +1686,7 @@ body.tts-on .to-top { bottom: 128px; }
 <nav class="catnav" id="catnav" aria-label="News sections">
   <div class="catnav-inner">
     <a href="#section-breaking" data-sec="section-breaking"><span class="live-dot" aria-hidden="true"></span>Breaking</a>
+    <a href="#section-weather"  data-sec="section-weather">Weather</a>
     <a href="#section-ecom"     data-sec="section-ecom">eCommerce</a>
     <a href="#section-ai"       data-sec="section-ai">AI</a>
     <a href="#section-politics" data-sec="section-politics">Politics</a>
@@ -1775,6 +1865,40 @@ body.tts-on .to-top { bottom: 128px; }
     </div>
   </section>
 
+  <!-- Section 9: Weather Reports (v8.1) - Open-Meteo forecasts + IMD warnings via NDMA SACHET -->
+  <section class="section" id="section-weather">
+    <div class="section-header">
+      <h2 class="section-title"><span class="section-title-num">9</span>Weather Reports <span style="opacity:0.7;font-weight:500;font-size:15px;">— forecasts &amp; IMD warnings</span></h2>
+      <span class="section-meta" id="meta-weather">—</span>
+    </div>
+    <div class="tabs" id="weather-tabs" role="tablist" aria-label="Weather places">
+      <button class="tab active" data-tab="tn" role="tab" aria-selected="true">Kanyakumari &amp; Tamil Nadu</button>
+      <button class="tab" data-tab="india" role="tab" aria-selected="false">India</button>
+      <button class="tab" data-tab="mine" role="tab" aria-selected="false">My location</button>
+      <button class="tab" data-tab="search" role="tab" aria-selected="false">Search a city</button>
+    </div>
+    <div class="news-body wx-body">
+      <div class="wx-layout">
+        <div class="wx-main">
+          <div class="wx-tool" id="wx-tool" hidden></div>
+          <div class="wx-grid" id="grid-weather" aria-live="polite"></div>
+          <p class="wx-credit">Forecasts: <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo.com</a> weather data (CC BY 4.0), refreshed every 30 minutes. Times are local to each place.</p>
+        </div>
+        <aside class="wx-alerts" aria-labelledby="wx-alerts-title">
+          <div class="wx-alerts-head">
+            <h3 id="wx-alerts-title">IMD weather warnings</h3>
+            <div class="wx-chips" role="group" aria-label="Warnings for">
+              <button type="button" class="wx-chip" data-wx-region="south" aria-pressed="true">Tamil Nadu &amp; Kerala</button>
+              <button type="button" class="wx-chip" data-wx-region="all" aria-pressed="false">All India</button>
+            </div>
+          </div>
+          <ol class="wx-alert-list" id="wx-alert-list"></ol>
+          <p class="wx-credit">Official warnings of the India Meteorological Department, from the public alert feed of NDMA <a href="https://sachet.ndma.gov.in/" target="_blank" rel="noopener">SACHET</a> (past 24 hours, English messages, worded as issued).</p>
+        </aside>
+      </div>
+    </div>
+  </section>
+
 </div><!-- /#view-feed -->
 </main>
 
@@ -1791,7 +1915,7 @@ body.tts-on .to-top { bottom: 128px; }
   <div style="margin-top:8px;font-size:12px;opacity:0.8;">
     Shortcuts: <kbd>/</kbd> search · <kbd>r</kbd> refresh · <kbd>t</kbd> theme · <kbd>s</kbd> saved · <kbd>Esc</kbd> close
   </div>
-  <div style="margin-top:8px;font-size:12px;opacity:0.5;font-family:monospace;">Build v8.0 · 2026-10-15</div>
+  <div style="margin-top:8px;font-size:12px;opacity:0.5;font-family:monospace;">Build v8.1 · 2026-10-25</div>
 </footer>
 
 <!-- ===================== APP LOGIC ===================== -->
@@ -3109,7 +3233,7 @@ body.tts-on .to-top { bottom: 128px; }
     const playlist = TTS.on && TTS.stories > 1;
     document.getElementById('tts-prev').hidden = !playlist;
     document.getElementById('tts-next').hidden = !playlist;
-    document.querySelectorAll('.card.is-speaking').forEach(c => c.classList.remove('is-speaking'));
+    document.querySelectorAll('.card.is-speaking, .wx-card.is-speaking, .wx-alert.is-speaking').forEach(c => c.classList.remove('is-speaking'));
     document.querySelectorAll('.card-act.is-on, .sec-listen.is-on').forEach(x => x.classList.remove('is-on'));
     document.querySelectorAll('.sec-listen').forEach(x => {
       const mine = TTS.on && TTS.key === 'sec:' + x.dataset.listenSection;
@@ -3216,6 +3340,7 @@ body.tts-on .to-top { bottom: 128px; }
     b.title = label;
   }
   function listenToSection(sectionId) {
+    if (sectionId === 'section-weather') { listenToWeather(); return; }   // v8.1: places + IMD warnings
     const sec = document.getElementById(sectionId);
     if (!sec) return;
     if (TTS.on && TTS.key === 'sec:' + sectionId) { togglePauseListening(); return; }
@@ -3532,6 +3657,7 @@ body.tts-on .to-top { bottom: 128px; }
   async function refreshAll(force) {
     if (isRefreshing) return;
     isRefreshing = true;
+    refreshWeather(force);   // v8.1: weather has its own sources and never waits for the news feeds
     setStatus('loading', 'Updating…');
     document.getElementById('refresh-btn').classList.add('spinning');
 
@@ -4521,6 +4647,507 @@ body.tts-on .to-top { bottom: 128px; }
     });
   }
 
+  // ---------- Weather Reports (v8.1, Founder 25 Oct 2026: "We need to add Weather Reports") ----------
+  // Forecasts come from Open-Meteo (free, no key, CORS open), one request per tab for every place in it.
+  // Official warnings are IMD's own messages from the NDMA SACHET public RSS, which sends no CORS header,
+  // so it rides our Worker (sachet.ndma.gov.in is in its ALLOWED_HOSTS from Worker v8.1.0).
+  const WX_CACHE_KEY = 'ibinews_wx_v1';
+  const WX_TAB_KEY = 'ibinews_wx_tab';
+  const WX_LOC_KEY = 'ibinews_wx_loc';
+  const WX_SEARCH_KEY = 'ibinews_wx_search';
+  const WX_REGION_KEY = 'ibinews_wx_region';
+  const WX_TTL_MS = 30 * 60 * 1000;
+  const WX_ALERT_TTL_MS = 10 * 60 * 1000;
+  const WX_ALERT_FEED = 'https://sachet.ndma.gov.in/cap_public_website/rss/rss_india.xml';
+  // Coordinates: OpenStreetMap (Karungal = the IBI warehouse area, Vilavancode taluk).
+  const WX_PLACES = {
+    tn: [
+      { name: 'Karungal', region: 'Kanyakumari district', lat: 8.2379, lon: 77.2414 },
+      { name: 'Nagercoil', region: 'Kanyakumari district', lat: 8.1840, lon: 77.4315 },
+      { name: 'Kanyakumari', region: 'Kanyakumari district', lat: 8.0793, lon: 77.5499 },
+      { name: 'Tirunelveli', region: 'Tamil Nadu', lat: 8.7139, lon: 77.7567 },
+      { name: 'Madurai', region: 'Tamil Nadu', lat: 9.9252, lon: 78.1198 },
+      { name: 'Chennai', region: 'Tamil Nadu', lat: 13.0827, lon: 80.2707 },
+      { name: 'Coimbatore', region: 'Tamil Nadu', lat: 11.0168, lon: 76.9558 },
+      { name: 'Tiruchirappalli', region: 'Tamil Nadu', lat: 10.7905, lon: 78.7047 }
+    ],
+    india: [
+      { name: 'Delhi', region: 'National Capital', lat: 28.6139, lon: 77.2090 },
+      { name: 'Mumbai', region: 'Maharashtra', lat: 19.0760, lon: 72.8777 },
+      { name: 'Kolkata', region: 'West Bengal', lat: 22.5726, lon: 88.3639 },
+      { name: 'Bengaluru', region: 'Karnataka', lat: 12.9716, lon: 77.5946 },
+      { name: 'Hyderabad', region: 'Telangana', lat: 17.3850, lon: 78.4867 },
+      { name: 'Thiruvananthapuram', region: 'Kerala', lat: 8.5241, lon: 76.9366 }
+    ]
+  };
+  const WX_TAB_NAMES = { tn: 'Kanyakumari & Tamil Nadu', india: 'India', mine: 'My location', search: 'Search a city' };
+  // WMO weather codes (the standard Open-Meteo reports) -> words + icon
+  const WMO = {
+    0: ['Clear sky', '☀️', '🌙'], 1: ['Mainly clear', '🌤️', '🌙'], 2: ['Partly cloudy', '⛅', '☁️'], 3: ['Overcast', '☁️'],
+    45: ['Fog', '🌫️'], 48: ['Freezing fog', '🌫️'],
+    51: ['Light drizzle', '🌦️'], 53: ['Drizzle', '🌦️'], 55: ['Heavy drizzle', '🌧️'],
+    56: ['Freezing drizzle', '🌧️'], 57: ['Heavy freezing drizzle', '🌧️'],
+    61: ['Light rain', '🌦️'], 63: ['Rain', '🌧️'], 65: ['Heavy rain', '🌧️'],
+    66: ['Freezing rain', '🌧️'], 67: ['Heavy freezing rain', '🌧️'],
+    71: ['Light snow', '🌨️'], 73: ['Snow', '🌨️'], 75: ['Heavy snow', '❄️'], 77: ['Snow grains', '🌨️'],
+    80: ['Light showers', '🌦️'], 81: ['Showers', '🌧️'], 82: ['Violent showers', '⛈️'],
+    85: ['Snow showers', '🌨️'], 86: ['Heavy snow showers', '❄️'],
+    95: ['Thunderstorm', '⛈️'], 96: ['Thunderstorm with hail', '⛈️'], 99: ['Thunderstorm with heavy hail', '⛈️']
+  };
+  const WX = { tab: 'tn', region: 'south', places: {}, data: {}, alerts: null, alertsAt: 0, alertsErr: false, busy: {}, open: new Set() };
+
+  function wxStore(key, val) { try { localStorage.setItem(key, JSON.stringify(val)); } catch {} }
+  function wxLoad(key) { try { return JSON.parse(localStorage.getItem(key) || 'null'); } catch { return null; } }
+  function wxCond(code, isDay) {
+    const w = WMO[code] || ['Weather code ' + code, '🌡️'];
+    return { text: w[0], icon: isDay === 0 && w[2] ? w[2] : w[1] };
+  }
+  function wxRound(n) { return n == null || isNaN(n) ? '–' : Math.round(n); }
+  // "2026-10-25T20:45" (already local to the place) -> "8:45 PM"
+  function wxClock(iso) {
+    const m = /T(\d{2}):(\d{2})/.exec(iso || '');
+    if (!m) return '';
+    const h = +m[1];
+    return ((h % 12) || 12) + ':' + m[2] + ' ' + (h < 12 ? 'AM' : 'PM');
+  }
+  function wxDayName(ymd, i) {
+    if (i === 0) return 'Today';
+    if (i === 1) return 'Tomorrow';
+    return new Date(ymd + 'T00:00:00Z').toLocaleDateString('en-IN', { weekday: 'short', timeZone: 'UTC' });
+  }
+  function wxDayLong(ymd, i) {
+    if (i === 0) return 'Today';
+    if (i === 1) return 'Tomorrow';
+    return new Date(ymd + 'T00:00:00Z').toLocaleDateString('en-IN', { weekday: 'long', timeZone: 'UTC' });
+  }
+  const WX_COMPASS = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
+  const WX_COMPASS_WORDS = ['north', 'north-east', 'east', 'south-east', 'south', 'south-west', 'west', 'north-west'];
+  function wxDirIdx(deg) { return Math.round(((deg % 360) + 360) % 360 / 45) % 8; }
+  function wxZone(abbr) { return abbr === 'GMT+5:30' || abbr === 'IST' ? 'IST' : 'local time'; }
+
+  function wxPlacesFor(tab) {
+    if (tab === 'tn' || tab === 'india') return WX_PLACES[tab];
+    if (tab === 'mine') {
+      const loc = wxLoad(WX_LOC_KEY);
+      return loc ? [{ name: 'Your location', region: Math.abs(loc.lat).toFixed(2) + '°' + (loc.lat >= 0 ? 'N' : 'S') + ', ' + Math.abs(loc.lon).toFixed(2) + '°' + (loc.lon >= 0 ? 'E' : 'W'), lat: loc.lat, lon: loc.lon }] : [];
+    }
+    if (tab === 'search') { const s = wxLoad(WX_SEARCH_KEY); return s && s.places || []; }
+    return [];
+  }
+
+  async function wxFetchForecast(places, tab) {
+    const p = new URLSearchParams({
+      latitude: places.map(x => x.lat).join(','),
+      longitude: places.map(x => x.lon).join(','),
+      current: 'temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,weather_code,wind_speed_10m,wind_direction_10m',
+      daily: 'weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,precipitation_sum,sunrise,sunset,uv_index_max',
+      timezone: tab === 'tn' || tab === 'india' ? 'Asia/Kolkata' : 'auto',
+      forecast_days: '7'
+    });
+    const ctl = new AbortController();
+    const timer = setTimeout(() => ctl.abort(), 15000);
+    try {
+      const r = await fetch('https://api.open-meteo.com/v1/forecast?' + p.toString(), { signal: ctl.signal });
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      const j = await r.json();
+      const arr = Array.isArray(j) ? j : [j];
+      if (arr.length !== places.length || !arr.every(x => x && x.current && x.daily)) throw new Error('Unexpected reply');
+      return arr;
+    } finally { clearTimeout(timer); }
+  }
+
+  async function loadWeatherTab(tab, force) {
+    const places = wxPlacesFor(tab);
+    WX.places[tab] = places;
+    if (!places.length) { WX.data[tab] = null; if (WX.tab === tab) renderWeather(); return; }
+    const sig = places.map(x => x.lat + ',' + x.lon).join(';');
+    const all = wxLoad(WX_CACHE_KEY) || {};
+    const hit = all[tab];
+    if (!force && hit && hit.sig === sig && Date.now() - hit.t < WX_TTL_MS) {
+      WX.data[tab] = hit;
+      if (WX.tab === tab) renderWeather();
+      return;
+    }
+    if (WX.busy[tab]) return;
+    WX.busy[tab] = true;
+    if (WX.tab === tab && !(hit && hit.sig === sig)) renderWeather(true);
+    try {
+      const arr = await wxFetchForecast(places, tab);
+      const rec = { t: Date.now(), sig, arr };
+      WX.data[tab] = rec;
+      const fresh = wxLoad(WX_CACHE_KEY) || {};
+      fresh[tab] = rec;
+      wxStore(WX_CACHE_KEY, fresh);
+    } catch (e) {
+      console.warn('[IBI News weather] forecast failed:', e && e.message);
+      // a stale copy for the same places is better than nothing; it shows its own reading time
+      WX.data[tab] = hit && hit.sig === sig ? Object.assign({}, hit, { stale: true }) : { error: true };
+    } finally {
+      WX.busy[tab] = false;
+    }
+    if (WX.tab === tab) renderWeather();
+  }
+
+  function wxCardHtml(pl, d, i) {
+    const c = d.current, dy = d.daily;
+    const cond = wxCond(c.weather_code, c.is_day);
+    const dir = c.wind_direction_10m != null ? WX_COMPASS[wxDirIdx(c.wind_direction_10m)] : '';
+    const rainP = dy.precipitation_probability_max && dy.precipitation_probability_max[0];
+    const rainMm = dy.precipitation_sum && dy.precipitation_sum[0];
+    const zone = wxZone(d.timezone_abbreviation);
+    const days = [1, 2, 3].filter(k => dy.time[k]).map(k => {
+      const dc = wxCond(dy.weather_code[k], 1);
+      return `<div class="wx-day"><b>${wxDayName(dy.time[k], k)}</b><span class="wx-di" aria-hidden="true">${dc.icon}</span>` +
+        `${wxRound(dy.temperature_2m_max[k])}° / ${wxRound(dy.temperature_2m_min[k])}°<small>${escapeHtml(dc.text)}</small>` +
+        `<small>Rain ${wxRound(dy.precipitation_probability_max[k])}%</small></div>`;
+    }).join('');
+    const week = dy.time.map((t, k) => {
+      const dc = wxCond(dy.weather_code[k], 1);
+      return `<div class="wx-week-row"><span>${wxDayLong(t, k)}</span><span class="wx-di" aria-hidden="true">${dc.icon}</span>` +
+        `<span class="wx-wc">${escapeHtml(dc.text)}</span><span class="wx-wt">${wxRound(dy.temperature_2m_max[k])}° / ${wxRound(dy.temperature_2m_min[k])}°` +
+        `<small>Rain ${wxRound(dy.precipitation_probability_max[k])}% · ${dy.precipitation_sum[k] != null ? dy.precipitation_sum[k].toFixed(1) : '–'} mm</small></span></div>`;
+    }).join('');
+    const key = WX.tab + ':' + i;
+    const open = WX.open.has(key);
+    return `<article class="wx-card" data-wx-key="${key}">
+      <div class="wx-head"><h3 class="wx-place">${escapeHtml(pl.name)}</h3><span class="wx-region">${escapeHtml(pl.region || '')}</span></div>
+      <div class="wx-now">
+        <span class="wx-icon" aria-hidden="true">${cond.icon}</span>
+        <span class="wx-temp">${wxRound(c.temperature_2m)}°C</span>
+        <span><span class="wx-cond">${escapeHtml(cond.text)}</span><br><span class="wx-feels">Feels like ${wxRound(c.apparent_temperature)}°C</span></span>
+      </div>
+      <dl class="wx-facts">
+        <div><dt>Today</dt><dd>${wxRound(dy.temperature_2m_max[0])}° / ${wxRound(dy.temperature_2m_min[0])}°</dd></div>
+        <div><dt>Rain</dt><dd>${wxRound(rainP)}%${rainMm != null ? ' · ' + rainMm.toFixed(1) + ' mm' : ''}</dd></div>
+        <div><dt>Humidity</dt><dd>${wxRound(c.relative_humidity_2m)}%</dd></div>
+        <div><dt>Wind</dt><dd>${wxRound(c.wind_speed_10m)} km/h ${dir}</dd></div>
+        <div><dt>Sunrise</dt><dd>${wxClock(dy.sunrise[0])}</dd></div>
+        <div><dt>Sunset</dt><dd>${wxClock(dy.sunset[0])}</dd></div>
+        ${dy.uv_index_max && dy.uv_index_max[0] != null ? `<div><dt>UV index</dt><dd>${wxRound(dy.uv_index_max[0])}</dd></div>` : ''}
+        ${c.precipitation ? `<div><dt>Rain now</dt><dd>${c.precipitation.toFixed(1)} mm</dd></div>` : ''}
+      </dl>
+      <div class="wx-days">${days}</div>
+      <div class="wx-actions">
+        <span class="wx-time">Reading at ${wxClock(c.time)} ${zone}</span>
+        <button type="button" class="wx-more" data-wx-week="${key}" aria-expanded="${open}">${open ? 'Hide 7 days ▴' : '7-day forecast ▾'}</button>
+        <button class="card-act card-listen" type="button" data-wx-listen="${key}" aria-label="Listen to this weather report" title="Listen">${ICON_PLAY}<span>Listen</span></button>
+      </div>
+      <div class="wx-week"${open ? '' : ' hidden'}>${week}</div>
+    </article>`;
+  }
+
+  function renderWeatherTool() {
+    const tool = document.getElementById('wx-tool');
+    if (WX.tab === 'mine') {
+      const has = !!wxLoad(WX_LOC_KEY);
+      tool.innerHTML = `<div class="wx-form">
+          <button type="button" class="wx-btn" data-wx-locate>${has ? 'Update my location' : 'Use my location'}</button>
+          ${has ? '<button type="button" class="wx-btn ghost" data-wx-forget>Forget my location</button>' : ''}
+        </div>
+        <p class="wx-note">${has ? 'Your location is kept only on this device.' : 'Your browser will ask for permission first. The location is kept only on this device and is used only for the weather.'}</p>`;
+      tool.hidden = false;
+    } else if (WX.tab === 'search') {
+      const s = wxLoad(WX_SEARCH_KEY);
+      tool.innerHTML = `<form class="wx-form" id="wx-search-form" role="search">
+          <label class="sr-only" for="wx-search-input">City or town</label>
+          <input class="wx-input" id="wx-search-input" type="search" autocomplete="off" placeholder="City or town name" value="${escapeHtml(s && s.q || '')}">
+          <button type="submit" class="wx-btn">Show weather</button>
+        </form>`;
+      tool.hidden = false;
+    } else {
+      tool.innerHTML = '';
+      tool.hidden = true;
+    }
+  }
+
+  function renderWeather(loading) {
+    const grid = document.getElementById('grid-weather');
+    const meta = document.getElementById('meta-weather');
+    const tab = WX.tab;
+    const places = WX.places[tab] || wxPlacesFor(tab);
+    const rec = WX.data[tab];
+    if (!places.length) {
+      grid.innerHTML = tab === 'mine'
+        ? '<div class="wx-msg">Tap <b>Use my location</b> to see the weather where you are.</div>'
+        : '<div class="wx-msg">Type a city or town name and tap <b>Show weather</b>. Places anywhere in the world can be found.</div>';
+      meta.textContent = 'Open-Meteo';
+      return;
+    }
+    if (loading || !rec) {
+      grid.innerHTML = places.map(() => '<div class="wx-skel" aria-hidden="true"></div>').join('');
+      meta.textContent = 'Loading weather…';
+      return;
+    }
+    if (rec.error) {
+      grid.innerHTML = '<div class="wx-msg">The weather service did not answer just now.<br><button type="button" class="wx-btn ghost" data-wx-retry>Try again</button></div>';
+      meta.textContent = 'Weather not loaded';
+      return;
+    }
+    grid.innerHTML = places.map((pl, i) => rec.arr[i] ? wxCardHtml(pl, rec.arr[i], i) : '').join('');
+    meta.textContent = 'Open-Meteo · fetched ' + new Date(rec.t).toLocaleTimeString('en-IN', { hour: 'numeric', minute: '2-digit', hour12: true }).toUpperCase() + (rec.stale ? ' · could not refresh' : '');
+  }
+
+  function activateWeatherTab(tab, force) {
+    if (!WX_TAB_NAMES[tab]) tab = 'tn';
+    WX.tab = tab;
+    try { localStorage.setItem(WX_TAB_KEY, tab); } catch {}
+    document.querySelectorAll('#weather-tabs .tab').forEach(b => {
+      const on = b.dataset.tab === tab;
+      b.classList.toggle('active', on);
+      b.setAttribute('aria-selected', on ? 'true' : 'false');
+    });
+    renderWeatherTool();
+    WX.places[tab] = wxPlacesFor(tab);
+    renderWeather();
+    return loadWeatherTab(tab, force);
+  }
+
+  async function wxSearch(q) {
+    q = String(q || '').trim();
+    if (q.length < 2) { toast('Type at least 2 letters of a place name.'); return; }
+    const btn = document.querySelector('#wx-search-form .wx-btn');
+    if (btn) { btn.disabled = true; btn.textContent = 'Searching…'; }
+    try {
+      const r = await fetch('https://geocoding-api.open-meteo.com/v1/search?' + new URLSearchParams({ name: q, count: '6', language: 'en', format: 'json' }));
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      const j = await r.json();
+      const places = (j.results || []).map(x => ({
+        name: x.name,
+        region: [x.admin2, x.admin1, x.country].filter(Boolean).filter((v, i, a) => a.indexOf(v) === i).join(', '),
+        lat: +x.latitude.toFixed(4), lon: +x.longitude.toFixed(4)
+      }));
+      if (!places.length) { toast('No place called "' + q + '" was found. Check the spelling.'); return; }
+      wxStore(WX_SEARCH_KEY, { q, places });
+      WX.open.forEach(k => { if (k.startsWith('search:')) WX.open.delete(k); });
+      await activateWeatherTab('search', true);
+    } catch (e) {
+      toast('The place search did not answer. Please try again.');
+    } finally {
+      const b2 = document.querySelector('#wx-search-form .wx-btn');
+      if (b2) { b2.disabled = false; b2.textContent = 'Show weather'; }
+    }
+  }
+
+  function wxLocate() {
+    if (!navigator.geolocation) { toast('This browser cannot share a location.'); return; }
+    const btn = document.querySelector('[data-wx-locate]');
+    if (btn) { btn.disabled = true; btn.textContent = 'Finding you…'; }
+    navigator.geolocation.getCurrentPosition(pos => {
+      // ~1 km is plenty for weather and keeps less detail on the device
+      wxStore(WX_LOC_KEY, { lat: +pos.coords.latitude.toFixed(2), lon: +pos.coords.longitude.toFixed(2) });
+      activateWeatherTab('mine', true);
+    }, err => {
+      renderWeatherTool();
+      toast(err && err.code === 1 ? 'Location permission was not given. You can allow it in the browser settings.' : 'Your location could not be found. Please try again.');
+    }, { enableHighAccuracy: false, timeout: 15000, maximumAge: 10 * 60 * 1000 });
+  }
+
+  // ----- IMD warnings (NDMA SACHET RSS via our Worker) -----
+  function wxIsEnglish(s) {
+    const t = String(s || '').replace(/\s/g, '');
+    if (!t) return false;
+    let ascii = 0;
+    for (const ch of t) if (ch.charCodeAt(0) < 128) ascii++;
+    return ascii / t.length > 0.9;
+  }
+  async function loadWeatherAlerts(force) {
+    if (!force && WX.alerts && Date.now() - WX.alertsAt < WX_ALERT_TTL_MS) { renderWeatherAlerts(); return; }
+    const list = document.getElementById('wx-alert-list');
+    if (!WX.alerts) list.innerHTML = '<li class="wx-msg">Loading IMD warnings…</li>';
+    const ctl = new AbortController();
+    const timer = setTimeout(() => ctl.abort(), 15000);
+    try {
+      const r = await fetch(OWN_PROXY_URL + '?url=' + encodeURIComponent(WX_ALERT_FEED), { signal: ctl.signal });
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      const doc = new DOMParser().parseFromString(await r.text(), 'text/xml');
+      if (doc.querySelector('parsererror')) throw new Error('Feed not readable');
+      const cutoff = Date.now() - 24 * 3600 * 1000;
+      const seen = new Set();
+      const out = [];
+      [...doc.querySelectorAll('item')].forEach(it => {
+        const txt = (s) => ((it.querySelector(s) || {}).textContent || '').trim();
+        const title = cleanText(txt('title')).replace(/\s+/g, ' ');
+        const author = txt('author');
+        const office = (/\(([^)]+)\)/.exec(author) || [])[1] || 'IMD';
+        const ts = Date.parse(txt('pubDate'));
+        if (!title || !wxIsEnglish(title) || !(ts > cutoff) || !/^IMD\b|^CWC\b/i.test(office)) return;
+        const k = title.toLowerCase();
+        if (seen.has(k)) return;                      // the same message is often sent twice
+        seen.add(k);
+        // nowcasts say how long they hold ("in next 3 hours", "next 24 hours"): past that they are history
+        const hrs = /next\s+(\d{1,2})\s*(?:hours?|hrs?)\b/i.exec(title);
+        out.push({ title, office, ts, until: hrs ? ts + (+hrs[1]) * 3600 * 1000 : 0, cat: txt('category') });
+      });
+      out.sort((a, b) => b.ts - a.ts);
+      WX.alerts = out; WX.alertsAt = Date.now(); WX.alertsErr = false;
+    } catch (e) {
+      console.warn('[IBI News weather] IMD warnings failed:', e && e.message);
+      WX.alertsErr = !WX.alerts;
+    } finally { clearTimeout(timer); }
+    renderWeatherAlerts();
+  }
+  const WX_SOUTH_RE = /tamil\s*nadu|kerala|puducherry|pondicherry|karaikal|kanniyakumari|kanyakumari|chennai|madurai|tirunelveli|thoothukudi|thoothukkudi|nilgiris|coimbatore|thiruvananthapuram|kollam|kochi|ernakulam/i;
+  function wxAlertsShown() {
+    const a = WX.alerts || [];
+    const now = Date.now();
+    const shown = WX.region === 'all' ? a : a.filter(x => /chennai|thiruvananthapuram/i.test(x.office) || WX_SOUTH_RE.test(x.title));
+    shown.forEach(x => { x.ended = !!x.until && x.until < now; });
+    return shown.filter(x => !x.ended).concat(shown.filter(x => x.ended));   // in force first, newest first within each
+  }
+  function wxIssued(ts) {
+    const d = new Date(ts);
+    const opt = { timeZone: 'Asia/Kolkata' };
+    const day = d.toLocaleDateString('en-IN', opt) === new Date().toLocaleDateString('en-IN', opt) ? 'Today' : 'Yesterday';
+    return day + ', ' + wxIst(ts) + ' IST';
+  }
+  function wxIst(ts) {
+    return new Date(ts).toLocaleTimeString('en-IN', { hour: 'numeric', minute: '2-digit', hour12: true, timeZone: 'Asia/Kolkata' }).toUpperCase();
+  }
+  function renderWeatherAlerts() {
+    const list = document.getElementById('wx-alert-list');
+    document.querySelectorAll('.wx-chip').forEach(b => b.setAttribute('aria-pressed', b.dataset.wxRegion === WX.region ? 'true' : 'false'));
+    if (WX.alertsErr) {
+      list.innerHTML = '<li class="wx-msg">IMD warnings could not be loaded just now.<br><button type="button" class="wx-btn ghost" data-wx-alert-retry>Try again</button></li>';
+      return;
+    }
+    if (!WX.alerts) return;
+    const shown = wxAlertsShown();
+    if (!shown.length) {
+      list.innerHTML = '<li class="wx-msg">' + (WX.region === 'all'
+        ? 'No IMD warning in English in the past 24 hours.'
+        : 'No IMD warning for Tamil Nadu or Kerala in the past 24 hours.') + '</li>';
+      return;
+    }
+    const live = shown.filter(a => !a.ended).length;
+    list.innerHTML = (live ? '' : '<li class="wx-msg">No warning is in force right now. The latest ones are below.</li>') +
+      shown.slice(0, 30).map((a, i) =>
+      `<li class="wx-alert${a.ended ? ' is-ended' : ''}" data-wx-alert="${i}"><p>${escapeHtml(a.title)}</p>` +
+      `<div class="wx-alert-meta"><b>${escapeHtml(a.office)}</b> · Issued ${wxIssued(a.ts)}` +
+      (a.until ? ' · ' + (a.ended ? 'ended ' : 'valid till ') + wxIst(a.until) : '') + `</div></li>`).join('');
+  }
+
+  // ----- read aloud -----
+  function wxSpokenParts(el, key, n, count, playlist) {
+    const [tab, idx] = key.split(':');
+    const pl = (WX.places[tab] || [])[+idx];
+    const rec = WX.data[tab];
+    const d = rec && rec.arr && rec.arr[+idx];
+    if (!pl || !d) return [];
+    const c = d.current, dy = d.daily;
+    const cond = wxCond(c.weather_code, c.is_day);
+    const dir = c.wind_direction_10m != null ? ' from the ' + WX_COMPASS_WORDS[wxDirIdx(c.wind_direction_10m)] : '';
+    let s = (count > 1 ? 'Place ' + n + ' of ' + count + '. ' : '') + pl.name + '. ' +
+      'At ' + wxClock(c.time) + ', ' + wxRound(c.temperature_2m) + ' degrees, feels like ' + wxRound(c.apparent_temperature) + '. ' +
+      cond.text + '. Humidity ' + wxRound(c.relative_humidity_2m) + ' percent. Wind ' + wxRound(c.wind_speed_10m) + ' kilometres an hour' + dir + '. ' +
+      'Today, a high of ' + wxRound(dy.temperature_2m_max[0]) + ' and a low of ' + wxRound(dy.temperature_2m_min[0]) +
+      ', with a ' + wxRound(dy.precipitation_probability_max[0]) + ' percent chance of rain. ';
+    if (dy.time[1]) s += 'Tomorrow, ' + wxCond(dy.weather_code[1], 1).text.toLowerCase() + ', ' + wxRound(dy.temperature_2m_max[1]) + ' to ' + wxRound(dy.temperature_2m_min[1]) + ' degrees.';
+    return ttsSplit(s).map(text => ({ text, el, story: playlist ? n : 0 }));
+  }
+  function wxAlertParts(startStory) {
+    const shown = wxAlertsShown().slice(0, 30);
+    const where = WX.region === 'all' ? 'all of India' : 'Tamil Nadu and Kerala';
+    if (!WX.alerts) return [];
+    const parts = [{ text: 'I M D weather warnings for ' + where + ': ' + (shown.length ? shown.length + '.' : 'none in the past 24 hours.'), el: null, story: shown.length ? startStory : 0 }];
+    shown.forEach((a, i) => {
+      const el = document.querySelector('.wx-alert[data-wx-alert="' + i + '"]');
+      ttsSplit('Warning ' + (i + 1) + (a.ended ? ', now ended' : '') + ', from ' + a.office.replace(/^IMD/, 'I M D') + ', issued ' + wxIssued(a.ts).replace(' IST', '') + '. ' + a.title)
+        .forEach(text => parts.push({ text, el, story: startStory + i }));
+    });
+    return parts;
+  }
+  function listenToWeather() {
+    const sid = 'section-weather';
+    if (TTS.on && TTS.key === 'sec:' + sid) { togglePauseListening(); return; }
+    const cards = [...document.querySelectorAll('#grid-weather .wx-card')];
+    const nAlerts = WX.alerts ? wxAlertsShown().slice(0, 30).length : 0;
+    if (!cards.length && !nAlerts) { toast('No weather report on screen yet.'); return; }
+    const total = cards.length + nAlerts;
+    const label = 'Weather Reports · ' + WX_TAB_NAMES[WX.tab];
+    const parts = [{ text: label + '. ' + (cards.length === 1 ? '1 place.' : cards.length + ' places.'), el: null, story: 0 }];
+    const playlist = total > 1;
+    cards.forEach((c, i) => parts.push(...wxSpokenParts(c, c.dataset.wxKey, i + 1, cards.length, playlist)));
+    // the warnings follow the places as further "stories", so ⏮ / ⏭ step through them too
+    if (playlist) parts.push(...wxAlertParts(cards.length + 1));
+    else if (nAlerts) parts.push(...wxAlertParts(0).map(p => Object.assign(p, { story: 0 })));
+    startParts(label, parts, 'sec:' + sid);
+  }
+  function listenToWeatherCard(key) {
+    const el = document.querySelector('.wx-card[data-wx-key="' + key + '"]');
+    if (!el) return;
+    const cur = TTS.on ? currentPart() : null;
+    if (cur && cur.el === el) { togglePauseListening(); return; }
+    if (TTS.on && TTS.stories > 1) {
+      const i = TTS.parts.findIndex(p => p.el === el);
+      if (i >= 0) {
+        TTS.idx = i; TTS.paused = false;
+        const token = ++TTS.token;
+        ttsHalt(); paintTts();
+        setTimeout(() => ttsSpeak(token), 60);
+        return;
+      }
+    }
+    const pl = (WX.places[key.split(':')[0]] || [])[+key.split(':')[1]];
+    startParts('Weather · ' + (pl ? pl.name : ''), wxSpokenParts(el, key, 0, 1, false), 'wx:' + key);
+  }
+
+  function refreshWeather(force) {
+    loadWeatherTab(WX.tab, force);
+    loadWeatherAlerts(force);
+  }
+
+  function initWeather() {
+    let tab = 'tn';
+    try { tab = localStorage.getItem(WX_TAB_KEY) || 'tn'; } catch {}
+    try { if (localStorage.getItem(WX_REGION_KEY) === 'all') WX.region = 'all'; } catch {}
+    if (!WX_TAB_NAMES[tab]) tab = 'tn';
+    WX.tab = tab;
+    document.getElementById('weather-tabs').addEventListener('click', (e) => {
+      const t = e.target.closest('.tab');
+      if (t) activateWeatherTab(t.dataset.tab);
+    });
+    const sec = document.getElementById('section-weather');
+    sec.addEventListener('submit', (e) => {
+      if (e.target.id !== 'wx-search-form') return;
+      e.preventDefault();
+      wxSearch(document.getElementById('wx-search-input').value);
+    });
+    sec.addEventListener('click', (e) => {
+      const wk = e.target.closest('[data-wx-week]');
+      if (wk) {
+        const k = wk.dataset.wxWeek;
+        const box = wk.closest('.wx-card').querySelector('.wx-week');
+        const open = box.hidden;
+        box.hidden = !open;
+        open ? WX.open.add(k) : WX.open.delete(k);
+        wk.setAttribute('aria-expanded', open ? 'true' : 'false');
+        wk.textContent = open ? 'Hide 7 days ▴' : '7-day forecast ▾';
+        return;
+      }
+      const wl = e.target.closest('[data-wx-listen]');
+      if (wl) { e.preventDefault(); listenToWeatherCard(wl.dataset.wxListen); return; }
+      if (e.target.closest('[data-wx-retry]')) { loadWeatherTab(WX.tab, true); return; }
+      if (e.target.closest('[data-wx-alert-retry]')) { WX.alertsErr = false; loadWeatherAlerts(true); return; }
+      if (e.target.closest('[data-wx-locate]')) { wxLocate(); return; }
+      if (e.target.closest('[data-wx-forget]')) {
+        try { localStorage.removeItem(WX_LOC_KEY); } catch {}
+        const all = wxLoad(WX_CACHE_KEY) || {}; delete all.mine; wxStore(WX_CACHE_KEY, all);
+        WX.data.mine = null;
+        activateWeatherTab('mine');
+        toast('Your location has been forgotten on this device.');
+        return;
+      }
+      const chip = e.target.closest('[data-wx-region]');
+      if (chip) {
+        WX.region = chip.dataset.wxRegion;
+        try { localStorage.setItem(WX_REGION_KEY, WX.region); } catch {}
+        if (TTS.on && TTS.key === 'sec:section-weather') stopListening();
+        renderWeatherAlerts();
+      }
+    });
+    activateWeatherTab(tab);   // paints from cache at once; refreshAll() brings fresh data
+  }
+
   // ---------- Wire-up ----------
   function init() {
     initTheme();
@@ -4660,6 +5287,8 @@ body.tts-on .to-top { bottom: 128px; }
     });
     activateBusinessTab('india_biz');
     activateWorldTab('all');
+
+    initWeather();
 
     // Initial full load
     refreshAll(false);

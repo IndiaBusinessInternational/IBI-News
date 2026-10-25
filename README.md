@@ -1,4 +1,6 @@
-# IBI-News — v8.0
+# IBI-News — v8.1
+
+v8.1 (25 Oct 2026, Founder: "We need to add Weather Reports - a new section to IBI News."): new section 9 Weather Reports, linked from the top menu next to Breaking. Live forecasts from Open-Meteo (free, no key; CC BY 4.0) for Kanyakumari & Tamil Nadu (Karungal, Nagercoil, Kanyakumari, Tirunelveli, Madurai, Chennai, Coimbatore, Tiruchirappalli), India (Delhi, Mumbai, Kolkata, Bengaluru, Hyderabad, Thiruvananthapuram), My location (asks permission; kept only on the device) and Search a city. Each card: temperature, feels like, sky, humidity, wind, today's rain chance and high/low, sunrise/sunset (12-hour), next 3 days, and a 7-day list. Official IMD warnings (past 24 h, English) from the NDMA SACHET public RSS through the Worker, filtered to Tamil Nadu & Kerala or All India. Read-aloud covers the cards and warnings. Refreshes every 30 minutes. Worker v8.1.0 adds sachet.ndma.gov.in.
 
 v8.0 (15 Oct 2026, CEO: "Add a feature to increase voice sound to 300 %. Now the sound is low."): read-aloud now uses IBI voices — free Microsoft neural voices (Prabhat, Neerja, Jenny, Ryan, Sonia and more) made sentence by sentence on IBI's laptop (gateway POST /news/tts) and played through a volume control of 100–300% (default 300%) with a limiter, so it gets louder without crackling. Pause now stops mid-word and resumes from there. When the laptop is off (10 PM – 6 AM) the nearest device voice reads at normal volume, quietly. A reader's earlier device-voice choice carries over to the nearest IBI voice.
 
