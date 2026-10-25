@@ -35,7 +35,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="ibi-build" content="v8.1-2026-10-25">
+<meta name="ibi-build" content="v8.2-2026-10-25">
 
 <!-- Favicon: IBI text in #00c5ff on black, Roboto -->
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='10' fill='black'/><text x='32' y='44' font-family='Roboto,Arial,sans-serif' font-size='26' font-weight='900' text-anchor='middle' fill='%2300c5ff' letter-spacing='-1'>IBI</text></svg>">
@@ -1484,8 +1484,8 @@ body.tts-on .to-top { bottom: 128px; }
 
 /* ---------- v8.1 Weather Reports (Founder, 25 Oct 2026: "We need to add Weather Reports") ----------
    City cards on the left, IMD warnings on the right on laptops; one column on phones, edge to edge. */
-:root[data-theme="light"] { --wx-warn: #b45309; --wx-warn-bg: #fff8ed; }
-:root[data-theme="dark"]  { --wx-warn: #f59e0b; --wx-warn-bg: #1d1910; }
+:root[data-theme="light"] { --wx-warn: #b45309; --wx-warn-bg: #fff8ed; --wx-break-bg: #fdf1f2; }
+:root[data-theme="dark"]  { --wx-warn: #f59e0b; --wx-warn-bg: #1d1910; --wx-break-bg: #221316; }
 .wx-layout { display: grid; grid-template-columns: minmax(0, 1fr); gap: 24px; }
 .wx-tool { margin-bottom: 16px; }
 .wx-tool[hidden] { display: none; }
@@ -1555,6 +1555,29 @@ body.tts-on .to-top { bottom: 128px; }
 .wx-alert { border-left: 3px solid var(--wx-warn); background: var(--wx-warn-bg); padding: 10px 12px; margin-top: 10px; border-radius: 0 6px 6px 0; }
 .wx-alert.is-speaking { outline: 2px solid var(--accent); }
 .wx-alert.is-ended { border-left-color: var(--border); background: transparent; }
+.wx-alert.is-serious { border-left-color: #c8102e; }
+.wx-alert-event { font-size: 12px; font-weight: 700; letter-spacing: 0.4px; text-transform: uppercase; color: var(--wx-warn); margin-bottom: 4px; }
+.wx-alert.is-serious .wx-alert-event { color: #c8102e; }
+.wx-alert.is-ended .wx-alert-event { color: var(--text-muted); }
+.wx-alert-area { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
+/* v8.2: serious official warning at the top of Breaking News */
+.wx-break { border-left: 4px solid #c8102e; background: var(--wx-break-bg); padding: 12px 14px; margin-bottom: 18px; border-radius: 0 6px 6px 0; }
+.wx-break[hidden] { display: none; }
+.wx-break.is-speaking { outline: 2px solid var(--accent); }
+.wx-break-head { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; }
+.wx-break-flag { background: #c8102e; color: #fff; font-size: 12px; font-weight: 700; letter-spacing: 0.6px; text-transform: uppercase; padding: 3px 8px; border-radius: 3px; }
+.wx-break-count { font-size: 13px; color: var(--text-muted); }
+.wx-break-list { list-style: none; margin: 8px 0 0; padding: 0; }
+.wx-break-list li { padding: 8px 0; border-bottom: 1px solid var(--border); }
+.wx-break-list li:last-child { border-bottom: 0; }
+.wx-break-list b { font-family: Georgia, 'Times New Roman', Times, serif; font-size: 19px; }
+.wx-break-sev { font-family: 'Roboto', Arial, sans-serif; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; color: #c8102e; margin-left: 6px; }
+.wx-break-list p { margin: 4px 0 0; font-size: 15px; line-height: 1.5; overflow-wrap: break-word; }
+.wx-break-list small { display: block; margin-top: 4px; font-size: 12px; color: var(--text-muted); }
+.wx-break-go { margin-top: 8px; font: inherit; font-size: 14px; font-weight: 700; min-height: 40px; padding: 0 14px; border-radius: 999px; cursor: pointer; border: 1px solid var(--border-strong); background: transparent; color: var(--text); }
+.wx-break-go:hover { background: var(--text); color: var(--bg); }
+/* v8.2: a story many publishers carry at once, promoted to Breaking News */
+.card-dev { display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; color: #fff; background: #c8102e; padding: 2px 7px; border-radius: 3px; margin-bottom: 6px; }
 .wx-alert.is-ended p { color: var(--text-muted); }
 .wx-alert.is-ended .wx-alert-meta b { color: var(--text-muted); }
 .wx-alert p { margin: 0; font-size: 15px; line-height: 1.5; overflow-wrap: break-word; }
@@ -1568,6 +1591,7 @@ body.tts-on .to-top { bottom: 128px; }
 @media (max-width: 600px) {
   .wx-card, .wx-tool, .wx-credit, .wx-alerts-head, .wx-msg { padding-left: 10px; padding-right: 10px; }
   .wx-alert { margin-left: 0; margin-right: 0; border-radius: 0; }
+  .wx-break { border-radius: 0; padding-left: 10px; padding-right: 10px; }
   .wx-temp, .wx-icon { font-size: 36px; }
 }
 </style>
@@ -1633,7 +1657,7 @@ body.tts-on .to-top { bottom: 128px; }
     <div class="brand">
       <div class="brand-mark"></div>
       <div class="brand-text">
-        <h1 class="brand-title">IBI <span class="accent">News</span> <span class="version-badge" id="version-badge">v8.1</span></h1>
+        <h1 class="brand-title">IBI <span class="accent">News</span> <span class="version-badge" id="version-badge">v8.2</span></h1>
         <div class="brand-sub">Live Briefings</div>
       </div>
     </div>
@@ -1747,6 +1771,7 @@ body.tts-on .to-top { bottom: 128px; }
       <span class="section-meta" id="meta-breaking">Top headlines · India &amp; World</span>
     </div>
     <div class="news-body" style="border-top: 1px solid var(--border); border-radius: 0 0 8px 8px;">
+      <div class="wx-break" id="wx-break" hidden></div>
       <div class="ai-summary-box" id="ai-box-breaking" style="display:none;"></div>
       <div class="news-grid" id="grid-breaking"></div>
     </div>
@@ -1915,7 +1940,7 @@ body.tts-on .to-top { bottom: 128px; }
   <div style="margin-top:8px;font-size:12px;opacity:0.8;">
     Shortcuts: <kbd>/</kbd> search · <kbd>r</kbd> refresh · <kbd>t</kbd> theme · <kbd>s</kbd> saved · <kbd>Esc</kbd> close
   </div>
-  <div style="margin-top:8px;font-size:12px;opacity:0.5;font-family:monospace;">Build v8.1 · 2026-10-25</div>
+  <div style="margin-top:8px;font-size:12px;opacity:0.5;font-family:monospace;">Build v8.2 · 2026-10-25</div>
 </footer>
 
 <!-- ===================== APP LOGIC ===================== -->
@@ -2726,6 +2751,7 @@ body.tts-on .to-top { bottom: 128px; }
     // and gives site-wide search something to search. maxItems still decides how
     // many are visible on first paint.
     const shown = feed.maxItems || ITEMS_PER_FEED;
+    noteAlsoReportedBy(fresh);   // v8.2: oneStoryOnce keeps one copy - remember who else carried it
     return diversifyBySource(oneStoryOnce(fresh)).slice(0, Math.max(shown, feed.poolItems || 18));
   }
 
@@ -2840,6 +2866,80 @@ body.tts-on .to-top { bottom: 128px; }
     for (const it of ranked) if (!kept.some(k => sameStory(k, it))) kept.push(it);
     const keep = new Set(kept);
     return items.filter(it => keep.has(it));   // back in the original newest-first order
+  }
+
+  // ---------- Developing stories (v8.2) ----------
+  // Founder, 25 Oct 2026: Breaking News should also carry "the other news, if it becomes urgent and important".
+  // Rule approved the same evening - the Google News test for a big story: 3 or more different publishers report
+  // the same story within 3 hours, from any section. It then leads Breaking News with a "Developing" label and,
+  // by the one-story-once rule, leaves its own section. State media are not counted towards the 3.
+  const DEV_MIN_PUBLISHERS = 3;
+  const DEV_WINDOW_MS = 3 * 3600 * 1000;
+  const DEV_MAX = 3;
+  const DEV_INFO = new Map();               // promoted item -> { n }; rebuilt on every check, never stored on the cached item
+  let devSig = '', devTimer = 0;
+  function publisherOf(src) {               // one newsroom, several feed labels (ET Markets / ETtech / ETRetail...)
+    const s = String(src || '').trim().toLowerCase();
+    if (/^(et\b|et[a-z]|economic times)/.test(s)) return 'economic times';
+    if (/^ndtv/.test(s)) return 'ndtv';
+    if (/^dw\b/.test(s)) return 'dw';
+    if (/^(indian express|ie )/.test(s)) return 'indian express';
+    return s;
+  }
+  function itemTs(it) { const d = new Date(it.pubDate || 0).getTime(); return isNaN(d) ? 0 : d; }
+  function noteAlsoReportedBy(items) {
+    items.forEach(it => {
+      const also = [];
+      items.forEach(o => {
+        if (o === it || publisherOf(o.source) === publisherOf(it.source) || !sameStory(o, it)) return;
+        if (!also.some(a => publisherOf(a.s) === publisherOf(o.source))) also.push({ s: o.source || '', t: o.pubDate || '', st: o.state ? 1 : 0 });
+      });
+      if (also.length) it.alsoBy = also; else delete it.alsoBy;
+    });
+  }
+  function developingStories() {
+    const since = Date.now() - DEV_WINDOW_MS;
+    DEV_INFO.clear();                        // a story that no longer qualifies loses its label
+    const seen = new Set();
+    const pool = [];
+    Object.keys(cache).forEach(k => {
+      const c = cache[k];
+      if (!c || !c.items || !FEEDS[k]) return;
+      filterFreshCached(c.items, k).forEach(it => {
+        const key = it.link || it.title;
+        if (!key || seen.has(key) || isPaywalled(it)) return;
+        seen.add(key); pool.push(it);
+      });
+    });
+    const clusters = [];
+    pool.forEach(it => {
+      const c = clusters.find(cl => cl.some(x => sameStory(x, it)));
+      c ? c.push(it) : clusters.push([it]);
+    });
+    const out = [];
+    clusters.forEach(cl => {
+      const pubs = new Set();
+      cl.forEach(it => {
+        if (!it.state && itemTs(it) >= since) pubs.add(publisherOf(it.source));
+        (it.alsoBy || []).forEach(a => { const t = new Date(a.t).getTime(); if (!a.st && t >= since) pubs.add(publisherOf(a.s)); });
+      });
+      pubs.delete('');
+      if (pubs.size < DEV_MIN_PUBLISHERS) return;
+      const rep = cl.filter(it => !it.state).sort((a, b) => sourceTier(a) - sourceTier(b) || itemTs(b) - itemTs(a))[0];
+      if (rep) out.push({ rep, n: pubs.size, newest: Math.max(...cl.map(itemTs)) });
+    });
+    out.sort((a, b) => b.n - a.n || b.newest - a.newest);
+    return out.slice(0, DEV_MAX).map(d => { DEV_INFO.set(d.rep, { n: d.n }); return d.rep; });
+  }
+  // a section that lands later may complete a 3-publisher story: re-check, and redraw Breaking only on a change
+  function scheduleDevCheck() {
+    clearTimeout(devTimer);
+    devTimer = setTimeout(() => {
+      const lr = LAST_RENDER.breaking;
+      if (!lr) return;
+      const sig = developingStories().map(it => it.link || it.title).join('|');
+      if (sig !== devSig) renderItems(lr.gridEl, lr.items, lr.feedKey);
+    }, 400);
   }
 
   // Page order of the sections; a story shown higher up is not repeated lower down.
@@ -3199,7 +3299,8 @@ body.tts-on .to-top { bottom: 128px; }
   function storyParts(el, it, n, total) {
     const title = stripSourceFromTitle(it.title, it.source);
     const desc = it.desc && it.desc.length > 5 ? it.desc : '';
-    const lead = total > 1 ? 'Story ' + n + ' of ' + total + '. ' : '';
+    const lead = (total > 1 ? 'Story ' + n + ' of ' + total + '. ' : '') +
+      (DEV_INFO.has(it) ? 'Developing story, reported by ' + DEV_INFO.get(it).n + ' publishers. ' : '');
     return ttsSplit(lead + title + '. ' + (desc ? desc + ' ' : '') + 'From ' + (it.source || 'the publisher') + '.')
       .map(text => ({ text, el, story: total > 1 ? n : 0 }));
   }
@@ -3233,7 +3334,7 @@ body.tts-on .to-top { bottom: 128px; }
     const playlist = TTS.on && TTS.stories > 1;
     document.getElementById('tts-prev').hidden = !playlist;
     document.getElementById('tts-next').hidden = !playlist;
-    document.querySelectorAll('.card.is-speaking, .wx-card.is-speaking, .wx-alert.is-speaking').forEach(c => c.classList.remove('is-speaking'));
+    document.querySelectorAll('.card.is-speaking, .wx-card.is-speaking, .wx-alert.is-speaking, .wx-break.is-speaking').forEach(c => c.classList.remove('is-speaking'));
     document.querySelectorAll('.card-act.is-on, .sec-listen.is-on').forEach(x => x.classList.remove('is-on'));
     document.querySelectorAll('.sec-listen').forEach(x => {
       const mine = TTS.on && TTS.key === 'sec:' + x.dataset.listenSection;
@@ -3350,6 +3451,7 @@ body.tts-on .to-top { bottom: 128px; }
     const tab = sec.querySelector('.tabs .tab.active');
     const label = name + (tab ? ' · ' + tab.textContent.trim() : '');
     const parts = [{ text: label + '. ' + cards.length + (cards.length === 1 ? ' story.' : ' stories.'), el: null, story: 0 }];
+    if (sectionId === 'section-breaking') parts.push(...wxBreakingParts());   // v8.2: a serious official warning is read first
     cards.forEach((c, i) => parts.push(...storyParts(c, ITEM_INDEX[c.dataset.id], i + 1, cards.length)));
     startParts(label, parts, 'sec:' + sectionId);
   }
@@ -3444,6 +3546,7 @@ body.tts-on .to-top { bottom: 128px; }
         <a class="card-hit" href="${escapeAttr(it.link)}" target="_blank" rel="noopener noreferrer">
           ${thumb}
           <div class="card-body">
+            ${DEV_INFO.has(it) ? `<span class="card-dev">Developing · ${DEV_INFO.get(it).n} publishers</span>` : ''}
             <h3 class="card-title">${titleHTML}</h3>
             ${desc ? `<p class="card-desc">${descHTML}</p>` : ''}
           </div>
@@ -3470,6 +3573,13 @@ body.tts-on .to-top { bottom: 128px; }
     const sec = sectionOf(feedKey);
     if (sec) {
       LAST_RENDER[sec] = { gridEl, items, feedKey };
+      if (sec === 'breaking') {               // v8.2: developing stories from any section lead Breaking News
+        const dev = developingStories();
+        devSig = dev.map(it => it.link || it.title).join('|');
+        items = dev.concat((items || []).filter(it => !dev.some(d => sameStory(d, it))));
+      } else {
+        scheduleDevCheck();
+      }
       const higher = PAGE_ORDER.slice(0, PAGE_ORDER.indexOf(sec)).flatMap(x => SHOWN[x] || []);
       items = (items || []).filter(it => !isPaywalled(it) && !higher.some(h => sameStory(h, it)));
       SHOWN[sec] = items.slice();
@@ -4954,6 +5064,47 @@ body.tts-on .to-top { bottom: 128px; }
     if (!force && WX.alerts && Date.now() - WX.alertsAt < WX_ALERT_TTL_MS) { renderWeatherAlerts(); return; }
     const list = document.getElementById('wx-alert-list');
     if (!WX.alerts) list.innerHTML = '<li class="wx-msg">Loading IMD warnings…</li>';
+    try {
+      WX.alerts = await wxAlertsFromCap().catch(e => {
+        console.warn('[IBI News weather] /alerts failed, reading the RSS instead:', e && e.message);
+        return wxAlertsFromRss();
+      });
+      WX.alertsAt = Date.now(); WX.alertsErr = false;
+    } catch (e) {
+      console.warn('[IBI News weather] IMD warnings failed:', e && e.message);
+      WX.alertsErr = !WX.alerts;
+    }
+    renderWeatherAlerts();
+    renderWeatherBreaking();
+  }
+  // v8.2: the Worker's /alerts reads each warning's CAP file - IMD's own severity, area and real start/end times,
+  // and the English text even when the RSS headline is in Malayalam or Telugu.
+  async function wxAlertsFromCap() {
+    const ctl = new AbortController();
+    const timer = setTimeout(() => ctl.abort(), 20000);
+    try {
+      const r = await fetch(OWN_PROXY_URL + '/alerts', { signal: ctl.signal });
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      const j = await r.json();
+      if (!j || !Array.isArray(j.items)) throw new Error('Unexpected reply');
+      const seen = new Set();
+      const out = [];
+      j.items.forEach(a => {
+        let title = cleanText(a.headline || '').replace(/\s+/g, ' ');
+        if (!wxIsEnglish(title)) title = [a.event, a.area].filter(Boolean).join(' · ');
+        const ts = Date.parse(a.sent);
+        if (!title || !(ts > 0)) return;
+        const k = title.toLowerCase() + '|' + (a.area || '').toLowerCase();
+        if (seen.has(k)) return;                      // the same message is often sent twice
+        seen.add(k);
+        const until = Date.parse(a.expires), from = Date.parse(a.effective);
+        out.push({ title, office: a.office || 'IMD', ts, until: until > 0 ? until : 0, from: from > 0 ? from : 0,
+          event: a.event || '', severity: a.severity || '', area: a.area || '', cap: true });
+      });
+      return out.sort((a, b) => b.ts - a.ts);
+    } finally { clearTimeout(timer); }
+  }
+  async function wxAlertsFromRss() {
     const ctl = new AbortController();
     const timer = setTimeout(() => ctl.abort(), 15000);
     try {
@@ -4976,21 +5127,16 @@ body.tts-on .to-top { bottom: 128px; }
         seen.add(k);
         // nowcasts say how long they hold ("in next 3 hours", "next 24 hours"): past that they are history
         const hrs = /next\s+(\d{1,2})\s*(?:hours?|hrs?)\b/i.exec(title);
-        out.push({ title, office, ts, until: hrs ? ts + (+hrs[1]) * 3600 * 1000 : 0, cat: txt('category') });
+        out.push({ title, office, ts, until: hrs ? ts + (+hrs[1]) * 3600 * 1000 : 0, from: 0, event: '', severity: '', area: '' });
       });
-      out.sort((a, b) => b.ts - a.ts);
-      WX.alerts = out; WX.alertsAt = Date.now(); WX.alertsErr = false;
-    } catch (e) {
-      console.warn('[IBI News weather] IMD warnings failed:', e && e.message);
-      WX.alertsErr = !WX.alerts;
+      return out.sort((a, b) => b.ts - a.ts);
     } finally { clearTimeout(timer); }
-    renderWeatherAlerts();
   }
   const WX_SOUTH_RE = /tamil\s*nadu|kerala|puducherry|pondicherry|karaikal|kanniyakumari|kanyakumari|chennai|madurai|tirunelveli|thoothukudi|thoothukkudi|nilgiris|coimbatore|thiruvananthapuram|kollam|kochi|ernakulam/i;
   function wxAlertsShown() {
     const a = WX.alerts || [];
     const now = Date.now();
-    const shown = WX.region === 'all' ? a : a.filter(x => /chennai|thiruvananthapuram/i.test(x.office) || WX_SOUTH_RE.test(x.title));
+    const shown = WX.region === 'all' ? a : a.filter(wxIsSouth);
     shown.forEach(x => { x.ended = !!x.until && x.until < now; });
     return shown.filter(x => !x.ended).concat(shown.filter(x => x.ended));   // in force first, newest first within each
   }
@@ -5002,6 +5148,60 @@ body.tts-on .to-top { bottom: 128px; }
   }
   function wxIst(ts) {
     return new Date(ts).toLocaleTimeString('en-IN', { hour: 'numeric', minute: '2-digit', hour12: true, timeZone: 'Asia/Kolkata' }).toUpperCase();
+  }
+  // "10:09 PM" today, otherwise "1:53 PM tomorrow" / "Mon 6:00 AM" (all India time)
+  function wxWhen(ts) {
+    const opt = { timeZone: 'Asia/Kolkata' };
+    const day = (t) => new Date(t).toLocaleDateString('en-CA', opt);
+    const d = day(ts), today = day(Date.now()), tomorrow = day(Date.now() + 86400000);
+    if (d === today) return wxIst(ts);
+    if (d === tomorrow) return wxIst(ts) + ' tomorrow';
+    return new Date(ts).toLocaleDateString('en-IN', { weekday: 'short', timeZone: 'Asia/Kolkata' }) + ' ' + wxIst(ts);
+  }
+  function wxIsSouth(x) {
+    return /chennai|thiruvananthapuram/i.test(x.office) || WX_SOUTH_RE.test(x.title) || WX_SOUTH_RE.test(x.area || '');
+  }
+
+  // ----- v8.2: serious official warnings lead Breaking News -----
+  // Founder, 25 Oct 2026: "Breaking News should cover Weather Reports now since Storm Alerts were provided by
+  // Meteorological Departments". Rule approved the same evening: only warnings still in force, and only the
+  // serious ones - IMD grades "Extreme", or cyclone / very or extremely heavy rain / flood / storm surge /
+  // tsunami / heat wave - for Tamil Nadu & Kerala; a cyclone or tsunami anywhere in India. Routine lightning
+  // and thunderstorm nowcasts (most of what IMD sends, mostly graded "Severe") stay in Weather Reports.
+  const WX_DANGER_RE = /cyclon|very\s+heavy|extremely\s+heavy|flood|storm\s+surge|tsunami|heat\s*wave/i;
+  const WX_ANYWHERE_RE = /cyclon|tsunami/i;
+  function wxSerious(a) {
+    if (!a || !(a.until > Date.now())) return false;   // only while it is in force (or yet to start)
+    const what = a.event + ' ' + a.title;
+    if (WX_ANYWHERE_RE.test(what)) return true;
+    return wxIsSouth(a) && (/^extreme$/i.test(a.severity) || WX_DANGER_RE.test(what));
+  }
+  function wxBreakingAlerts() {
+    return (WX.alerts || []).filter(wxSerious)
+      .sort((a, b) => (/^extreme$/i.test(b.severity) ? 1 : 0) - (/^extreme$/i.test(a.severity) ? 1 : 0) || b.ts - a.ts);
+  }
+  function renderWeatherBreaking() {
+    const box = document.getElementById('wx-break');
+    if (!box) return;
+    const list = wxBreakingAlerts();
+    if (!list.length) { box.hidden = true; box.innerHTML = ''; return; }
+    const top = list.slice(0, 3);
+    box.innerHTML = `<div class="wx-break-head"><span class="wx-break-flag">Official weather warning</span>` +
+      `<span class="wx-break-count">${list.length === 1 ? '1 warning in force' : list.length + ' warnings in force'} · IMD</span></div>` +
+      `<ul class="wx-break-list">` + top.map(a =>
+        `<li><b>${escapeHtml(a.event || 'Weather warning')}${a.severity ? ' <span class="wx-break-sev">' + escapeHtml(a.severity) + '</span>' : ''}</b>` +
+        `<p>${escapeHtml(a.title)}</p>` +
+        `<small>${escapeHtml(a.office)}` + (a.from > Date.now() ? ' · from ' + wxWhen(a.from) : '') + ' · valid till ' + wxWhen(a.until) + `</small></li>`).join('') +
+      `</ul><button type="button" class="wx-break-go" data-wx-goto>${list.length > 3 ? 'See all ' + list.length + ' in Weather Reports' : 'Open Weather Reports'} ›</button>`;
+    box.hidden = false;
+  }
+  function wxBreakingParts() {
+    const list = wxBreakingAlerts();
+    if (!list.length) return [];
+    const box = document.getElementById('wx-break');
+    const text = 'Official weather warning. ' + (list.length === 1 ? 'One warning is in force. ' : list.length + ' warnings are in force. ') +
+      list.slice(0, 3).map(a => (a.event ? a.event + '. ' : '') + a.title + ' Valid till ' + wxWhen(a.until) + '.').join(' ');
+    return ttsSplit(text).map(t => ({ text: t, el: box, story: 0 }));
   }
   function renderWeatherAlerts() {
     const list = document.getElementById('wx-alert-list');
@@ -5021,9 +5221,12 @@ body.tts-on .to-top { bottom: 128px; }
     const live = shown.filter(a => !a.ended).length;
     list.innerHTML = (live ? '' : '<li class="wx-msg">No warning is in force right now. The latest ones are below.</li>') +
       shown.slice(0, 30).map((a, i) =>
-      `<li class="wx-alert${a.ended ? ' is-ended' : ''}" data-wx-alert="${i}"><p>${escapeHtml(a.title)}</p>` +
+      `<li class="wx-alert${a.ended ? ' is-ended' : ''}${wxSerious(a) ? ' is-serious' : ''}" data-wx-alert="${i}">` +
+      (a.event ? `<div class="wx-alert-event">${escapeHtml(a.event)}${a.severity ? ' · ' + escapeHtml(a.severity) : ''}</div>` : '') +
+      `<p>${escapeHtml(a.title)}</p>` +
+      (a.area && a.title.indexOf(a.area) < 0 ? `<div class="wx-alert-area">${escapeHtml(a.area)}</div>` : '') +
       `<div class="wx-alert-meta"><b>${escapeHtml(a.office)}</b> · Issued ${wxIssued(a.ts)}` +
-      (a.until ? ' · ' + (a.ended ? 'ended ' : 'valid till ') + wxIst(a.until) : '') + `</div></li>`).join('');
+      (a.until ? ' · ' + (a.ended ? 'ended ' : 'valid till ') + wxWhen(a.until) : '') + `</div></li>`).join('');
   }
 
   // ----- read aloud -----
@@ -5146,6 +5349,11 @@ body.tts-on .to-top { bottom: 128px; }
       }
     });
     activateWeatherTab(tab);   // paints from cache at once; refreshAll() brings fresh data
+    // v8.2: a warning leaves Breaking News (and turns "ended" in the list) the minute it expires
+    setInterval(() => {
+      renderWeatherBreaking();
+      if (WX.alerts && !(TTS.on && TTS.key === 'sec:section-weather')) renderWeatherAlerts();
+    }, 60000);
   }
 
   // ---------- Wire-up ----------
@@ -5219,6 +5427,17 @@ body.tts-on .to-top { bottom: 128px; }
           showAiSkeleton(aiBoxId(fk));
           enqueueAiSummary(fk, items);
         }
+        return;
+      }
+
+      const wxGo = e.target.closest('[data-wx-goto]');
+      if (wxGo) {
+        e.preventDefault();
+        // show the warnings list that holds every warning in the box
+        const region = wxBreakingAlerts().every(wxIsSouth) ? 'south' : 'all';
+        if (WX.region !== region) { WX.region = region; try { localStorage.setItem(WX_REGION_KEY, region); } catch {} renderWeatherAlerts(); }
+        const sec = document.getElementById('section-weather');
+        if (sec) { sec.scrollIntoView({ behavior: 'smooth', block: 'start' }); history.replaceState(null, '', '#section-weather'); }
         return;
       }
 

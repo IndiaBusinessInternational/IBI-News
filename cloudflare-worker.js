@@ -10,7 +10,7 @@
    identically on every version, so a smoke test proves it is alive, not that
    your new code shipped. GET /version reports these, so confirming a deploy
    is opening one URL instead of comparing version IDs in the dashboard. */
-const WORKER_VERSION = 'v8.1.0';
+const WORKER_VERSION = 'v8.2.0';
 const WORKER_BUILT   = '2026-10-25';
 
 // NOTE: matching is `hostname === h || hostname.endsWith('.' + h)`, so a bare
@@ -94,6 +94,25 @@ export default {
       return res;
     }
 
+    // GET /alerts (v8.2) - IMD's official warnings of the past 24 h as clean JSON, built from the NDMA SACHET
+    // RSS plus each warning's CAP file (English block, severity, area, real start/end times). Built at most once
+    // per 5 minutes at each edge, so readers share one copy and the daily request limit is safe.
+    if (url.pathname === '/alerts') {
+      const key = new Request('https://alerts.ibi-news.invalid/v1');
+      const cache = caches.default;
+      const hit = await cache.match(key);
+      if (hit) return hit;
+      let body, ok = true;
+      try { body = await buildAlerts(); }
+      catch (e) { ok = false; body = { error: 'alerts failed: ' + e.message, items: [] }; }
+      const res = new Response(JSON.stringify(body), {
+        status: ok ? 200 : 502,
+        headers: { ...corsHeaders(), 'Content-Type': 'application/json', 'Cache-Control': ok ? 'public, max-age=300' : 'no-store' }
+      });
+      if (ok && ctx) ctx.waitUntil(cache.put(key, res.clone()));
+      return res;
+    }
+
     // GET /version — "which build is actually live?" (v7.5: this Worker holds no AI keys at all)
     if (url.pathname === '/version') {
       return new Response(JSON.stringify({
@@ -137,6 +156,68 @@ export default {
     }
   }
 };
+
+/* v8.2 - IMD warnings for /alerts. A Worker may make 50 sub-requests, so at most 45 CAP files are read:
+   the newest IMD / CWC warnings of the past 24 hours. Each CAP file never changes once issued, so the
+   edge keeps it for an hour. */
+const SACHET_RSS = 'https://sachet.ndma.gov.in/cap_public_website/rss/rss_india.xml';
+const SACHET_CAP = 'https://sachet.ndma.gov.in/cap_public_website/FetchXMLFile?identifier=';
+const UA = { 'User-Agent': 'Mozilla/5.0 (compatible; IBINewsBot/1.0)' };
+
+function xmlText(s) {
+  return String(s || '').replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, '$1')
+    .replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&apos;|&#39;/g, "'").replace(/&amp;/g, '&')
+    .replace(/\s+/g, ' ').trim();
+}
+function tag(block, name) {
+  const m = new RegExp('<(?:cap:)?' + name + '>([\\s\\S]*?)</(?:cap:)?' + name + '>').exec(block);
+  return m ? xmlText(m[1]) : '';
+}
+
+async function buildAlerts() {
+  const r = await fetch(SACHET_RSS, { headers: UA, cf: { cacheTtlByStatus: { '200-299': 120, '400-599': 0 }, cacheEverything: true } });
+  if (!r.ok) throw new Error('SACHET RSS HTTP ' + r.status);
+  const rss = await r.text();
+  const cutoff = Date.now() - 24 * 3600 * 1000;
+  const picks = [];
+  for (const m of rss.matchAll(/<item>([\s\S]*?)<\/item>/g)) {
+    const it = m[1];
+    const office = ((/\(([^)]+)\)/.exec(tag(it, 'author')) || [])[1] || '').trim();
+    const id = tag(it, 'guid') || ((/identifier=(\d+)/.exec(tag(it, 'link')) || [])[1] || '');
+    const ts = Date.parse(tag(it, 'pubDate'));
+    if (!id || !(ts > cutoff) || !/^(IMD|CWC)\b/i.test(office)) continue;
+    picks.push({ id, office, ts, rssTitle: tag(it, 'title') });
+  }
+  picks.sort((a, b) => b.ts - a.ts);
+  const chosen = picks.slice(0, 45);
+  const items = await Promise.all(chosen.map(async p => {
+    let cap = '';
+    try {
+      const c = await fetch(SACHET_CAP + encodeURIComponent(p.id), { headers: UA, cf: { cacheTtlByStatus: { '200-299': 3600, '400-599': 0 }, cacheEverything: true } });
+      if (c.ok) cap = await c.text();
+    } catch (e) { cap = ''; }
+    const infos = [...cap.matchAll(/<(?:cap:)?info>([\s\S]*?)<\/(?:cap:)?info>/g)].map(x => x[1]);
+    const info = infos.find(b => /^en/i.test(tag(b, 'language'))) || infos[0] || '';
+    const areas = [...info.matchAll(/<(?:cap:)?areaDesc>([\s\S]*?)<\/(?:cap:)?areaDesc>/g)].map(x => xmlText(x[1])).filter(Boolean);
+    return {
+      id: p.id,
+      office: p.office,
+      sent: new Date(p.ts).toISOString(),
+      event: tag(info, 'event'),
+      severity: tag(info, 'severity'),
+      urgency: tag(info, 'urgency'),
+      certainty: tag(info, 'certainty'),
+      effective: tag(info, 'effective') || tag(info, 'onset'),
+      expires: tag(info, 'expires'),
+      headline: tag(info, 'headline') || p.rssTitle,
+      instruction: tag(info, 'instruction'),
+      area: areas.join('; '),
+      cap: !!info
+    };
+  }));
+  return { source: 'NDMA SACHET (India Meteorological Department warnings)', built: new Date().toISOString(),
+           considered: picks.length, items };
+}
 
 function corsHeaders() {
   return { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': 'GET, POST, OPTIONS', 'Access-Control-Allow-Headers': 'Content-Type' };
