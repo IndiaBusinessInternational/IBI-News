@@ -1,4 +1,6 @@
-# IBI-News — v8.3
+# IBI-News — v8.4
+
+v8.4 (27 Oct 2026, Founder: "Yes, make all the apps edge to edge on laptop too, each with its own version bump.") — edge to edge on every screen. The 16 px tablet / 20 px laptop side edge of v7.9.3 is gone: `main` has no side padding at any width, the top bar, status bar, masthead, footer and section rules run to the screen edges with a 10 px inset, and on tablets and laptops the story grid sits 10 px in. `html, body { overflow-x: clip }` at every width. Phones unchanged. Wide screens still get more columns.
 
 v8.3 (27 Oct 2026, Founder: "all web apps should have a sharing link too") — WhatsApp link preview + Share this app. The preview banner is now a 1200×630 JPEG under 300 KB (`og-banner.jpg`, `og:image:type` image/jpeg; `og-banner.png` kept), so WhatsApp shows the large card. A round Share button (`ibi-share.js`, IBI Share v1.0, precached by sw.js) sits at the end of the top-bar controls and shares the site link to WhatsApp, Facebook, X, Telegram, Email, Copy link or More apps.
 

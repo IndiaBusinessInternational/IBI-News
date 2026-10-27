@@ -37,7 +37,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="ibi-build" content="v8.3-2026-10-27">
+<meta name="ibi-build" content="v8.4-2026-10-27">
 
 <!-- Favicon: IBI text in #00c5ff on black, Roboto -->
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='10' fill='black'/><text x='32' y='44' font-family='Roboto,Arial,sans-serif' font-size='26' font-weight='900' text-anchor='middle' fill='%2300c5ff' letter-spacing='-1'>IBI</text></svg>">
@@ -1597,6 +1597,20 @@ body.tts-on .to-top { bottom: 128px; }
   .wx-break { border-radius: 0; padding-left: 10px; padding-right: 10px; }
   .wx-temp, .wx-icon { font-size: 36px; }
 }
+/* v8.4 edge to edge on every screen (Founder, 27 Oct 2026: "Yes, make all the apps edge to edge on laptop too").
+   The 16px tablet / 20px laptop edge of v7.9.3 is gone: main has no side padding at any width, the bars and
+   section rules run to the screen edges, and the content keeps a 10px inset (header bars 10px). On tablets and
+   laptops the story grid sits 10px in (pictures line up with the text); phones keep their own rules above
+   (pictures full width, text 10px in). Wide screens still get more columns. */
+html, body { overflow-x: clip; }
+main { padding-left: 0; padding-right: 0; }
+.topbar-inner, .statusbar, footer, .hero { padding-left: 10px; padding-right: 10px; }
+.catnav-inner { padding-left: 4px; padding-right: 4px; }
+.section-header { padding-left: 10px; padding-right: 10px; }
+.card, .ai-summary-box, .wx-card, .wx-alert, .wx-break { overflow-wrap: break-word; }
+@media (min-width: 601px) {
+  .news-body { padding-left: 10px; padding-right: 10px; }
+}
 </style>
 </head>
 <body>
@@ -1660,7 +1674,7 @@ body.tts-on .to-top { bottom: 128px; }
     <div class="brand">
       <div class="brand-mark"></div>
       <div class="brand-text">
-        <h1 class="brand-title">IBI <span class="accent">News</span> <span class="version-badge" id="version-badge">v8.3</span></h1>
+        <h1 class="brand-title">IBI <span class="accent">News</span> <span class="version-badge" id="version-badge">v8.4</span></h1>
         <div class="brand-sub">Live Briefings</div>
       </div>
     </div>
@@ -1943,7 +1957,7 @@ body.tts-on .to-top { bottom: 128px; }
   <div style="margin-top:8px;font-size:12px;opacity:0.8;">
     Shortcuts: <kbd>/</kbd> search · <kbd>r</kbd> refresh · <kbd>t</kbd> theme · <kbd>s</kbd> saved · <kbd>Esc</kbd> close
   </div>
-  <div style="margin-top:8px;font-size:12px;opacity:0.5;font-family:monospace;">Build v8.3 · 2026-10-27</div>
+  <div style="margin-top:8px;font-size:12px;opacity:0.5;font-family:monospace;">Build v8.4 · 2026-10-27</div>
 </footer>
 
 <!-- ===================== APP LOGIC ===================== -->
