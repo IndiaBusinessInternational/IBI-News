@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════════════
-   IBI News — service worker (v8.2)
+   IBI News — service worker (v8.3)
 
    Strategy
    ────────
@@ -15,7 +15,7 @@
    shipping old JS under a new version badge. Always bypass the HTTP cache here.
    ═══════════════════════════════════════════════════════════════════════════ */
 
-const VERSION     = 'v8.2';
+const VERSION     = 'v8.3';
 const SHELL_CACHE = 'ibinews-shell-' + VERSION;
 const ASSET_CACHE = 'ibinews-assets-' + VERSION;
 const OFFLINE_URL = './index.html';
@@ -26,7 +26,8 @@ const PRECACHE = [
   './manifest.json',
   './ibi-logo.jpg',
   './icon-192.png',
-  './icon-512.png'
+  './icon-512.png',
+  './ibi-share.js'
 ];
 
 self.addEventListener('install', (event) => {
